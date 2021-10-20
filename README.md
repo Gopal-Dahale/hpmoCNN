@@ -1,5 +1,6 @@
 "# hpmoCNN" 
 
+```bash
 ├───.vscode
 ├───cnn
 │   ├───include
@@ -11,7 +12,7 @@
     └───neo
         ├───device
         └───kernels
-
+```
 ```
 cd cnn
 nvcc -o launch\main -I ./include launch\main.cu && launch\main
