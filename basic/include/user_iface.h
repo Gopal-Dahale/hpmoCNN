@@ -1,8 +1,6 @@
 #ifndef USER_IFACE
 #define USER_IFACE
 
-#include "utils.h"
-
 enum LayerOp { CONV, FULLY_CONNECTED, POOLING, ACTV, SOFTMAX };
 enum SoftmaxAlgorithm { SOFTMAX_FAST, SOFTMAX_ACCURATE };
 enum SoftmaxMode { SOFTMAX_MODE_INSTANCE, SOFTMAX_MODE_CHANNEL };

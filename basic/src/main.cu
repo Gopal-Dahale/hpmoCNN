@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "solver.h"
+#include "user_iface.h"
 
 using namespace std;
 

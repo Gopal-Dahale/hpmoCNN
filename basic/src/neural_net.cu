@@ -140,22 +140,6 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
       ((FCLayerParams *)params[i])
           ->initializeValues(user_params, batch_size, this->tensor_format, this->data_type,
                              current_output_size, update_rule);
-    } else if (layers[i].type == DROPOUT) {
-      DropoutDescriptor *user_params = (DropoutDescriptor *)layers[i].params;
-      params[i] = malloc(sizeof(DropoutLayerParams));
-      ((DropoutLayerParams *)params[i])
-          ->initializeValues(cudnn_handle, user_params, this->data_type, batch_size,
-                             this->tensor_format, current_output_size);
-
-    }
-
-    else if (layers[i].type == BATCHNORM) {
-      BatchNormDescriptor *user_params = (BatchNormDescriptor *)layers[i].params;
-      params[i] = malloc(sizeof(BatchNormLayerParams));
-      ((BatchNormLayerParams *)params[i])
-          ->initializeValues(user_params, this->data_type, this->tensor_format, batch_size,
-                             current_output_size, update_rule);
-
     } else if (layers[i].type == POOLING) {
       PoolingDescriptor *user_params = (PoolingDescriptor *)layers[i].params;
       params[i] = malloc(sizeof(BatchNormLayerParams));
@@ -394,32 +378,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
                                           cur_params->output_tensor, layer_input[i + 1]));
       }
       // std::cout << "FChere" << i << std::endl;
-    } else if (layer_type[i] == DROPOUT) {
-      // std::cout << "Dropout\n";
-      DropoutLayerParams *cur_params = (DropoutLayerParams *)params[i];
-      checkCUDNN(cudnnDropoutForward(cudnn_handle, cur_params->dropout_desc,
-                                     cur_params->input_tensor, layer_input[i],
-                                     cur_params->input_tensor, layer_input[i + 1],
-                                     cur_params->reserved_space, cur_params->reserved_space_size));
-    } else if (layer_type[i] == BATCHNORM) {
-      // std::cout << "Batchnorm\n";
-      BatchNormLayerParams *cur_params = (BatchNormLayerParams *)params[i];
-
-      if (train == true) {
-        checkCUDNN(cudnnBatchNormalizationForwardTraining(
-            cudnn_handle, cur_params->mode, &alpha, &beta, cur_params->input_tensor, layer_input[i],
-            cur_params->input_tensor, layer_input[i + 1], cur_params->sbmv_desc, cur_params->scale,
-            cur_params->bias, cur_params->factor, cur_params->running_mean,
-            cur_params->running_variance, cur_params->epsilon, cur_params->result_save_mean,
-            cur_params->result_save_inv_var));
-
-      } else {
-        checkCUDNN(cudnnBatchNormalizationForwardInference(
-            cudnn_handle, cur_params->mode, &alpha, &beta, cur_params->input_tensor, layer_input[i],
-            cur_params->input_tensor, layer_input[i + 1], cur_params->sbmv_desc, cur_params->scale,
-            cur_params->bias, cur_params->running_mean, cur_params->running_variance,
-            cur_params->epsilon));
-      }
     } else if (layer_type[i] == POOLING) {
       // std::cout << "Pooling\n";
       PoolingLayerParams *cur_params = (PoolingLayerParams *)params[i];

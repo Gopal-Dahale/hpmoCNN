@@ -39,36 +39,37 @@ float Solver::step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
   // 	for (int i = 0; i < model->num_layers; i++) {
   // 		if (model->layer_type[i] == CONV) {
   // 			ConvLayerParams *cur_params = (ConvLayerParams *)model->params[i];
-  // 			int kernel_size = cur_params->C_in * cur_params->C_out * cur_params->filter_h
+  // 			int kernel_size = cur_params->C_in * cur_params->C_out *
+  // cur_params->filter_h
   // * cur_params->filter_w; 			if (model->data_type == CUDNN_DATA_FLOAT) {
   // 				checkCUBLAS(cublasSaxpy(model->cublas_handle, kernel_size,
   // 										&Salpha,
   // 										(float
   // *)cur_params->dW,
-  // 1, 										(float *)cur_params->W,
-  // 1));
+  // 1, 										(float
+  // *)cur_params->W, 1));
 
   // 				checkCUBLAS(cublasSaxpy(model->cublas_handle, cur_params->C_out,
   // 										&Salpha,
   // 										(float
   // *)cur_params->db,
-  // 1, 										(float *)cur_params->b,
-  // 1));
+  // 1, 										(float
+  // *)cur_params->b, 1));
   // 			}
   // 			else if (model->data_type == CUDNN_DATA_DOUBLE) {
   // 				checkCUBLAS(cublasDaxpy(model->cublas_handle, kernel_size,
   // 										&Dalpha,
   // 										(double
   // *)cur_params->dW,
-  // 1, 										(double *)cur_params->W,
-  // 1));
+  // 1, 										(double
+  // *)cur_params->W, 1));
 
   // 				checkCUBLAS(cublasDaxpy(model->cublas_handle, cur_params->C_out,
   // 										&Dalpha,
   // 										(double
   // *)cur_params->db,
-  // 1, 										(double *)cur_params->b,
-  // 1));
+  // 1, 										(double
+  // *)cur_params->b, 1));
   // 			}
 
   // 		}
@@ -77,29 +78,32 @@ float Solver::step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
   // 			FCLayerParams *cur_params = (FCLayerParams *)model->params[i];
   // 			if (model->data_type == CUDNN_DATA_FLOAT) {
   // 				checkCUBLAS(cublasSaxpy(model->cublas_handle, cur_params->C_in *
-  // cur_params->C_out, 										&Salpha, 										(float
-  // *)cur_params->dW, 1, 										(float *)cur_params->W,
-  // 1));
+  // cur_params->C_out,
+  // &Salpha, (float
+  // *)cur_params->dW, 1, (float
+  // *)cur_params->W, 1));
 
   // 				checkCUBLAS(cublasSaxpy(model->cublas_handle, cur_params->C_out,
   // 										&Salpha,
   // 										(float
   // *)cur_params->db,
-  // 1, 										(float *)cur_params->b,
-  // 1));
+  // 1, 										(float
+  // *)cur_params->b, 1));
   // 			}
   // 			else if (model->data_type == CUDNN_DATA_DOUBLE) {
   // 				checkCUBLAS(cublasDaxpy(model->cublas_handle, cur_params->C_in *
-  // cur_params->C_out, 										&Dalpha, 										(double
-  // *)cur_params->dW, 1, 										(double *)cur_params->W,
-  // 1));
+  // cur_params->C_out,
+  // &Dalpha, (double
+  // *)cur_params->dW, 1,
+  // (double
+  // *)cur_params->W, 1));
 
   // 				checkCUBLAS(cublasDaxpy(model->cublas_handle, cur_params->C_out,
   // 										&Dalpha,
   // 										(double
   // *)cur_params->db,
-  // 1, 										(double *)cur_params->b,
-  // 1));
+  // 1, 										(double
+  // *)cur_params->b, 1));
   // 			}
   // 		}
 
@@ -110,10 +114,9 @@ float Solver::step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
   // 										&Salpha,
   // 										(float
   // *)cur_params->dscale,
-  // 1, 										(float *)cur_params->scale, 1));
-  // checkCUBLAS(cublasSaxpy(model->cublas_handle, cur_params->sbmv_size,
-  // &Salpha, 										(float *)cur_params->dbias, 1,
-  // (float *)cur_params->bias, 1));
+  // 1, 										(float
+  // *)cur_params->scale, 1)); checkCUBLAS(cublasSaxpy(model->cublas_handle, cur_params->sbmv_size,
+  // &Salpha, (float *)cur_params->dbias, 1, (float *)cur_params->bias, 1));
 
   // 			}
   // 			else if (model->data_type == CUDNN_DATA_DOUBLE) {
@@ -121,10 +124,9 @@ float Solver::step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
   // 										&Dalpha,
   // 										(double
   // *)cur_params->dscale,
-  // 1, 										(double *)cur_params->scale, 1));
-  // checkCUBLAS(cublasDaxpy(model->cublas_handle, cur_params->sbmv_size,
-  // &Dalpha, 										(double *)cur_params->dbias, 1,
-  // (double *)cur_params->bias, 1));
+  // 1, 										(double
+  // *)cur_params->scale, 1)); checkCUBLAS(cublasDaxpy(model->cublas_handle, cur_params->sbmv_size,
+  // &Dalpha, (double *)cur_params->dbias, 1, (double *)cur_params->bias, 1));
 
   // 			}
   // 		}
