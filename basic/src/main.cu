@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
     layer_specifier.push_back(temp);
   }
 
-  int batch_size = 128;
+  int batch_size = 64;
   long long dropout_seed = 1;
   float softmax_eps = 1e-8;
   float init_std_dev = 0.1;
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
                 init_std_dev, SGD);
 
   int num_epoch = 10;
-  double learning_rate = 1e-15;
+  double learning_rate = 1e-6;
   double learning_rate_decay = 0.9;
 
   Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
