@@ -74,45 +74,6 @@ struct FCLayerParams {
   void stepParams(cublasHandle_t cublas_handle, double learning_rate);
 };
 
-struct DropoutLayerParams {
-  cudnnDropoutDescriptor_t dropout_desc;
-  cudnnTensorDescriptor_t input_tensor;
-  void *reserved_space;
-  void *state;
-  size_t reserved_space_size;
-  size_t state_size;
-
-  void initializeValues(cudnnHandle_t cudnn_handle, DropoutDescriptor *user_params,
-                        cudnnDataType_t data_type, int batch_size,
-                        cudnnTensorFormat_t tensor_format, LayerDimension &output_size);
-
-  void allocateSpace(size_t &free_bytes, cudnnHandle_t cudnn_handle, DropoutDescriptor *user_params,
-                     long long seed);
-};
-
-struct BatchNormLayerParams {
-  cudnnTensorDescriptor_t input_tensor;
-  cudnnTensorDescriptor_t sbmv_desc;
-  void *scale, *bias;
-  void *dscale, *dbias;
-  void *running_mean, *running_variance;
-  void *result_save_mean, *result_save_inv_var;
-  double factor, epsilon;
-  cudnnBatchNormMode_t mode;
-  int h, w, c;
-  int sbmv_size;
-  UpdateRule update_rule;
-  size_t allocation_size;
-  cudnnDataType_t data_type;
-
-  void initializeValues(BatchNormDescriptor *user_params, cudnnDataType_t data_type,
-                        cudnnTensorFormat_t tensor_format, int batch_size,
-                        LayerDimension &output_size, UpdateRule update_rule);
-  void allocateSpace(cudnnDataType_t data_type, size_t data_type_size, size_t &free_bytes);
-
-  void stepParams(cublasHandle_t cublas_handle, double learning_rate);
-};
-
 struct PoolingLayerParams {
   cudnnTensorDescriptor_t input_tensor;
   cudnnTensorDescriptor_t output_tensor;
