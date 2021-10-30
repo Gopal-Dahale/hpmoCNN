@@ -1,4 +1,4 @@
-SOURCE	= src/main.cu src/user_iface.cu 
+SOURCE	= src/utils.cu src/user_iface.cu src/solver.cu src/neural_net.cu src/layer_params.cu src/main.cu
 HEADER	= 
 OUT	= main
 CC	 = nvcc
