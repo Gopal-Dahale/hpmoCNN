@@ -140,32 +140,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
       ((FCLayerParams *)params[i])
           ->initializeValues(user_params, batch_size, this->tensor_format, this->data_type,
                              current_output_size, update_rule);
-    } else if (layers[i].type == DROPOUT) {
-      DropoutDescriptor *user_params = (DropoutDescriptor *)layers[i].params;
-      params[i] = malloc(sizeof(DropoutLayerParams));
-      ((DropoutLayerParams *)params[i])
-          ->initializeValues(cudnn_handle, user_params, this->data_type, batch_size,
-                             this->tensor_format, current_output_size);
 
-    }
-
-    else if (layers[i].type == BATCHNORM) {
-      BatchNormDescriptor *user_params = (BatchNormDescriptor *)layers[i].params;
-      params[i] = malloc(sizeof(BatchNormLayerParams));
-      ((BatchNormLayerParams *)params[i])
-          ->initializeValues(user_params, this->data_type, this->tensor_format, batch_size,
-                             current_output_size, update_rule);
-
-    } else if (layers[i].type == POOLING) {
-      PoolingDescriptor *user_params = (PoolingDescriptor *)layers[i].params;
-      params[i] = malloc(sizeof(BatchNormLayerParams));
-
-      ((PoolingLayerParams *)params[i])
-          ->initializeValues(user_params, this->data_type, this->tensor_format, batch_size,
-                             current_output_size);
-    }
-
-    else if (layers[i].type == ACTV) {
+    } else if (layers[i].type == ACTV) {
       ActivationDescriptor *user_params = (ActivationDescriptor *)layers[i].params;
       params[i] = malloc(sizeof(ActivationLayerParams));
       ((ActivationLayerParams *)params[i])
@@ -284,7 +260,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
   workspace_size = 0;
   for (int i = 0; i < num_layers; i++) {
     if (layers[i].type == CONV) {
-      ((ConvLayerParams *)params[i])->getWorkspaceSize(cur_workspace_size, free_bytes);
+      cur_workspace_size = ((ConvLayerParams *)params[i])->getWorkspaceSize(free_bytes, );
       if (cur_workspace_size > workspace_size) workspace_size = cur_workspace_size;
     }
   }
@@ -344,12 +320,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
       // std::cout << "conv\n";
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
 
-      int cur_workspace_size = cur_params->fwd_workspace_size;
       // computation
       checkCUDNN(cudnnConvolutionForward(
           cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i], cur_params->filter_desc,
-          cur_params->W, cur_params->conv_desc, cur_params->fwd_algo, cur_workspace,
-          cur_workspace_size, &beta, cur_params->output_tensor, layer_input[i + 1]));
+          cur_params->W, cur_params->conv_desc, cur_params->fwd_algo, workspace,
+          workspace_size, &beta, cur_params->output_tensor, layer_input[i + 1]));
       checkCUDNN(cudnnAddTensor(cudnn_handle, &alpha, cur_params->bias_desc, cur_params->b, &alpha,
                                 cur_params->output_tensor, layer_input[i + 1]));
 
@@ -370,88 +345,41 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
       // std::cout << "FChere" << i << std::endl;
 
       if (data_type == CUDNN_DATA_FLOAT) {
-        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_ou,
-                                batch_size, cur_params->C_in, &Salpha, (float *)cur_params->W,
-                                cur_params->C_out, (float *)layer_input[i], cur_params->C_in,
-                                &Sbeta, (float *)layer_input[i + 1], cur_params->C_out));
-        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_ou,
-                                batch_size, 1, &Salpha, (float *)cur_params->b, cur_params->C_out,
-                                (float *)one_vec, 1, &Salpha, (float *)layer_input[i + 1],
-                                cur_params->C_out));
+        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out, batch_size, cur_params->C_in, &Salpha, (float *)cur_params->W, cur_params->C_out, (float *)layer_input[i], cur_params->C_in, &Sbeta, (float *)layer_input[i + 1], cur_params->C_out);
+        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out, batch_size, 1, &Salpha, (float *)cur_params->b, cur_params->C_out, (float *)one_vec, 1, &Salpha, (float *)layer_input[i + 1],cur_params->C_out);
       } else if (data_type == CUDNN_DATA_DOUBLE) {
-        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_ou,
-                                batch_size, cur_params->C_in, &Dalpha, (double *)cur_params->W,
-                                cur_params->C_out, (double *)layer_input[i], cur_params->C_in,
-                                &Dbeta, (double *)layer_input[i + 1], cur_params->C_out));
-        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_ou,
-                                batch_size, 1, &Dalpha, (double *)cur_params->b, cur_params->C_out,
-                                (double *)one_vec, 1, &Dalpha, (double *)layer_input[i + 1],
-                                cur_params->C_out));
+        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out,batch_size, cur_params->C_in, &Dalpha, (double *)cur_params->W,cur_params->C_out, (double *)layer_input[i], cur_params->C_in,&Dbeta, (double *)layer_input[i + 1], cur_params->C_out);
+        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out,batch_size, 1, &Dalpha, (double *)cur_params->b, cur_params->C_out,(double *)one_vec, 1, &Dalpha, (double *)layer_input[i + 1],cur_params->C_out);
       }
       if (cur_params->activation_mode != ACTIVATION_NONE) {
-        checkCUDNN(cudnnActivationForward(cudnn_handle, cur_params->actv_desc, &alpha,
-                                          cur_params->output_tensor, layer_input[i + 1], &beta,
-                                          cur_params->output_tensor, layer_input[i + 1]));
+        checkCUDNN(cudnnActivationForward(cudnn_handle, cur_params->actv_desc, &alpha,cur_params->output_tensor, layer_input[i + 1], &beta,cur_params->output_tensor, layer_input[i + 1]));
       }
       // std::cout << "FChere" << i << std::endl;
-    } else if (layer_type[i] == DROPOUT) {
-      // std::cout << "Dropout\n";
-      DropoutLayerParams *cur_params = (DropoutLayerParams *)params[i];
-      checkCUDNN(cudnnDropoutForward(cudnn_handle, cur_params->dropout_desc,
-                                     cur_params->input_tensor, layer_input[i],
-                                     cur_params->input_tensor, layer_input[i + 1],
-                                     cur_params->reserved_space, cur_params->reserved_space_size));
-    } else if (layer_type[i] == BATCHNORM) {
-      // std::cout << "Batchnorm\n";
-      BatchNormLayerParams *cur_params = (BatchNormLayerParams *)params[i];
-
-      if (train == true) {
-        checkCUDNN(cudnnBatchNormalizationForwardTraining(
-            cudnn_handle, cur_params->mode, &alpha, &beta, cur_params->input_tensor, layer_input[i],
-            cur_params->input_tensor, layer_input[i + 1], cur_params->sbmv_desc, cur_params->scale,
-            cur_params->bias, cur_params->factor, cur_params->running_mean,
-            cur_params->running_variance, cur_params->epsilon, cur_params->result_save_mean,
-            cur_params->result_save_inv_var));
-
-      } else {
-        checkCUDNN(cudnnBatchNormalizationForwardInference(
-            cudnn_handle, cur_params->mode, &alpha, &beta, cur_params->input_tensor, layer_input[i],
-            cur_params->input_tensor, layer_input[i + 1], cur_params->sbmv_desc, cur_params->scale,
-            cur_params->bias, cur_params->running_mean, cur_params->running_variance,
-            cur_params->epsilon));
-      }
     } else if (layer_type[i] == POOLING) {
       // std::cout << "Pooling\n";
       PoolingLayerParams *cur_params = (PoolingLayerParams *)params[i];
-      checkCUDNN(cudnnPoolingForward(cudnn_handle, cur_params->pool_desc, &alpha,
-                                     cur_params->input_tensor, layer_input[i], &beta,
-                                     cur_params->output_tensor, layer_input[i + 1]));
+      checkCUDNN(cudnnPoolingForward(cudnn_handle, cur_params->pool_desc, &alpha,cur_params->input_tensor, layer_input[i], &beta,cur_params->output_tensor, layer_input[i + 1]));
     } else if (layer_type[i] == ACTV) {
       // std::cout << "Actv\n";
       std::cout << "Panic!! ACTV wrong place\n";
       exit(0);
       ActivationLayerParams *cur_params = (ActivationLayerParams *)params[i];
-      checkCUDNN(cudnnActivationForward(cudnn_handle, cur_params->actv_desc, &alpha,
-                                        cur_params->input_tensor, layer_input[i], &beta,
-                                        cur_params->input_tensor, layer_input[i + 1]));
+      checkCUDNN(cudnnActivationForward(cudnn_handle, cur_params->actv_desc, &alpha,cur_params->input_tensor, layer_input[i], &beta,cur_params->input_tensor, layer_input[i + 1]));
     } else if (layer_type[i] == SOFTMAX) {
       // std::cout << "Softmax\n";
       std::cout << "Panic!! SOFTMAX wrong place\n";
       exit(0);
       if (train == true) {
         SoftmaxLayerParams *cur_params = (SoftmaxLayerParams *)params[i];
-        checkCUDNN(cudnnSoftmaxForward(cudnn_handle, cur_params->algo, cur_params->mode, &alpha,
-                                       cur_params->input_tensor, layer_input[i], &beta,
-                                       cur_params->input_tensor, layer_input[i + 1]));
+        checkCUDNN(cudnnSoftmaxForward(cudnn_handle, cur_params->algo, cur_params->mode, &alpha,cur_params->input_tensor, layer_input[i], &beta,cur_params->input_tensor, layer_input[i + 1]));
       }
     }
-    -
         // synchronization
         // cudaDeviceSynchronize();
 
         // if next layer is ACTV or SOFTMAX, complete that and come to synchronization
         // the case in above if for ACTV and SOFTMAX never occurs
-        if (layer_type[i + 1] == SOFTMAX) {
+      if (layer_type[i + 1] == SOFTMAX) {
       i++;
       if (train == true) {
         layer_input[i + 1] = layer_input[i];
@@ -498,15 +426,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
                                            cur_params->output_tensor, dlayer_input[i + 1]));
       }
 
-      cur_filter_workspace_size = cur_params->bwd_filter_workspace_size;
-      if (i > 0)
-        cur_data_workspace_size = cur_params->bwd_data_workspace_size;
-      else
-        cur_data_workspace_size = 0;
-      // std::cout << "bwd cur_workspace_size: " << cur_workspace_size << std::endl;
-      cur_workspace_size = (cur_filter_workspace_size > cur_data_workspace_size)
-                               ? cur_filter_workspace_size
-                               : cur_data_workspace_size;
 
       checkCUDNN(cudnnConvolutionBackwardBias(cudnn_handle, &alpha, cur_params->output_tensor,
                                               dlayer_input[i + 1], &beta, cur_params->bias_desc,
@@ -516,13 +435,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
 
       checkCUDNN(cudnnConvolutionBackwardFilter(
           cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i], cur_params->output_tensor,
-          dlayer_input[i + 1], cur_params->conv_desc, cur_params->bwd_filter_algo, cur_workspace,
-          cur_workspace_size, &beta, cur_params->filter_desc, cur_params->dW));
+          dlayer_input[i + 1], cur_params->conv_desc, cur_params->bwd_filter_algo, workspace,
+          workspace_size, &beta, cur_params->filter_desc, cur_params->dW));
       if (i > 0)
         checkCUDNN(cudnnConvolutionBackwardData(
             cudnn_handle, &alpha, cur_params->filter_desc, cur_params->W, cur_params->output_tensor,
-            dlayer_input[i + 1], cur_params->conv_desc, cur_params->bwd_data_algo, cur_workspace,
-            cur_workspace_size, &beta, cur_params->input_tensor, dlayer_input[i]));
+            dlayer_input[i + 1], cur_params->conv_desc, cur_params->bwd_data_algo, workspace,
+            workspace_size, &beta, cur_params->input_tensor, dlayer_input[i]));
 
       // std::cout << "Free bytes: " << free_bytes << std::endl;
       // std::cout << "here\n";
@@ -542,69 +461,48 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
 
       if (data_type == CUDNN_DATA_FLOAT) {
         // bias backward
-        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out, ,
+        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out, 1,
                                 batch_size, &Salpha, (float *)dlayer_input[i + 1],
                                 cur_params->C_out, (float *)one_vec, batch_size, &Sbeta,
-                                (float *)cur_params->db, cur_params->C_out));
+                                (float *)cur_params->db, cur_params->C_out);
 
         // weight backward
-        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_T, cur_params->C_ou,
+        cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_T, cur_params->C_out,
                                 cur_params->C_in, batch_size, &Salpha, (float *)dlayer_input[i + 1],
                                 cur_params->C_out, (float *)layer_input[i], cur_params->C_in,
-                                &Sbeta, (float *)cur_params->dW, cur_params->C_out));
+                                &Sbeta, (float *)cur_params->dW, cur_params->C_out);
 
         // data backward
         if (i > 0)
-          cublasSgemm(cublas_handle, CUBLAS_OP_T, CUBLAS_OP_N, cur_params->C_i,
+          cublasSgemm(cublas_handle, CUBLAS_OP_T, CUBLAS_OP_N, cur_params->C_in,
                                   batch_size, cur_params->C_out, &Salpha, (float *)cur_params->W,
                                   cur_params->C_out, (float *)dlayer_input[i + 1],
                                   cur_params->C_out, &Sbeta, (float *)dlayer_input[i],
-                                  cur_params->C_in));
+                                  cur_params->C_in);
       }
 
       else if (data_type == CUDNN_DATA_DOUBLE) {
         // bias backward
-        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out, ,
+        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, cur_params->C_out, 1,
                                 batch_size, &Dalpha, (double *)dlayer_input[i + 1],
                                 cur_params->C_out, (double *)one_vec, batch_size, &Dbeta,
-                                (double *)cur_params->db, cur_params->C_out));
+                                (double *)cur_params->db, cur_params->C_out);
 
         // weight backward
-        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_T, cur_params->C_ou,
+        cublasDgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_T, cur_params->C_out,
                                 cur_params->C_in, batch_size, &Dalpha,
                                 (double *)dlayer_input[i + 1], cur_params->C_out,
                                 (double *)layer_input[i], cur_params->C_in, &Dbeta,
-                                (double *)cur_params->dW, cur_params->C_out));
+                                (double *)cur_params->dW, cur_params->C_out);
 
         // data backward
         if (i > 0)
-          cublasDgemm(cublas_handle, CUBLAS_OP_T, CUBLAS_OP_N, cur_params->C_i,
+          cublasDgemm(cublas_handle, CUBLAS_OP_T, CUBLAS_OP_N, cur_params->C_in,
                                   batch_size, cur_params->C_out, &Dalpha, (double *)cur_params->W,
                                   cur_params->C_out, (double *)dlayer_input[i + 1],
                                   cur_params->C_out, &Dbeta, (double *)dlayer_input[i],
-                                  cur_params->C_in));
+                                  cur_params->C_in);
       }
-      cur_params->stepParams(cublas_handle, learning_rate);
-    }
-
-    else if (layer_type[i] == DROPOUT) {
-      DropoutLayerParams *cur_params = (DropoutLayerParams *)params[i];
-      checkCUDNN(cudnnDropoutBackward(cudnn_handle, cur_params->dropout_desc,
-                                      cur_params->input_tensor, dlayer_input[i + 1],
-                                      cur_params->input_tensor, dlayer_input[i],
-                                      cur_params->reserved_space, cur_params->reserved_space_size));
-    }
-
-    else if (layer_type[i] == BATCHNORM) {
-      BatchNormLayerParams *cur_params = (BatchNormLayerParams *)params[i];
-
-      checkCUDNN(cudnnBatchNormalizationBackward(
-          cudnn_handle, cur_params->mode, &alpha, &beta, &alpha, &beta, cur_params->input_tensor,
-          layer_input[i], cur_params->input_tensor, dlayer_input[i + 1], cur_params->input_tensor,
-          dlayer_input[i], cur_params->sbmv_desc, cur_params->scale, cur_params->dscale,
-          cur_params->dbias, cur_params->epsilon, cur_params->result_save_mean,
-          cur_params->result_save_inv_var));
-
       cur_params->stepParams(cublas_handle, learning_rate);
     }
 
@@ -637,9 +535,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
       continue;
     }
 
-    if (space_tracker.getConsumed() != 0) {
-      std::cout << "Panic!! Space not updated properly\n";
-    }
-
     // exit(0);
   }
+}  
