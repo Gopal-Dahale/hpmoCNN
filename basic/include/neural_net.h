@@ -64,12 +64,13 @@ class NeuralNet {
 
   // data of time
   cudaEvent_t start_compute, stop_compute;
-  void getComputationTime(void *X, int *y, double learning_rate,
-                          std::vector<float> &fwd_computation_time,
-                          std::vector<float> &bwd_computation_time);
+  //   void getComputationTime(void *X, int *y, double learning_rate,
+  //                           std::vector<float> &fwd_computation_time,
+  //                           std::vector<float> &bwd_computation_time);
   cudaEvent_t start_transfer, stop_transfer;
-  void getTransferTime(void *X, int *y, double learning_rate, std::vector<float> &fwd_transfer_time,
-                       std::vector<float> &bwd_transfer_time);
+  //   void getTransferTime(void *X, int *y, double learning_rate, std::vector<float>
+  //   &fwd_transfer_time,
+  //                        std::vector<float> &bwd_transfer_time);
 };
 
 #endif

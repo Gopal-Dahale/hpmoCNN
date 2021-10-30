@@ -1,3 +1,7 @@
+#include <cublas_v2.h>
+#include <cudnn.h>
+#include <curand.h>
+
 #include "layer_params.h"
 
 void ConvLayerParams::initializeValues(cudnnHandle_t cudnn_handle, ConvDescriptor *user_params,

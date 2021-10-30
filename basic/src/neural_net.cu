@@ -1,3 +1,6 @@
+#include <cublas_v2.h>
+#include <cudnn.h>
+#include <curand.h>
 #include <time.h>
 
 #include <cstdio>
