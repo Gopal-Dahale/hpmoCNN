@@ -179,34 +179,50 @@ int main(int argc, char *argv[]) {
   vector<LayerSpecifier> layer_specifier;
   {
     ConvDescriptor layer0;
-    layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
+    layer0.initializeValues(1, 64, 3, 3, 28, 28, 1, 1, 1, 1);
     LayerSpecifier temp;
     temp.initPointer(CONV);
     *((ConvDescriptor *)temp.params) = layer0;
     layer_specifier.push_back(temp);
   }
   {
-    FCDescriptor layer1;
-    layer1.initializeValues(3 * 28 * 28, 50, RELU);
+    ConvDescriptor layer1;
+    layer1.initializeValues(1, 64, 3, 3, 28, 28, 1, 1, 1, 1);
     LayerSpecifier temp;
-    temp.initPointer(FULLY_CONNECTED);
-    *((FCDescriptor *)temp.params) = layer1;
+    temp.initPointer(CONV);
+    *((ConvDescriptor *)temp.params) = layer1;
     layer_specifier.push_back(temp);
   }
   {
-    FCDescriptor layer2;
-    layer2.initializeValues(50, 10);
+    PoolingDescriptor layer2;
+    layer2.initializeValues(64, 2, 2, 28, 28, 0, 0, 2, 2, POOLING_MAX);
     LayerSpecifier temp;
-    temp.initPointer(FULLY_CONNECTED);
-    *((FCDescriptor *)temp.params) = layer2;
+    temp.initPointer(POOLING);
+    *((PoolingDescriptor *)temp.params) = layer2;
     layer_specifier.push_back(temp);
   }
   {
-    SoftmaxDescriptor layer2_smax;
-    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1, 1);
+    FCDescriptor layer3;
+    layer3.initializeValues(64 * 64 * (28 / 2), 128);
+    LayerSpecifier temp;
+    temp.initPointer(FULLY_CONNECTED);
+    *((FCDescriptor *)temp.params) = layer3;
+    layer_specifier.push_back(temp);
+  }
+  {
+    FCDescriptor layer4;
+    layer4.initializeValues(128, 10);
+    LayerSpecifier temp;
+    temp.initPointer(FULLY_CONNECTED);
+    *((FCDescriptor *)temp.params) = layer4;
+    layer_specifier.push_back(temp);
+  }
+  {
+    SoftmaxDescriptor layer5;
+    layer5.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 1000, 1, 1);
     LayerSpecifier temp;
     temp.initPointer(SOFTMAX);
-    *((SoftmaxDescriptor *)temp.params) = layer2_smax;
+    *((SoftmaxDescriptor *)temp.params) = layer5;
     layer_specifier.push_back(temp);
   }
 
@@ -217,7 +233,7 @@ int main(int argc, char *argv[]) {
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, dropout_seed, softmax_eps,
                 init_std_dev, SGD);
 
-  int num_epoch = 10;
+  int num_epoch = 100;
   double learning_rate = 1e-6;
   double learning_rate_decay = 0.9;
 
