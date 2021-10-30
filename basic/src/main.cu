@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "user_iface.h"
+#include "solver.h"
 
 using namespace std;
 
@@ -125,19 +125,32 @@ int main(int argc, char *argv[]) {
   // 	y_val[i] = rand() % 2;
   // }
 
-  // int rows = 28, cols = 28, channels = 1;
+  int rows = 28, cols = 28, channels = 1;
   vector<vector<uchar> > train_images, test_images;
   vector<uchar> train_labels, test_labels;
   readMNIST(train_images, test_images, train_labels, test_labels);
-  // float *f_train_images, *f_train_labels, *f_test_images, *f_test_labels;
   float *f_train_images, *f_test_images;
   int *f_train_labels, *f_test_labels;
-  int rows = 227, cols = 227, channels = 3;
+
   int input_size = rows * cols * channels;
   f_train_images = (float *)malloc(num_train * input_size * sizeof(float));
   f_train_labels = (int *)malloc(num_train * sizeof(int));
   f_test_images = (float *)malloc(num_test * input_size * sizeof(float));
   f_test_labels = (int *)malloc(num_test * sizeof(int));
+
+  for (int k = 0; k < num_train; k++) {
+    for (int j = 0; j < rows * cols; j++) {
+      f_train_images[k * input_size + j] = (float)train_images[k][j];
+    }
+    f_train_labels[k] = (int)train_labels[k];
+  }
+
+  for (int k = 0; k < num_test; k++) {
+    for (int j = 0; j < rows * cols; j++) {
+      f_test_images[k * input_size + j] = (float)test_images[k][j];
+    }
+    f_test_labels[k] = (int)test_labels[k];
+  }
 
   float *mean_image;
   mean_image = (float *)malloc(input_size * sizeof(float));
@@ -166,71 +179,57 @@ int main(int argc, char *argv[]) {
   vector<LayerSpecifier> layer_specifier;
   {
     ConvDescriptor layer0;
-    layer0.initializeValues(1, 64, 3, 3, 28, 28, 1, 1, 1, 1);
+    layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
     LayerSpecifier temp;
     temp.initPointer(CONV);
     *((ConvDescriptor *)temp.params) = layer0;
     layer_specifier.push_back(temp);
   }
-  //   {
-  //     ConvDescriptor layer1;
-  //     layer1.initializeValues(1, 64, 3, 3, 28, 28, 1, 1, 1, 1);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(CONV);
-  //     *((ConvDescriptor *)temp.params) = layer1;
-  //     layer_specifier.push_back(temp);
-  //   }
-  //   {
-  //     PoolingDescriptor layer2;
-  //     layer2.initializeValues(64, 2, 2, 28, 28, 0, 0, 2, 2, POOLING_MAX);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(POOLING);
-  //     *((PoolingDescriptor *)temp.params) = layer2;
-  //     layer_specifier.push_back(temp);
-  //   }
-  //   {
-  //     FCDescriptor layer3;
-  //     layer3.initializeValues(64 * 64 * (28 / 2), 128);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(FULLY_CONNECTED);
-  //     *((FCDescriptor *)temp.params) = layer3;
-  //     layer_specifier.push_back(temp);
-  //   }
-  //   {
-  //     FCDescriptor layer4;
-  //     layer4.initializeValues(128, 10);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(FULLY_CONNECTED);
-  //     *((FCDescriptor *)temp.params) = layer4;
-  //     layer_specifier.push_back(temp);
-  //   }
-  //   {
-  //     SoftmaxDescriptor layer5;
-  //     layer5.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 1000, 1, 1);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(SOFTMAX);
-  //     *((SoftmaxDescriptor *)temp.params) = layer5;
-  //     layer_specifier.push_back(temp);
-  //   }
+  {
+    FCDescriptor layer1;
+    layer1.initializeValues(3 * 28 * 28, 50, RELU);
+    LayerSpecifier temp;
+    temp.initPointer(FULLY_CONNECTED);
+    *((FCDescriptor *)temp.params) = layer1;
+    layer_specifier.push_back(temp);
+  }
+  {
+    FCDescriptor layer2;
+    layer2.initializeValues(50, 10);
+    LayerSpecifier temp;
+    temp.initPointer(FULLY_CONNECTED);
+    *((FCDescriptor *)temp.params) = layer2;
+    layer_specifier.push_back(temp);
+  }
+  {
+    SoftmaxDescriptor layer2_smax;
+    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1, 1);
+    LayerSpecifier temp;
+    temp.initPointer(SOFTMAX);
+    *((SoftmaxDescriptor *)temp.params) = layer2_smax;
+    layer_specifier.push_back(temp);
+  }
 
-  //   int batch_size = 128;
-  //   long long dropout_seed = 1;
-  //   float softmax_eps = 1e-8;
-  //   float init_std_dev = 0.1;
-  //   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, dropout_seed,
-  //   softmax_eps,
-  //                 init_std_dev, vdnn_type, vdnn_conv_algo, SGD);
+  int batch_size = 128;
+  long long dropout_seed = 1;
+  float softmax_eps = 1e-8;
+  float init_std_dev = 0.1;
+  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, dropout_seed, softmax_eps,
+                init_std_dev, SGD);
 
-  //   int num_epoch = 1000;
-  //   double learning_rate = 1e-15;
-  //   double learning_rate_decay = 0.9;
+  int num_epoch = 1;
+  double learning_rate = 1e-15;
+  double learning_rate_decay = 0.9;
 
-  //   Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
-  //                 f_train_labels, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
-  //                 num_train);
-  //   vector<float> loss;
-  //   vector<float> time;
-  //   vector<vector<float> > fwd_vdnn_lag, bwd_vdnn_lag;
+  Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
+                f_train_labels, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
+                num_train);
+  vector<float> loss;
+  vector<int> val_acc;
+  solver.train(loss, val_acc);
+  int num_correct;
+  solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
+  cout << "NUM CORRECT:" << num_correct << endl;
   //   solver.getTrainTime(loss, time, 100, fwd_vdnn_lag, bwd_vdnn_lag);
   //   printTimes(time, filename);
   //   printvDNNLag(fwd_vdnn_lag, bwd_vdnn_lag, filename);

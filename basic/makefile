@@ -7,6 +7,6 @@ FLAGS	 = -I $(INC_DIR)
 LFLAGS	 = 
 
 all: $(SOURCE)
-	$(CC) -o $(OUT) $(FLAGS) $(SOURCE) 
+	$(CC) -o $(OUT) $(FLAGS) $(SOURCE) -lcublas -lcudnn -lcurand
 
 clean:
