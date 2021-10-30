@@ -390,16 +390,16 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
                                      cur_params->output_tensor, layer_input[i + 1]));
     } else if (layer_type[i] == ACTV) {
       // std::cout << "Actv\n";
-      std::cout << "Panic!! ACTV wrong place\n";
-      exit(0);
+      //   std::cout << "Panic!! ACTV wrong place\n";
+      //   exit(0);
       ActivationLayerParams *cur_params = (ActivationLayerParams *)params[i];
       checkCUDNN(cudnnActivationForward(cudnn_handle, cur_params->actv_desc, &alpha,
                                         cur_params->input_tensor, layer_input[i], &beta,
                                         cur_params->input_tensor, layer_input[i + 1]));
     } else if (layer_type[i] == SOFTMAX) {
       // std::cout << "Softmax\n";
-      std::cout << "Panic!! SOFTMAX wrong place\n";
-      exit(0);
+      //   std::cout << "Panic!! SOFTMAX wrong place\n";
+      //   exit(0);
       if (train == true) {
         SoftmaxLayerParams *cur_params = (SoftmaxLayerParams *)params[i];
         checkCUDNN(cudnnSoftmaxForward(cudnn_handle, cur_params->algo, cur_params->mode, &alpha,
