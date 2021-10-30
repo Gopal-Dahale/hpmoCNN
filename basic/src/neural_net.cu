@@ -261,11 +261,18 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
 
   // do not allocate workspace initially
   // allocate space for workspace and also keep track of algo
-  size_t cur_workspace_size;
+  size_t cur_workspace_size_1, cur_workspace_size_2, cur_workspace_size_3, cur_workspace_size;
   workspace_size = 0;
   for (int i = 0; i < num_layers; i++) {
     if (layers[i].type == CONV) {
-      cur_workspace_size = ((ConvLayerParams *)params[i])->getWorkspaceSize(free_bytes, );
+      cur_workspace_size_1 =
+          ((ConvLayerParams *)params[i])->getWorkspaceSize(free_bytes, ConvLayerParams::FWD);
+      cur_workspace_size_2 =
+          ((ConvLayerParams *)params[i])->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_DATA);
+      cur_workspace_size_3 =
+          ((ConvLayerParams *)params[i])->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_FILTER);
+      cur_workspace_size =
+          max(cur_workspace_size_1, max(cur_workspace_size_2, cur_workspace_size_3));
       if (cur_workspace_size > workspace_size) workspace_size = cur_workspace_size;
     }
   }
