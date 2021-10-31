@@ -1,4 +1,4 @@
-#include "user_iface.h"
+#include "user_iface.cuh"
 
 void ConvDescriptor::initializeValues(int input_channels, int output_channels,
                                       int kernel_h, int kernel_w, int input_h,

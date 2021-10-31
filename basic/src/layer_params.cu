@@ -2,7 +2,7 @@
 #include <cudnn.h>
 #include <curand.h>
 
-#include "layer_params.h"
+#include "layer_params.cuh"
 
 void ConvLayerParams::initializeValues(
     cudnnHandle_t cudnn_handle, ConvDescriptor *user_params,
@@ -64,9 +64,12 @@ void ConvLayerParams::initializeValues(
   // fwd_ret_count; i++) { 	std::cout << i << std::endl; 	std::cout << "algo:
   // " << fwd_perf[i].algo << std::endl; 	std::cout << "status: " <<
   // cudnnGetErrorString(fwd_perf[i].status) << std::endl; 	std::cout <<
-  // "time(ms): " << fwd_perf[i].time << std::endl; 	std::cout << "memory(MB): "
+  // "time(ms): " << fwd_perf[i].time << std::endl; 	std::cout <<
+  // "memory(MB):
+  // "
   // << fwd_perf[i].memory * 1.0 / 1024 / 1024 << std::endl; 	std::cout <<
-  // "mathType: " << fwd_perf[i].mathType << std::endl; 	std::cout << std::endl;
+  // "mathType: " << fwd_perf[i].mathType << std::endl; 	std::cout <<
+  // std::endl;
   // }
 
   bwd_filter_req_count = 10;
@@ -81,7 +84,7 @@ void ConvLayerParams::initializeValues(
   // CUDNN_CONVOLUTION_BWD_FILTER_ALGO_1 << std::endl; for (int i = 0; i <
   // bwd_filter_ret_count; i++) { 	std::cout << i << std::endl; 	std::cout <<
   // "algo: " << bwd_filter_perf[i].algo << std::endl; 	std::cout << "status: "
-  // << cudnnGetErrorString(bwd_filter_perf[i].status) << std::endl; 	std::cout
+  // << cudnnGetErrorString(bwd_filter_perf[i].status) << std::endl; std::cout
   // << "time(ms): " << bwd_filter_perf[i].time << std::endl; 	std::cout <<
   // "memory(MB): " << bwd_filter_perf[i].memory * 1.0 / 1024 / 1024 <<
   // std::endl; 	std::cout << "mathType: " << bwd_filter_perf[i].mathType <<
@@ -100,8 +103,8 @@ void ConvLayerParams::initializeValues(
   // 	std::cout << "algo: " << bwd_data_perf[i].algo << std::endl;
   // 	std::cout << "status: " << cudnnGetErrorString(bwd_data_perf[i].status)
   // << std::endl; 	std::cout << "time(ms): " << bwd_data_perf[i].time <<
-  // std::endl; 	std::cout << "memory(MB): " << bwd_data_perf[i].memory * 1.0 /
-  // 1024 / 1024 << std::endl; 	std::cout << "mathType: " <<
+  // std::endl; 	std::cout << "memory(MB): " << bwd_data_perf[i].memory * 1.0
+  // / 1024 / 1024 << std::endl; 	std::cout << "mathType: " <<
   // bwd_data_perf[i].mathType << std::endl; 	std::cout << std::endl;
   // }
 
@@ -289,7 +292,7 @@ void FCLayerParams::stepParams(cublasHandle_t cublas_handle,
   // {
   // 	float *db_h = (float *)malloc(C_out * sizeof(float));
   // 	checkCudaErrors(cudaMemcpy(db_h, db, C_out * sizeof(float),
-  // cudaMemcpyDeviceToHost)); 	for (int i = 0; i < C_out; i++) { 		std::cout <<
+  // cudaMemcpyDeviceToHost)); 	for (int i = 0; i < C_out; i++) { std::cout <<
   // db_h[i] << ' ';
   // 	}
   // 	std::cout << "\n";
@@ -318,7 +321,7 @@ void FCLayerParams::stepParams(cublasHandle_t cublas_handle,
   // {
   // 	float *db_h = (float *)malloc(C_out * sizeof(float));
   // 	checkCudaErrors(cudaMemcpy(db_h, b, C_out * sizeof(float),
-  // cudaMemcpyDeviceToHost)); 	for (int i = 0; i < C_out; i++) { 		std::cout <<
+  // cudaMemcpyDeviceToHost)); 	for (int i = 0; i < C_out; i++) { std::cout <<
   // db_h[i] << ' ';
   // 	}
   // 	std::cout << "\n";

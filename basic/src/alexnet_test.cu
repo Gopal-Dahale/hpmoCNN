@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "solver.h"
+#include "solver.cuh"
 
 using namespace std;
 

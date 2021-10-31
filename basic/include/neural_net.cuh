@@ -9,9 +9,9 @@
 #include <string>
 #include <vector>
 
-#include "layer_params.h"
-#include "user_iface.h"
-#include "utils.h"
+#include "layer_params.cuh"
+#include "user_iface.cuh"
+#include "utils.cuh"
 
 class NeuralNet
 {

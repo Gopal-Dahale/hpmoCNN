@@ -1,4 +1,6 @@
-SOURCE	= src/utils.cu src/user_iface.cu src/solver.cu src/neural_net.cu src/layer_params.cu src/main.cu
+NN_DIR = src/neural_net
+NEURAL_NET = $(NN_DIR)/neural_net.cu $(NN_DIR)/get_loss.cu $(NN_DIR)/compute_loss.cu $(NN_DIR)/compare_output_correct.cu
+SOURCE	= src/utils.cu src/user_iface.cu src/solver.cu $(NEURAL_NET) src/layer_params.cu src/main.cu
 HEADER	= 
 OUT	= main
 CC	 = nvcc

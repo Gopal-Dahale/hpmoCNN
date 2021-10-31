@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "solver.h"
+#include "solver.cuh"
 
 using namespace std;
 

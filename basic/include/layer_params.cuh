@@ -3,8 +3,8 @@
 
 #include <limits>
 
-#include "user_iface.h"
-#include "utils.h"
+#include "user_iface.cuh"
+#include "utils.cuh"
 
 enum workspaceStatus_t
 {

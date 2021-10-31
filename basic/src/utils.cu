@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "utils.cuh"
 
 int LayerDimension::getTotalSize()
 {

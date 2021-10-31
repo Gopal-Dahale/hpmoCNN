@@ -1,4 +1,4 @@
-#include "solver.h"
+#include "solver.cuh"
 
 Solver::Solver(NeuralNet *model, void *X_train, int *y_train, void *X_val,
                int *y_val, int num_epoch, UpdateRule update_rule,

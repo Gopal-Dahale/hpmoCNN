@@ -1,6 +1,6 @@
 /** NOTHING TO WORK HERE UNTIL PHASE I */
 
-#include "neural_net.h"
+#include "neural_net.cuh"
 
 void NeuralNet::getComputationTime(void *X, int *y, double learning_rate,
                                    std::vector<float> &fwd_computation_time,

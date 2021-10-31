@@ -1,7 +1,7 @@
 #ifndef SOLVER
 #define SOLVER
 
-#include "neural_net.h"
+#include "neural_net.cuh"
 
 class Solver
 {
