@@ -20,5 +20,5 @@ nvcc -o launch\main -I ./include launch\main.cu && launch\main
 
 ```
 cd basic
-nvcc -o src\main -I ./include src\main.cu && src\main
+make
 ```
