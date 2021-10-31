@@ -13,21 +13,26 @@ typedef unsigned char uchar;
 
 int num_train = 128, num_test = 500;
 
-int reverseInt(int n) {
+int reverseInt(int n)
+{
   const int bytes = 4;
   unsigned char ch[bytes];
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     ch[i] = (n >> i * 8) & 255;
   }
   int p = 0;
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     p += (int)ch[i] << (bytes - i - 1) * 8;
   }
   return p;
 }
 
-void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &test_images,
-               vector<uchar> &train_labels, vector<uchar> &test_labels) {
+void readMNIST(vector<vector<uchar>> &train_images,
+               vector<vector<uchar>> &test_images, vector<uchar> &train_labels,
+               vector<uchar> &test_labels)
+{
   string filename_train_images = "data/train-images.idx3-ubyte";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
@@ -35,7 +40,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     string filename;
     if (i == 0)
       filename = filename_train_images;
@@ -43,7 +49,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
       filename = filename_test_images;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open())
+      printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
@@ -56,10 +63,12 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
     f.read((char *)&n_cols, sizeof(n_cols));
     n_cols = reverseInt(n_cols);
 
-    for (int k = 0; k < n_images; k++) {
+    for (int k = 0; k < n_images; k++)
+    {
       vector<uchar> temp;
       temp.reserve(n_rows * n_cols);
-      for (int j = 0; j < n_rows * n_cols; j++) {
+      for (int j = 0; j < n_rows * n_cols; j++)
+      {
         uchar t = 0;
         f.read((char *)&t, sizeof(t));
         temp.push_back(t);
@@ -73,7 +82,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
   }
 
   // read train/test labels
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     string filename;
     if (i == 0)
       filename = filename_train_labels;
@@ -81,7 +91,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
       filename = filename_test_labels;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open())
+      printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_labels = 0;
@@ -90,7 +101,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
     f.read((char *)&n_labels, sizeof(n_labels));
     n_labels = reverseInt(n_labels);
 
-    for (int k = 0; k < n_labels; k++) {
+    for (int k = 0; k < n_labels; k++)
+    {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
       if (i == 0)
@@ -104,13 +116,14 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
 }
 
 void printTimes(vector<float> &time, string filename);
-void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float> > &bwd_vdnn_lag,
-                  string filename);
-void printComputationTransferTimes(vector<vector<float> > &fwd_times,
-                                   vector<vector<float> > &bwd_times, bool computation,
-                                   string filename);
+void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
+                  vector<vector<float>> &bwd_vdnn_lag, string filename);
+void printComputationTransferTimes(vector<vector<float>> &fwd_times,
+                                   vector<vector<float>> &bwd_times,
+                                   bool computation, string filename);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // Allocate space in memory and read images
   float *f_train_images, *f_test_images;
   int *f_train_labels, *f_test_labels;
@@ -129,22 +142,28 @@ int main(int argc, char *argv[]) {
   float *mean_image;
   mean_image = (float *)malloc(input_size * sizeof(float));
 
-  for (int i = 0; i < input_size; i++) {
+  for (int i = 0; i < input_size; i++)
+  {
     mean_image[i] = 0;
-    for (int k = 0; k < num_train; k++) {
+    for (int k = 0; k < num_train; k++)
+    {
       mean_image[i] += f_train_images[k * input_size + i];
     }
     mean_image[i] /= num_train;
   }
 
-  for (int i = 0; i < num_train; i++) {
-    for (int j = 0; j < input_size; j++) {
+  for (int i = 0; i < num_train; i++)
+  {
+    for (int j = 0; j < input_size; j++)
+    {
       f_train_images[i * input_size + j] -= mean_image[j];
     }
   }
 
-  for (int i = 0; i < num_test; i++) {
-    for (int j = 0; j < input_size; j++) {
+  for (int i = 0; i < num_test; i++)
+  {
+    for (int j = 0; j < input_size; j++)
+    {
       f_test_images[i * input_size + j] -= mean_image[j];
     }
   }
@@ -331,38 +350,54 @@ int main(int argc, char *argv[]) {
   }
 
   // reading command line input
-  // argv[1] - vDNN scheme - dyn, all, conv, alternate_conv, argv[2] - performance_optimal or
-  // memory_optimal
+  // argv[1] - vDNN scheme - dyn, all, conv, alternate_conv, argv[2] -
+  // performance_optimal or memory_optimal
   vDNNConvAlgo vdnn_conv_algo = vDNN_PERFORMANCE_OPTIMAL;
   vDNNType vdnn_type = vDNN_DYN;
   string filename("vdnn_dyn");
-  if (argc == 3) {
+  if (argc == 3)
+  {
     filename.assign("vdnn");
-    if (strcmp(argv[1], "dyn") == 0) {
+    if (strcmp(argv[1], "dyn") == 0)
+    {
       vdnn_type = vDNN_DYN;
       filename.append("_dyn");
-    } else if (strcmp(argv[1], "conv") == 0) {
+    }
+    else if (strcmp(argv[1], "conv") == 0)
+    {
       vdnn_type = vDNN_CONV;
       filename.append("_conv");
-    } else if (strcmp(argv[1], "all") == 0) {
+    }
+    else if (strcmp(argv[1], "all") == 0)
+    {
       vdnn_type = vDNN_ALL;
       filename.append("_all");
-    } else if (strcmp(argv[1], "alternate_conv") == 0) {
+    }
+    else if (strcmp(argv[1], "alternate_conv") == 0)
+    {
       vdnn_type = vDNN_ALTERNATE_CONV;
       filename.append("_alternate_conv");
-    } else {
+    }
+    else
+    {
       printf("invalid argument.. using vdnn dynamic\n");
       filename.assign("vdnn_dyn");
     }
     if ((strcmp(argv[1], "conv") == 0 or strcmp(argv[1], "all") == 0 or
-         strcmp(argv[1], "alternate_conv") == 0)) {
-      if (strcmp(argv[2], "p") == 0) {
+         strcmp(argv[1], "alternate_conv") == 0))
+    {
+      if (strcmp(argv[2], "p") == 0)
+      {
         vdnn_conv_algo = vDNN_PERFORMANCE_OPTIMAL;
         filename.append("_p");
-      } else if (strcmp(argv[2], "m") == 0) {
+      }
+      else if (strcmp(argv[2], "m") == 0)
+      {
         vdnn_conv_algo = vDNN_MEMORY_OPTIMAL;
         filename.append("_m");
-      } else {
+      }
+      else
+      {
         printf("invalid argument.. using vdnn dynamic\n");
         filename.assign("vdnn_dyn");
       }
@@ -374,45 +409,51 @@ int main(int argc, char *argv[]) {
   float softmax_eps = 1e-8;
   float init_std_dev = 0.1;
   // instantiating network object
-  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, dropout_seed, softmax_eps,
-                init_std_dev, vdnn_type, vdnn_conv_algo, SGD);
+  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
+                dropout_seed, softmax_eps, init_std_dev, vdnn_type,
+                vdnn_conv_algo, SGD);
 
   int num_epoch = 1000;
   double learning_rate = 1e-3;
   double learning_rate_decay = 0.9;
 
   // solver, which takes a network object and runs SGD on it
-  Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
-                f_train_labels, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
-                num_train);
+  Solver solver(&net, (void *)f_train_images, f_train_labels,
+                (void *)f_train_images, f_train_labels, num_epoch, SGD,
+                learning_rate, learning_rate_decay, num_train, num_train);
   vector<float> loss;
   vector<float> time;
-  vector<vector<float> > fwd_vdnn_lag, bwd_vdnn_lag;
-  // trains for given number of steps (here 100). and gets computation/transfer times of each layer
-  // for each iteration
+  vector<vector<float>> fwd_vdnn_lag, bwd_vdnn_lag;
+  // trains for given number of steps (here 100). and gets
+  // computation/transfer times of each layer for each iteration
   solver.getTrainTime(loss, time, 100, fwd_vdnn_lag, bwd_vdnn_lag);
   printTimes(time, filename);
   printvDNNLag(fwd_vdnn_lag, bwd_vdnn_lag, filename);
 
-  vector<vector<float> > fwd_computation_time, bwd_computation_time;
+  vector<vector<float>> fwd_computation_time, bwd_computation_time;
   solver.getComputationTime(1, fwd_computation_time, bwd_computation_time);
 
-  vector<vector<float> > fwd_transfer_time, bwd_transfer_time;
+  vector<vector<float>> fwd_transfer_time, bwd_transfer_time;
   solver.getTransferTime(1, fwd_transfer_time, bwd_transfer_time);
 
-  printComputationTransferTimes(fwd_computation_time, bwd_computation_time, true, filename);
-  printComputationTransferTimes(fwd_transfer_time, bwd_transfer_time, false, filename);
+  printComputationTransferTimes(fwd_computation_time, bwd_computation_time,
+                                true, filename);
+  printComputationTransferTimes(fwd_transfer_time, bwd_transfer_time, false,
+                                filename);
 }
 
-void printTimes(vector<float> &time, string filename) {
+void printTimes(vector<float> &time, string filename)
+{
   float mean_time = 0.0;
   float std_dev = 0.0;
   int N = time.size();
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++)
+  {
     mean_time += time[i];
   }
   mean_time /= N;
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++)
+  {
     std_dev += pow(time[i] - mean_time, 2);
   }
   std_dev /= N;
@@ -424,7 +465,8 @@ void printTimes(vector<float> &time, string filename) {
   fstream f;
   f.open(filename.c_str(), ios_base::out);
 
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++)
+  {
     f << time[i] << endl;
   }
   f << "mean_time: " << mean_time << endl;
@@ -435,25 +477,30 @@ void printTimes(vector<float> &time, string filename) {
   fstream f_bin;
   f_bin.open(filename.c_str(), ios_base::out);
   f_bin.write((char *)&N, sizeof(N));
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++)
+  {
     f_bin.write((char *)&time[i], sizeof(time[i]));
   }
   f_bin.close();
 }
 
-void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float> > &bwd_vdnn_lag,
-                  string filename) {
+void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
+                  vector<vector<float>> &bwd_vdnn_lag, string filename)
+{
   filename.append("_lag.dat");
 
   fstream f;
   f.open(filename.c_str(), ios_base::out);
 
   int N = fwd_vdnn_lag.size();
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < fwd_vdnn_lag[i].size(); j++) {
+  for (int i = 0; i < N; i++)
+  {
+    for (int j = 0; j < fwd_vdnn_lag[i].size(); j++)
+    {
       f << "fwd" << j << ": " << fwd_vdnn_lag[i][j] << endl;
     }
-    for (int j = 0; j < bwd_vdnn_lag[i].size(); j++) {
+    for (int j = 0; j < bwd_vdnn_lag[i].size(); j++)
+    {
       f << "bwd" << j << ": " << bwd_vdnn_lag[i][j] << endl;
     }
     f << endl;
@@ -461,9 +508,10 @@ void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float> > &
   f.close();
 }
 
-void printComputationTransferTimes(vector<vector<float> > &fwd_times,
-                                   vector<vector<float> > &bwd_times, bool computation,
-                                   string filename) {
+void printComputationTransferTimes(vector<vector<float>> &fwd_times,
+                                   vector<vector<float>> &bwd_times,
+                                   bool computation, string filename)
+{
   if (computation)
     filename.append("_compute_time.dat");
   else
@@ -473,11 +521,14 @@ void printComputationTransferTimes(vector<vector<float> > &fwd_times,
   f.open(filename.c_str(), ios_base::out);
 
   int N = fwd_times.size();
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < fwd_times[i].size(); j++) {
+  for (int i = 0; i < N; i++)
+  {
+    for (int j = 0; j < fwd_times[i].size(); j++)
+    {
       f << "fwd" << j << ": " << fwd_times[i][j] << endl;
     }
-    for (int j = 0; j < bwd_times[i].size(); j++) {
+    for (int j = 0; j < bwd_times[i].size(); j++)
+    {
       f << "bwd" << j << ": " << bwd_times[i][j] << endl;
     }
     f << endl;

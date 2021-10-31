@@ -13,21 +13,26 @@ typedef unsigned char uchar;
 
 int num_train = 1000, num_test = 500;
 
-int reverseInt(int n) {
+int reverseInt(int n)
+{
   const int bytes = 4;
   unsigned char ch[bytes];
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     ch[i] = (n >> i * 8) & 255;
   }
   int p = 0;
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     p += (int)ch[i] << (bytes - i - 1) * 8;
   }
   return p;
 }
 
-void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &test_images,
-               vector<uchar> &train_labels, vector<uchar> &test_labels) {
+void readMNIST(vector<vector<uchar>> &train_images,
+               vector<vector<uchar>> &test_images, vector<uchar> &train_labels,
+               vector<uchar> &test_labels)
+{
   string filename_train_images = "data/train-images.idx3-ubyte";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
@@ -35,7 +40,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     string filename;
     if (i == 0)
       filename = filename_train_images;
@@ -43,7 +49,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
       filename = filename_test_images;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open())
+      printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
@@ -56,10 +63,12 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
     f.read((char *)&n_cols, sizeof(n_cols));
     n_cols = reverseInt(n_cols);
 
-    for (int k = 0; k < n_images; k++) {
+    for (int k = 0; k < n_images; k++)
+    {
       vector<uchar> temp;
       temp.reserve(n_rows * n_cols);
-      for (int j = 0; j < n_rows * n_cols; j++) {
+      for (int j = 0; j < n_rows * n_cols; j++)
+      {
         uchar t = 0;
         f.read((char *)&t, sizeof(t));
         temp.push_back(t);
@@ -73,7 +82,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
   }
 
   // read train/test labels
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     string filename;
     if (i == 0)
       filename = filename_train_labels;
@@ -81,7 +91,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
       filename = filename_test_labels;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open())
+      printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_labels = 0;
@@ -90,7 +101,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
     f.read((char *)&n_labels, sizeof(n_labels));
     n_labels = reverseInt(n_labels);
 
-    for (int k = 0; k < n_labels; k++) {
+    for (int k = 0; k < n_labels; k++)
+    {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
       if (i == 0)
@@ -104,10 +116,11 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
 }
 
 void printTimes(vector<float> &time, string filename);
-void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float> > &bwd_vdnn_lag,
-                  string filename);
+void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
+                  vector<vector<float>> &bwd_vdnn_lag, string filename);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // int num_train = 100 * batch_size, num_val = batch_size;
   // void *X_train = malloc(num_train * input_channels * sizeof(float));
   // int *y_train = (int *)malloc(num_train * sizeof(int));
@@ -115,14 +128,14 @@ int main(int argc, char *argv[]) {
   // int *y_val = (int *)malloc(num_val * sizeof(int));
   // for (int i = 0; i < num_train; i++) {
   // 	for (int j = 0; j < input_channels; j++)
-  // 		((float *)X_train)[i * input_channels + j] = (rand() % 1000) * 1.0 / 1000;
-  // 	y_train[i] = 0;
+  // 		((float *)X_train)[i * input_channels + j] = (rand() % 1000) * 1.0 /
+  // 1000; 	y_train[i] = 0;
   // }
 
   // for (int i = 0; i < num_val; i++) {
   // 	for (int j = 0; j < input_channels; j++)
-  // 		((float *)X_val)[i * input_channels + j] = (rand() % 1000) * 1.0 / 1000;
-  // 	y_val[i] = rand() % 2;
+  // 		((float *)X_val)[i * input_channels + j] = (rand() % 1000) * 1.0 /
+  // 1000; 	y_val[i] = rand() % 2;
   // }
 
   // int rows = 28, cols = 28, channels = 1;
@@ -142,29 +155,35 @@ int main(int argc, char *argv[]) {
   float *mean_image;
   mean_image = (float *)malloc(input_size * sizeof(float));
 
-  for (int i = 0; i < input_size; i++) {
+  for (int i = 0; i < input_size; i++)
+  {
     mean_image[i] = 0;
-    for (int k = 0; k < num_train; k++) {
+    for (int k = 0; k < num_train; k++)
+    {
       mean_image[i] += f_train_images[k * input_size + i];
     }
     mean_image[i] /= num_train;
   }
 
-  for (int i = 0; i < num_train; i++) {
-    for (int j = 0; j < input_size; j++) {
+  for (int i = 0; i < num_train; i++)
+  {
+    for (int j = 0; j < input_size; j++)
+    {
       f_train_images[i * input_size + j] -= mean_image[j];
     }
   }
 
-  for (int i = 0; i < num_test; i++) {
-    for (int j = 0; j < input_size; j++) {
+  for (int i = 0; i < num_test; i++)
+  {
+    for (int j = 0; j < input_size; j++)
+    {
       f_test_images[i * input_size + j] -= mean_image[j];
     }
   }
 
-  // int input_channels = rows * cols * channels * 3, hidden_channels1 = 50, hidden_channels2 = 100,
-  // output_channels = 10; vector<LayerSpecifier> layer_specifier; ConvDescriptor layer0;
-  // LayerSpecifier temp;
+  // int input_channels = rows * cols * channels * 3, hidden_channels1 = 50,
+  // hidden_channels2 = 100, output_channels = 10; vector<LayerSpecifier>
+  // layer_specifier; ConvDescriptor layer0; LayerSpecifier temp;
   // layer0.initializeValues(1, 3, 3, 3, rows, cols, 1, 1, 1, 1);
   // temp.initPointer(CONV);
   // *((ConvDescriptor *)temp.params) = layer0;
@@ -199,8 +218,8 @@ int main(int argc, char *argv[]) {
   // *((PoolingDescriptor *)temp.params) = layer0_pool;
   // layer_specifier.push_back(temp);
 
-  // layer0_bn.initializeValues(BATCHNORM_SPATIAL, 1e-5, 0.1, 3, rows / 2, cols / 2);
-  // temp.initPointer(BATCHNORM);
+  // layer0_bn.initializeValues(BATCHNORM_SPATIAL, 1e-5, 0.1, 3, rows / 2, cols
+  // / 2); temp.initPointer(BATCHNORM);
   // *((BatchNormDescriptor *)temp.params) = layer0_bn;
   // layer_specifier.push_back(temp);
 
@@ -219,8 +238,8 @@ int main(int argc, char *argv[]) {
   // *((ActivationDescriptor *)temp.params) = layer0_actv;
   // layer_specifier.push_back(temp);
 
-  // layer0_bn.initializeValues(BATCHNORM_SPATIAL, 1e-5, 0.1, 3, rows / 2, cols / 2);
-  // temp.initPointer(BATCHNORM);
+  // layer0_bn.initializeValues(BATCHNORM_SPATIAL, 1e-5, 0.1, 3, rows / 2, cols
+  // / 2); temp.initPointer(BATCHNORM);
   // *((BatchNormDescriptor *)temp.params) = layer0_bn;
   // layer_specifier.push_back(temp);
 
@@ -236,8 +255,8 @@ int main(int argc, char *argv[]) {
   // *((ActivationDescriptor *)temp.params) = layer1_actv;
   // layer_specifier.push_back(temp);
 
-  // layer0_bn.initializeValues(BATCHNORM_PER_ACTIVATION, 1e-5, 0.1, hidden_channels1, 1, 1);
-  // temp.initPointer(BATCHNORM);
+  // layer0_bn.initializeValues(BATCHNORM_PER_ACTIVATION, 1e-5, 0.1,
+  // hidden_channels1, 1, 1); temp.initPointer(BATCHNORM);
   // *((BatchNormDescriptor *)temp.params) = layer0_bn;
   // layer_specifier.push_back(temp);
 
@@ -255,7 +274,8 @@ int main(int argc, char *argv[]) {
 
   // temp.initPointer(SOFTMAX);
   // SoftmaxDescriptor smax;
-  // smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, output_channels, 1, 1);
+  // smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE,
+  // output_channels, 1, 1);
   // *((SoftmaxDescriptor *)(temp.params)) = smax;
   // layer_specifier.push_back(temp);
 
@@ -305,30 +325,44 @@ int main(int argc, char *argv[]) {
   vDNNConvAlgo vdnn_conv_algo = vDNN_PERFORMANCE_OPTIMAL;
   vDNNType vdnn_type = vDNN_DYN;
   string filename("vdnn_dyn");
-  if (argc == 3) {
+  if (argc == 3)
+  {
     filename.assign("vdnn");
     // argv[1] - layers to offload, argv[2] - conv algo to use
-    if (strcmp(argv[1], "dyn") == 0) {
+    if (strcmp(argv[1], "dyn") == 0)
+    {
       vdnn_type = vDNN_DYN;
       filename.append("_dyn");
-    } else if (strcmp(argv[1], "conv") == 0) {
+    }
+    else if (strcmp(argv[1], "conv") == 0)
+    {
       vdnn_type = vDNN_CONV;
       filename.append("_conv");
-    } else if (strcmp(argv[1], "all") == 0) {
+    }
+    else if (strcmp(argv[1], "all") == 0)
+    {
       vdnn_type = vDNN_ALL;
       filename.append("_all");
-    } else {
+    }
+    else
+    {
       printf("invalid argument.. using vdnn dynamic\n");
       filename.assign("vdnn_dyn");
     }
-    if ((strcmp(argv[1], "conv") == 0 or strcmp(argv[1], "all") == 0)) {
-      if (strcmp(argv[2], "p") == 0) {
+    if ((strcmp(argv[1], "conv") == 0 or strcmp(argv[1], "all") == 0))
+    {
+      if (strcmp(argv[2], "p") == 0)
+      {
         vdnn_conv_algo = vDNN_PERFORMANCE_OPTIMAL;
         filename.append("_p");
-      } else if (strcmp(argv[2], "m") == 0) {
+      }
+      else if (strcmp(argv[2], "m") == 0)
+      {
         vdnn_conv_algo = vDNN_MEMORY_OPTIMAL;
         filename.append("_m");
-      } else {
+      }
+      else
+      {
         printf("invalid argument.. using vdnn dynamic\n");
         filename.assign("vdnn_dyn");
       }
@@ -339,33 +373,37 @@ int main(int argc, char *argv[]) {
   long long dropout_seed = 1;
   float softmax_eps = 1e-8;
   float init_std_dev = 0.1;
-  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, dropout_seed, softmax_eps,
-                init_std_dev, vdnn_type, vdnn_conv_algo, SGD);
+  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
+                dropout_seed, softmax_eps, init_std_dev, vdnn_type,
+                vdnn_conv_algo, SGD);
 
   int num_epoch = 1000;
   double learning_rate = 1e-3;
   double learning_rate_decay = 0.9;
 
-  Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
-                f_train_labels, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
-                num_train);
+  Solver solver(&net, (void *)f_train_images, f_train_labels,
+                (void *)f_train_images, f_train_labels, num_epoch, SGD,
+                learning_rate, learning_rate_decay, num_train, num_train);
   vector<float> loss;
   vector<float> time;
-  vector<vector<float> > fwd_vdnn_lag, bwd_vdnn_lag;
+  vector<vector<float>> fwd_vdnn_lag, bwd_vdnn_lag;
   solver.getTrainTime(loss, time, 100, fwd_vdnn_lag, bwd_vdnn_lag);
   printTimes(time, filename);
   printvDNNLag(fwd_vdnn_lag, bwd_vdnn_lag, filename);
 }
 
-void printTimes(vector<float> &time, string filename) {
+void printTimes(vector<float> &time, string filename)
+{
   float mean_time = 0.0;
   float std_dev = 0.0;
   int N = time.size();
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++)
+  {
     mean_time += time[i];
   }
   mean_time /= N;
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++)
+  {
     std_dev += pow(time[i] - mean_time, 2);
   }
   std_dev /= N;
@@ -377,7 +415,8 @@ void printTimes(vector<float> &time, string filename) {
   fstream f;
   f.open(filename.c_str(), ios_base::out);
 
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++)
+  {
     f << time[i] << endl;
   }
   f << "mean_time: " << mean_time << endl;
@@ -385,19 +424,23 @@ void printTimes(vector<float> &time, string filename) {
   f.close();
 }
 
-void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float> > &bwd_vdnn_lag,
-                  string filename) {
+void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
+                  vector<vector<float>> &bwd_vdnn_lag, string filename)
+{
   filename.append("_lag.dat");
 
   fstream f;
   f.open(filename.c_str(), ios_base::out);
 
   int N = fwd_vdnn_lag.size();
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < fwd_vdnn_lag[i].size(); j++) {
+  for (int i = 0; i < N; i++)
+  {
+    for (int j = 0; j < fwd_vdnn_lag[i].size(); j++)
+    {
       f << "fwd" << j << ": " << fwd_vdnn_lag[i][j] << endl;
     }
-    for (int j = 0; j < bwd_vdnn_lag[i].size(); j++) {
+    for (int j = 0; j < bwd_vdnn_lag[i].size(); j++)
+    {
       f << "bwd" << j << ": " << bwd_vdnn_lag[i][j] << endl;
     }
     f << endl;

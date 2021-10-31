@@ -13,8 +13,9 @@
 #include "user_iface.h"
 #include "utils.h"
 
-class NeuralNet {
- public:
+class NeuralNet
+{
+public:
   void **layer_input, **dlayer_input, **params;
   int *layer_input_size;
   int *y, *pred_y;
@@ -48,15 +49,16 @@ class NeuralNet {
 
   // void **h_layer_input;
 
-  NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, int batch_size,
-            TensorFormat tensor_format, long long dropout_seed, float softmax_eps,
-            float init_std_dev, UpdateRule update_rule);
+  NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
+            int batch_size, TensorFormat tensor_format, long long dropout_seed,
+            float softmax_eps, float init_std_dev, UpdateRule update_rule);
 
-  void getLoss(void *X, int *y, double learning_rate, std::vector<float> &fwd_vdnn_lag,
-               std::vector<float> &bwd_vdnn_lag, bool train = true, int *correct_count = NULL,
-               float *loss = NULL);
-  void getLoss(void *X, int *y, double learning_rate, bool train = true, int *correct_count = NULL,
-               float *loss = NULL);
+  void getLoss(void *X, int *y, double learning_rate,
+               std::vector<float> &fwd_vdnn_lag,
+               std::vector<float> &bwd_vdnn_lag, bool train = true,
+               int *correct_count = NULL, float *loss = NULL);
+  void getLoss(void *X, int *y, double learning_rate, bool train = true,
+               int *correct_count = NULL, float *loss = NULL);
 
   void compareOutputCorrect(int *correct_count, int *y);
 
@@ -68,8 +70,8 @@ class NeuralNet {
   //                           std::vector<float> &fwd_computation_time,
   //                           std::vector<float> &bwd_computation_time);
   cudaEvent_t start_transfer, stop_transfer;
-  //   void getTransferTime(void *X, int *y, double learning_rate, std::vector<float>
-  //   &fwd_transfer_time,
+  //   void getTransferTime(void *X, int *y, double learning_rate,
+  //   std::vector<float> &fwd_transfer_time,
   //                        std::vector<float> &bwd_transfer_time);
 };
 

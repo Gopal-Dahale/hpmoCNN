@@ -13,21 +13,26 @@ typedef unsigned char uchar;
 
 int num_train = 1000, num_test = 500;
 
-int reverseInt(int n) {
+int reverseInt(int n)
+{
   const int bytes = 4;
   unsigned char ch[bytes];
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     ch[i] = (n >> i * 8) & 255;
   }
   int p = 0;
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     p += (int)ch[i] << (bytes - i - 1) * 8;
   }
   return p;
 }
 
-void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &test_images,
-               vector<uchar> &train_labels, vector<uchar> &test_labels) {
+void readMNIST(vector<vector<uchar>> &train_images,
+               vector<vector<uchar>> &test_images, vector<uchar> &train_labels,
+               vector<uchar> &test_labels)
+{
   string filename_train_images = "data/train-images.idx3-ubyte";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
@@ -35,7 +40,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     string filename;
     if (i == 0)
       filename = filename_train_images;
@@ -43,7 +49,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
       filename = filename_test_images;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open())
+      printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
@@ -56,10 +63,12 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
     f.read((char *)&n_cols, sizeof(n_cols));
     n_cols = reverseInt(n_cols);
 
-    for (int k = 0; k < n_images; k++) {
+    for (int k = 0; k < n_images; k++)
+    {
       vector<uchar> temp;
       temp.reserve(n_rows * n_cols);
-      for (int j = 0; j < n_rows * n_cols; j++) {
+      for (int j = 0; j < n_rows * n_cols; j++)
+      {
         uchar t = 0;
         f.read((char *)&t, sizeof(t));
         temp.push_back(t);
@@ -73,7 +82,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
   }
 
   // read train/test labels
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     string filename;
     if (i == 0)
       filename = filename_train_labels;
@@ -81,7 +91,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
       filename = filename_test_labels;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open())
+      printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_labels = 0;
@@ -90,7 +101,8 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
     f.read((char *)&n_labels, sizeof(n_labels));
     n_labels = reverseInt(n_labels);
 
-    for (int k = 0; k < n_labels; k++) {
+    for (int k = 0; k < n_labels; k++)
+    {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
       if (i == 0)
@@ -104,10 +116,11 @@ void readMNIST(vector<vector<uchar> > &train_images, vector<vector<uchar> > &tes
 }
 
 void printTimes(vector<float> &time, string filename);
-void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float> > &bwd_vdnn_lag,
-                  string filename);
+void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
+                  vector<vector<float>> &bwd_vdnn_lag, string filename);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // int num_train = 100 * batch_size, num_val = batch_size;
   // void *X_train = malloc(num_train * input_channels * sizeof(float));
   // int *y_train = (int *)malloc(num_train * sizeof(int));
@@ -115,18 +128,18 @@ int main(int argc, char *argv[]) {
   // int *y_val = (int *)malloc(num_val * sizeof(int));
   // for (int i = 0; i < num_train; i++) {
   // 	for (int j = 0; j < input_channels; j++)
-  // 		((float *)X_train)[i * input_channels + j] = (rand() % 1000) * 1.0 / 1000;
-  // 	y_train[i] = 0;
+  // 		((float *)X_train)[i * input_channels + j] = (rand() % 1000) * 1.0 /
+  // 1000; 	y_train[i] = 0;
   // }
 
   // for (int i = 0; i < num_val; i++) {
   // 	for (int j = 0; j < input_channels; j++)
-  // 		((float *)X_val)[i * input_channels + j] = (rand() % 1000) * 1.0 / 1000;
-  // 	y_val[i] = rand() % 2;
+  // 		((float *)X_val)[i * input_channels + j] = (rand() % 1000) * 1.0 /
+  // 1000; 	y_val[i] = rand() % 2;
   // }
 
   int rows = 28, cols = 28, channels = 1;
-  vector<vector<uchar> > train_images, test_images;
+  vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
   readMNIST(train_images, test_images, train_labels, test_labels);
   float *f_train_images, *f_test_images;
@@ -138,15 +151,19 @@ int main(int argc, char *argv[]) {
   f_test_images = (float *)malloc(num_test * input_size * sizeof(float));
   f_test_labels = (int *)malloc(num_test * sizeof(int));
 
-  for (int k = 0; k < num_train; k++) {
-    for (int j = 0; j < rows * cols; j++) {
+  for (int k = 0; k < num_train; k++)
+  {
+    for (int j = 0; j < rows * cols; j++)
+    {
       f_train_images[k * input_size + j] = (float)train_images[k][j];
     }
     f_train_labels[k] = (int)train_labels[k];
   }
 
-  for (int k = 0; k < num_test; k++) {
-    for (int j = 0; j < rows * cols; j++) {
+  for (int k = 0; k < num_test; k++)
+  {
+    for (int j = 0; j < rows * cols; j++)
+    {
       f_test_images[k * input_size + j] = (float)test_images[k][j];
     }
     f_test_labels[k] = (int)test_labels[k];
@@ -155,22 +172,28 @@ int main(int argc, char *argv[]) {
   float *mean_image;
   mean_image = (float *)malloc(input_size * sizeof(float));
 
-  for (int i = 0; i < input_size; i++) {
+  for (int i = 0; i < input_size; i++)
+  {
     mean_image[i] = 0;
-    for (int k = 0; k < num_train; k++) {
+    for (int k = 0; k < num_train; k++)
+    {
       mean_image[i] += f_train_images[k * input_size + i];
     }
     mean_image[i] /= num_train;
   }
 
-  for (int i = 0; i < num_train; i++) {
-    for (int j = 0; j < input_size; j++) {
+  for (int i = 0; i < num_train; i++)
+  {
+    for (int j = 0; j < input_size; j++)
+    {
       f_train_images[i * input_size + j] -= mean_image[j];
     }
   }
 
-  for (int i = 0; i < num_test; i++) {
-    for (int j = 0; j < input_size; j++) {
+  for (int i = 0; i < num_test; i++)
+  {
+    for (int j = 0; j < input_size; j++)
+    {
       f_test_images[i * input_size + j] -= mean_image[j];
     }
   }
@@ -219,7 +242,8 @@ int main(int argc, char *argv[]) {
   }
   {
     SoftmaxDescriptor layer5;
-    layer5.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 1000, 1, 1);
+    layer5.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 1000, 1,
+                            1);
     LayerSpecifier temp;
     temp.initPointer(SOFTMAX);
     *((SoftmaxDescriptor *)temp.params) = layer5;
@@ -230,16 +254,16 @@ int main(int argc, char *argv[]) {
   long long dropout_seed = 1;
   float softmax_eps = 1e-8;
   float init_std_dev = 0.1;
-  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, dropout_seed, softmax_eps,
-                init_std_dev, SGD);
+  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
+                dropout_seed, softmax_eps, init_std_dev, SGD);
 
   int num_epoch = 100;
   double learning_rate = 1e-6;
   double learning_rate_decay = 0.9;
 
-  Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
-                f_train_labels, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
-                num_train);
+  Solver solver(&net, (void *)f_train_images, f_train_labels,
+                (void *)f_train_images, f_train_labels, num_epoch, SGD,
+                learning_rate, learning_rate_decay, num_train, num_train);
   vector<float> loss;
   vector<int> val_acc;
   solver.train(loss, val_acc);
@@ -280,7 +304,8 @@ int main(int argc, char *argv[]) {
 //   f.close();
 // }
 
-// void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float> > &bwd_vdnn_lag,
+// void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float>
+// > &bwd_vdnn_lag,
 //                   string filename) {
 //   filename.append("_lag.dat");
 
