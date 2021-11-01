@@ -1,10 +1,14 @@
 #include "solver.cuh"
+#include <stdexcept>
 
 Solver::Solver(NeuralNet *model, void *X_train, int *y_train, void *X_val,
                int *y_val, int num_epoch, UpdateRule update_rule,
                double learning_rate, double learning_rate_decay, int num_train,
                int num_val)
 {
+  if ((model->batch_size == 0) || (model->num_layers == 0))
+    throw std::invalid_argument(
+        "Model is not initialized. Use parameterized constructor.");
   this->model = model;
   this->X_train = X_train, this->X_val = X_val;
   this->y_train = y_train, this->y_val = y_val;
