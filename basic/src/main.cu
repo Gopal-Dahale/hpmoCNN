@@ -242,8 +242,7 @@ int main(int argc, char *argv[])
   }
   {
     SoftmaxDescriptor layer5;
-    layer5.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 1000, 1,
-                            1);
+    layer5.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1, 1);
     LayerSpecifier temp;
     temp.initPointer(SOFTMAX);
     *((SoftmaxDescriptor *)temp.params) = layer5;
