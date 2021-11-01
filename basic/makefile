@@ -1,5 +1,5 @@
 NN_DIR = src/neural_net
-NEURAL_NET = $(NN_DIR)/neural_net.cu $(NN_DIR)/get_loss.cu $(NN_DIR)/compute_loss.cu $(NN_DIR)/compare_output_correct.cu
+NEURAL_NET = $(NN_DIR)/neural_net.cu $(NN_DIR)/get_loss.cu $(NN_DIR)/compute_loss.cu $(NN_DIR)/compare_output_correct.cu $(NN_DIR)/save_and_load.cu
 SOURCE	= src/utils.cu src/user_iface.cu src/solver.cu $(NEURAL_NET) src/layer_params.cu src/main.cu
 HEADER	= 
 OUT	= main
