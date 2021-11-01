@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
   }
   {
     ConvDescriptor layer1;
-    layer1.initializeValues(1, 64, 3, 3, 28, 28, 1, 1, 1, 1);
+    layer1.initializeValues(64, 64, 3, 3, 28, 28, 1, 1, 1, 1);
     LayerSpecifier temp;
     temp.initPointer(CONV);
     *((ConvDescriptor *)temp.params) = layer1;
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor layer3;
-    layer3.initializeValues(64 * 64 * (28 / 2), 128);
+    layer3.initializeValues(64 * (28 / 2) * (28 / 2), 128);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer3;
