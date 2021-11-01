@@ -49,6 +49,8 @@ public:
 
   // void **h_layer_input;
 
+  NeuralNet();
+
   NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
             int batch_size, TensorFormat tensor_format, long long dropout_seed,
             float softmax_eps, float init_std_dev, UpdateRule update_rule);
@@ -63,6 +65,9 @@ public:
   void compareOutputCorrect(int *correct_count, int *y);
 
   float computeLoss();
+
+  void save(std::string path);
+  void load(std::string path);
 
   // data of time
   cudaEvent_t start_compute, stop_compute;

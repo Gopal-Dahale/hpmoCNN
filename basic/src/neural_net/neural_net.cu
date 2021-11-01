@@ -8,6 +8,12 @@
 
 #include "neural_net.cuh"
 
+NeuralNet::NeuralNet()
+{
+  this->num_layers = 0;
+  this->batch_size = 0;
+}
+
 NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
                      int batch_size, TensorFormat tensor_format,
                      long long dropout_seed, float softmax_eps,
