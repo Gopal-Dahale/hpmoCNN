@@ -17,3 +17,8 @@
 cd cnn
 nvcc -o launch\main -I ./include launch\main.cu && launch\main
 ```
+
+```
+cd basic
+make
+```
