@@ -268,9 +268,9 @@ int main(int argc, char *argv[])
   solver.train(loss, val_acc);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
-  cout << "TRAIN NUM CORRECT:" << num_correct << endl;
+  cout << "TRAIN NUM CORRECT:" << num_correct << "of " << num_train << endl;
   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
-  cout << "TEST NUM CORRECT:" << num_correct << endl;
+  cout << "TEST NUM CORRECT:" << num_correct << "of " << num_test << endl;
 
   /** Store and load model from net object */
   net.save("model.txt");
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
                  (void *)f_train_images, f_train_labels, num_epoch, SGD,
                  learning_rate, learning_rate_decay, num_train, num_train);
   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
-  cout << "TEST NUM CORRECT:" << num_correct << endl;
+  cout << "TEST NUM CORRECT:" << num_correct << "of " << num_test << endl;
 
   //   solver.getTrainTime(loss, time, 100, fwd_vdnn_lag, bwd_vdnn_lag);
   //   printTimes(time, filename);
