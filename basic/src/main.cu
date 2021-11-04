@@ -11,7 +11,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
-int num_train = 1000, num_test = 500;
+int num_train = 60000, num_test = 10000;
 
 int reverseInt(int n)
 {
