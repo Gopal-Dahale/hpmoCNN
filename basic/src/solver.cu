@@ -168,12 +168,13 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
       cudaEventRecord(stop, model->stream_compute);
       cudaEventSynchronize(stop);
       cudaEventElapsedTime(&milli, start, stop);
-      std::cout << "One forward, backward pass time(ms): " << milli
+      std::cout << "Epoch: " << i
+                << " One forward, backward pass time(ms): " << milli
                 << std::endl;
 
       loss.push_back(temp_loss);
-      std::cout << "loss: " << temp_loss << std::endl;
     }
+    std::cout << "LOSS: " << loss[loss.size() - 1] << std::endl;
     int correct_count = 0;
     for (int j = 0; j < num_val_batches; j++)
     {
@@ -190,7 +191,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
       correct_count += temp_correct_count;
     }
     val_acc.push_back(correct_count);
-    std::cout << "val_acc: " << val_acc[i] << std::endl;
+    std::cout << "VAL_ACC: " << val_acc[i] << std::endl;
     learning_rate *= learning_rate_decay;
     std::cout << "learning_rate: " << learning_rate << std::endl;
   }
