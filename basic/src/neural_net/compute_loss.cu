@@ -33,9 +33,8 @@ float NeuralNet::computeLoss()
           (double *)layer_input[num_layers], this->y, loss, batch_size,
           num_classes, softmax_eps);
   }
-  cudaMemcpy(h_loss, loss, batch_size * sizeof(float), cudaMemcpyDeviceToHost);
   float total_loss = 0.0;
   for (int i = 0; i < batch_size; i++)
-    total_loss += h_loss[i];
+    total_loss += loss[i];
   return total_loss / batch_size;
 }
