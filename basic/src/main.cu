@@ -1,8 +1,13 @@
+#include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <random>
+#include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "solver.cuh"
@@ -115,33 +120,74 @@ void readMNIST(vector<vector<uchar>> &train_images,
   }
 }
 
+auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels)
+{
+  unordered_map<int, vector<int>> m;
+  for (int i = 0; i < labels.size(); i++)
+    m[(int)labels[i]].push_back(i);
+
+  int bucket = num_train / 10;
+
+  random_device rd;           // Initialize the random_device
+  mt19937_64 generator(rd()); // Seed the engine
+  set<int> results;
+  vector<int> indices;
+
+  for (auto &i : m)
+  {
+    // Specify the range of numbers to generate, in this case [min, max]
+    uniform_int_distribution<int> dist{0, (int)i.second.size()};
+
+    while (results.size() < bucket)
+      results.insert(dist(generator));
+
+    for (auto &j : results)
+      indices.push_back(i.second[j]);
+
+    results.clear();
+  }
+
+  assert(indices.size() == num_train);
+
+  // shuffle indices array with default random engine
+  shuffle(indices.begin(), indices.end(), default_random_engine(rd()));
+
+  vector<vector<uchar>> mini_images;
+  vector<uchar> mini_labels;
+
+  // extract data from images and labels vectors using indices vector and put
+  // them in mini_images and mini_labels
+  for (int i = 0; i < indices.size(); i++)
+  {
+    mini_images.push_back(images[indices[i]]);
+    mini_labels.push_back(labels[indices[i]]);
+  }
+
+  return make_pair(mini_images, mini_labels);
+}
+
 void printTimes(vector<float> &time, string filename);
 void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
                   vector<vector<float>> &bwd_vdnn_lag, string filename);
 
 int main(int argc, char *argv[])
 {
-  // int num_train = 100 * batch_size, num_val = batch_size;
-  // void *X_train = malloc(num_train * input_channels * sizeof(float));
-  // int *y_train = (int *)malloc(num_train * sizeof(int));
-  // void *X_val = malloc(num_val * input_channels * sizeof(float));
-  // int *y_val = (int *)malloc(num_val * sizeof(int));
-  // for (int i = 0; i < num_train; i++) {
-  // 	for (int j = 0; j < input_channels; j++)
-  // 		((float *)X_train)[i * input_channels + j] = (rand() % 1000) * 1.0 /
-  // 1000; 	y_train[i] = 0;
-  // }
-
-  // for (int i = 0; i < num_val; i++) {
-  // 	for (int j = 0; j < input_channels; j++)
-  // 		((float *)X_val)[i * input_channels + j] = (rand() % 1000) * 1.0 /
-  // 1000; 	y_val[i] = rand() % 2;
-  // }
-
   int rows = 28, cols = 28, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
   readMNIST(train_images, test_images, train_labels, test_labels);
+
+  auto data = create_mini_MNIST(train_images, train_labels);
+  train_images = data.first;
+  train_labels = data.second;
+
+  data = create_mini_MNIST(test_images, test_labels);
+  test_images = data.first;
+  test_labels = data.second;
+
+  assert(train_images.size() == train_labels.size());
+  assert(test_images.size() == test_labels.size());
+
   float *f_train_images, *f_test_images;
   int *f_train_labels, *f_test_labels;
 
