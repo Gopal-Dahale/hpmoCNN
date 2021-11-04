@@ -11,7 +11,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
-int num_train = 60000, num_test = 10000;
+int num_train = 10000, num_test = 1000;
 
 int reverseInt(int n)
 {
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     layer_specifier.push_back(temp);
   }
 
-  int batch_size = 64;
+  int batch_size = 128;
   long long dropout_seed = 1;
   float softmax_eps = 1e-8;
   float init_std_dev = 0.1;
