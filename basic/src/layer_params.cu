@@ -140,11 +140,11 @@ void ConvLayerParams::allocateSpace(curandGenerator_t curand_gen,
 {
   if (kernel_size % 2 != 0)
     kernel_size += 1;
-  cudaMalloc(&W, kernel_size * data_type_size);
-  cudaMalloc(&b, C_out * data_type_size);
+  cudaMallocManaged(&W, kernel_size * data_type_size);
+  cudaMallocManaged(&b, C_out * data_type_size);
 
-  cudaMalloc(&dW, kernel_size * data_type_size);
-  cudaMalloc(&db, C_out * data_type_size);
+  cudaMallocManaged(&dW, kernel_size * data_type_size);
+  cudaMallocManaged(&db, C_out * data_type_size);
 
   if (data_type == CUDNN_DATA_FLOAT)
   {
@@ -263,11 +263,11 @@ void FCLayerParams::allocateSpace(curandGenerator_t curand_gen,
   int wt_alloc_size = weight_matrix_size;
   if (wt_alloc_size % 2 != 0)
     wt_alloc_size += 1;
-  cudaMalloc(&W, wt_alloc_size * data_type_size);
-  cudaMalloc(&b, C_out * data_type_size);
+  cudaMallocManaged(&W, wt_alloc_size * data_type_size);
+  cudaMallocManaged(&b, C_out * data_type_size);
 
-  cudaMalloc(&dW, wt_alloc_size * data_type_size);
-  cudaMalloc(&db, C_out * data_type_size);
+  cudaMallocManaged(&dW, wt_alloc_size * data_type_size);
+  cudaMallocManaged(&db, C_out * data_type_size);
 
   if (data_type == CUDNN_DATA_FLOAT)
   {

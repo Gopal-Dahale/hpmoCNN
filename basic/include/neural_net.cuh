@@ -42,9 +42,6 @@ public:
   int input_channels, input_h, input_w;
   int num_classes;
 
-  float *h_loss;
-  int *h_pred_y;
-
   cudaStream_t stream_compute;
 
   // void **h_layer_input;

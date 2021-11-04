@@ -63,7 +63,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   dlayer_input = (void **)malloc((num_layers + 1) * sizeof(void *));
   params = (void **)malloc(num_layers * sizeof(void *));
 
-  LayerDimension prev_output_size;
+  // LayerDimension prev_output_size;
   LayerDimension current_output_size;
   for (int i = 0; i < num_layers; i++)
   {
@@ -114,10 +114,10 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
       // current_output_size.H
       // << current_output_size.W << std::endl;
     }
-    if (i == 0)
-    {
-      prev_output_size = current_output_size;
-    }
+    // if (i == 0)
+    // {
+    //   prev_output_size = current_output_size;
+    // }
     // incomplete - have to check flatten and check exact dimension
     // else if (current_output_size.getTotalSize() !=
     // prev_output_size.getTotalSize()) { 	std::cout << "Layer " << i << "
@@ -197,8 +197,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
           batch_size * user_params->channels * user_params->h * user_params->w;
 
       // assuming this is last layer, allocate for next layer as well
-      cudaMalloc(&layer_input[i + 1], input_size * data_type_size);
-      cudaMalloc(&dlayer_input[i + 1], input_size * data_type_size);
+      cudaMallocManaged(&layer_input[i + 1], input_size * data_type_size);
+      cudaMallocManaged(&dlayer_input[i + 1], input_size * data_type_size);
       layer_input_size[i + 1] = input_size;
       if (i == 0)
       {
@@ -213,18 +213,18 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
     }
 
     // do not allocate memory initially
-    cudaMalloc(&layer_input[i], input_size * data_type_size);
-    cudaMalloc(&dlayer_input[i], input_size * data_type_size);
+    cudaMallocManaged(&layer_input[i], input_size * data_type_size);
+    cudaMallocManaged(&dlayer_input[i], input_size * data_type_size);
   }
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "Free bytes just after allocate space: " << free_bytes
             << std::endl;
   // very small - could be allocated initially itself
-  cudaMalloc((void **)&y, batch_size * sizeof(int));
-  cudaMalloc((void **)&pred_y, batch_size * sizeof(int));
-  cudaMalloc((void **)&loss, batch_size * sizeof(float));
-  cudaMalloc(&one_vec, batch_size * data_type_size);
+  cudaMallocManaged((void **)&y, batch_size * sizeof(int));
+  cudaMallocManaged((void **)&pred_y, batch_size * sizeof(int));
+  cudaMallocManaged((void **)&loss, batch_size * sizeof(float));
+  cudaMallocManaged(&one_vec, batch_size * data_type_size);
 
   if (this->data_type == CUDNN_DATA_FLOAT)
     fillValue<float>
@@ -232,9 +232,6 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   else
     fillValue<double>
         <<<ceil(1.0 * batch_size / BW), BW>>>((double *)one_vec, batch_size, 1);
-
-  cudaMallocHost((void **)&h_loss, batch_size * sizeof(float));
-  cudaMallocHost((void **)&h_pred_y, batch_size * sizeof(int));
 
   // do not allocate workspace initially
   // allocate space for workspace and also keep track of algo
@@ -261,7 +258,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
     }
   }
 
-  cudaMalloc(&workspace, workspace_size);
+  cudaMallocManaged(&workspace, workspace_size);
   free_bytes = free_bytes - workspace_size;
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
