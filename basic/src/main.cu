@@ -11,7 +11,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
-int num_train = 10000, num_test = 1000;
+int num_train = 1000, num_test = 500;
 
 int reverseInt(int n)
 {
@@ -242,8 +242,8 @@ int main(int argc, char *argv[])
                 dropout_seed, softmax_eps, init_std_dev, SGD);
 
   int num_epoch = 1000;
-  double learning_rate = 1e-4;
-  double learning_rate_decay = 1.0;
+  double learning_rate = 1e-6;
+  double learning_rate_decay = 0.99;
 
   Solver solver(&net, (void *)f_train_images, f_train_labels,
                 (void *)f_train_images, f_train_labels, num_epoch, SGD,
