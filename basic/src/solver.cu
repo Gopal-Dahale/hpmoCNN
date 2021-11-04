@@ -191,7 +191,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
     }
     val_acc.push_back(correct_count);
     std::cout << "val_acc: " << val_acc[i] << std::endl;
-    learning_rate *= learning_rate_decay;
+//     learning_rate *= learning_rate_decay;
     std::cout << "learning_rate: " << learning_rate << std::endl;
   }
   //   learning_rate *= learning_rate_decay;
