@@ -170,6 +170,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
       // i--;
     }
+
+    cudaStreamSynchronize(stream_compute);
   }
 
   // std::cout << "here" << std::endl;
@@ -341,7 +343,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       // std::cout << "compute here\n";
       continue;
     }
-
+    cudaStreamSynchronize(stream_compute);
     // exit(0);
   }
 }
