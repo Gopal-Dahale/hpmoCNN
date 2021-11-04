@@ -120,13 +120,14 @@ void readMNIST(vector<vector<uchar>> &train_images,
   }
 }
 
-auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels)
+auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels,
+                       int size)
 {
   unordered_map<int, vector<int>> m;
   for (int i = 0; i < labels.size(); i++)
     m[(int)labels[i]].push_back(i);
 
-  int bucket = num_train / 10;
+  int bucket = size / 10;
 
   random_device rd;           // Initialize the random_device
   mt19937_64 generator(rd()); // Seed the engine
@@ -147,7 +148,7 @@ auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels)
     results.clear();
   }
 
-  assert(indices.size() == num_train);
+  assert(indices.size() == size);
 
   // shuffle indices array with default random engine
   shuffle(indices.begin(), indices.end(), default_random_engine(rd()));
@@ -163,6 +164,9 @@ auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels)
     mini_labels.push_back(labels[indices[i]]);
   }
 
+  assert(mini_images.size() == size);
+  assert(mini_labels.size() == size);
+
   return make_pair(mini_images, mini_labels);
 }
 
@@ -177,11 +181,11 @@ int main(int argc, char *argv[])
   vector<uchar> train_labels, test_labels;
   readMNIST(train_images, test_images, train_labels, test_labels);
 
-  auto data = create_mini_MNIST(train_images, train_labels);
+  auto data = create_mini_MNIST(train_images, train_labels, num_train);
   train_images = data.first;
   train_labels = data.second;
 
-  data = create_mini_MNIST(test_images, test_labels);
+  data = create_mini_MNIST(test_images, test_labels, num_test);
   test_images = data.first;
   test_labels = data.second;
 
