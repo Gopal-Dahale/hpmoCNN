@@ -40,6 +40,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
         typecast_O, pred_y, batch_size, num_classes);
     for (int i = 0; i < batch_size; i++)
     {
+      cout << "Predicted: " << pred_y[i] << " Actual: " << y[i] << "\n";
       if (pred_y[i] == y[i])
         *correct_count = *correct_count + 1;
     }
@@ -51,6 +52,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
         typecast_O, pred_y, batch_size, num_classes);
     for (int i = 0; i < batch_size; i++)
     {
+      cout << "Predicted: " << pred_y[i] << " Actual: " << y[i] << "\n";
       if (pred_y[i] == y[i])
         *correct_count = *correct_count + 1;
     }
