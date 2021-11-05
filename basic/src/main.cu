@@ -203,19 +203,15 @@ int main(int argc, char *argv[])
 
   for (int k = 0; k < num_train; k++)
   {
-    for (int j = 0; j < rows * cols; j++)
-    {
+    for (int j = 0; j < input_size; j++)
       f_train_images[k * input_size + j] = (float)train_images[k][j];
-    }
     f_train_labels[k] = (int)train_labels[k];
   }
 
   for (int k = 0; k < num_test; k++)
   {
-    for (int j = 0; j < rows * cols; j++)
-    {
+    for (int j = 0; j < input_size; j++)
       f_test_images[k * input_size + j] = (float)test_images[k][j];
-    }
     f_test_labels[k] = (int)test_labels[k];
   }
 
@@ -226,26 +222,28 @@ int main(int argc, char *argv[])
   {
     mean_image[i] = 0;
     for (int k = 0; k < num_train; k++)
-    {
       mean_image[i] += f_train_images[k * input_size + i];
-    }
     mean_image[i] /= num_train;
   }
 
   for (int i = 0; i < num_train; i++)
   {
     for (int j = 0; j < input_size; j++)
-    {
       f_train_images[i * input_size + j] -= mean_image[j];
-    }
+  }
+
+  for (int i = 0; i < input_size; i++)
+  {
+    mean_image[i] = 0;
+    for (int k = 0; k < num_test; k++)
+      mean_image[i] += f_test_images[k * input_size + i];
+    mean_image[i] /= num_test;
   }
 
   for (int i = 0; i < num_test; i++)
   {
     for (int j = 0; j < input_size; j++)
-    {
       f_test_images[i * input_size + j] -= mean_image[j];
-    }
   }
 
   // Simple CNN
@@ -260,7 +258,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor layer1;
-    layer1.initializeValues(3 * 28 * 28, 50, RELU);
+    layer1.initializeValues(3 * 28 * 28, 64, RELU);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer1;
@@ -268,7 +266,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor layer2;
-    layer2.initializeValues(50, 10);
+    layer2.initializeValues(64, 10);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer2;
@@ -285,15 +283,14 @@ int main(int argc, char *argv[])
   }
 
   int batch_size = 64;
-  long long dropout_seed = 1;
   float softmax_eps = 1e-8;
-  float init_std_dev = 0.1;
+  float init_std_dev = 0.01;
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
-                dropout_seed, softmax_eps, init_std_dev, SGD);
+                softmax_eps, init_std_dev, SGD);
 
   int num_epoch = 1000;
-  double learning_rate = 1e-6;
-  double learning_rate_decay = 1;
+  double learning_rate = 1e-4;
+  double learning_rate_decay = 0.9;
 
   Solver solver(&net, (void *)f_train_images, f_train_labels,
                 (void *)f_train_images, f_train_labels, num_epoch, SGD,
@@ -303,9 +300,9 @@ int main(int argc, char *argv[])
   solver.train(loss, val_acc);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
-  cout << "TRAIN NUM CORRECT:" << num_correct << endl;
+  std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
-  cout << "TEST NUM CORRECT:" << num_correct << endl;
+  std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   /** Store and load model from net object */
   net.save("model.txt");
@@ -315,7 +312,7 @@ int main(int argc, char *argv[])
                  (void *)f_train_images, f_train_labels, num_epoch, SGD,
                  learning_rate, learning_rate_decay, num_train, num_train);
   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
-  cout << "TEST NUM CORRECT:" << num_correct << endl;
+  std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   //   solver.getTrainTime(loss, time, 100, fwd_vdnn_lag, bwd_vdnn_lag);
   //   printTimes(time, filename);
