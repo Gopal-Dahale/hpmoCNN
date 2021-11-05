@@ -30,18 +30,18 @@ float Solver::step(int start_X, int start_y)
   return this->step(start_X, start_y, t1, t2);
 }
 
-float Solver::step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
-                   std::vector<float> &bwd_vdnn_lag)
+float Solver::step(int start_X, int start_y, std::vector<float> &fwd_dnn_lag,
+                   std::vector<float> &bwd_dnn_lag)
 {
   float temp_loss;
-  // std::cout << "start_X: " << start_X << std::endl;
+
   if (model->data_type == CUDNN_DATA_FLOAT)
     model->getLoss(&(((float *)X_train)[start_X]), &y_train[start_y],
-                   learning_rate, fwd_vdnn_lag, bwd_vdnn_lag, true, NULL,
+                   learning_rate, fwd_dnn_lag, bwd_dnn_lag, true, NULL,
                    &temp_loss);
   else if (model->data_type == CUDNN_DATA_DOUBLE)
     model->getLoss(&(((double *)X_train)[start_X]), &y_train[start_y],
-                   learning_rate, fwd_vdnn_lag, bwd_vdnn_lag, true, NULL,
+                   learning_rate, fwd_dnn_lag, bwd_dnn_lag, true, NULL,
                    &temp_loss);
 
   // float Salpha = -learning_rate;
@@ -176,6 +176,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
       loss.push_back(temp_loss);
     }
     std::cout << "LOSS: " << loss[loss.size() - 1] << std::endl;
+
     int correct_count = 0;
     for (int j = 0; j < num_val_batches; j++)
     {
@@ -193,7 +194,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
     }
     val_acc.push_back(correct_count);
     std::cout << "VAL_ACC: " << val_acc[i] << std::endl;
-    learning_rate *= learning_rate_decay;
+    learning_rate *= (1.0 / (1 + i * learning_rate_decay));
     std::cout << "learning_rate: " << learning_rate << std::endl;
   }
   //   learning_rate *= learning_rate_decay;
