@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
                 softmax_eps, init_std_dev, SGD);
 
   int num_epoch = 1000;
-  double learning_rate = 1e-6;
+  double learning_rate = 1e-7;
   double learning_rate_decay = 1;
 
   Solver solver(&net, (void *)f_train_images, f_train_labels,
