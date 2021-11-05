@@ -16,8 +16,8 @@ NeuralNet::NeuralNet()
 
 NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
                      int batch_size, TensorFormat tensor_format,
-                     long long dropout_seed, float softmax_eps,
-                     float init_std_dev, UpdateRule update_rule)
+                     float softmax_eps, float init_std_dev,
+                     UpdateRule update_rule)
 {
   cudaStreamCreate(&stream_compute);
 
@@ -57,13 +57,13 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   this->init_std_dev = init_std_dev;
 
   num_layers = layers.size();
-  // allocation of space for input to each layer
+
+  // Allocation of space for input to each layer
   layer_input = (void **)malloc((num_layers + 1) * sizeof(void *));
   layer_input_size = (int *)malloc((num_layers + 1) * sizeof(int));
   dlayer_input = (void **)malloc((num_layers + 1) * sizeof(void *));
   params = (void **)malloc(num_layers * sizeof(void *));
 
-  // LayerDimension prev_output_size;
   LayerDimension current_output_size;
   for (int i = 0; i < num_layers; i++)
   {
@@ -110,25 +110,14 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
       ((SoftmaxLayerParams *)params[i])
           ->initializeValues(user_params, this->data_type, this->tensor_format,
                              batch_size, current_output_size);
-      // std::cout << current_output_size.N << ' ' << current_output_size.C <<
-      // current_output_size.H
-      // << current_output_size.W << std::endl;
     }
-    // if (i == 0)
-    // {
-    //   prev_output_size = current_output_size;
-    // }
-    // incomplete - have to check flatten and check exact dimension
-    // else if (current_output_size.getTotalSize() !=
-    // prev_output_size.getTotalSize()) { 	std::cout << "Layer " << i << "
-    // output and next layer's input size mismatch\n"; 	exit(0);
-    // }
   }
 
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "Free bytes just before allocate space: " << free_bytes
             << std::endl;
 
+  // Allocate space for parameters
   for (int i = 0; i < num_layers; i++)
   {
     size_t input_size;
@@ -207,12 +196,9 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
         input_w = user_params->w;
       }
       if (i == num_layers - 1)
-      {
         num_classes = user_params->channels;
-      }
     }
 
-    // do not allocate memory initially
     cudaMallocManaged(&layer_input[i], input_size * data_type_size);
     cudaMallocManaged(&dlayer_input[i], input_size * data_type_size);
   }
@@ -220,7 +206,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "Free bytes just after allocate space: " << free_bytes
             << std::endl;
-  // very small - could be allocated initially itself
+
+  // Very small - could be allocated initially itself
   cudaMallocManaged((void **)&y, batch_size * sizeof(int));
   cudaMallocManaged((void **)&pred_y, batch_size * sizeof(int));
   cudaMallocManaged((void **)&loss, batch_size * sizeof(float));
@@ -233,8 +220,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
     fillValue<double>
         <<<ceil(1.0 * batch_size / BW), BW>>>((double *)one_vec, batch_size, 1);
 
-  // do not allocate workspace initially
-  // allocate space for workspace and also keep track of algo
+  // Allocate space for workspace
   size_t cur_workspace_size_1, cur_workspace_size_2, cur_workspace_size_3,
       cur_workspace_size;
   workspace_size = 0;
@@ -263,22 +249,18 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
 
-  // leave 600 MB and use the rest
+  // Leave 600 MB and use the rest
   std::cout << "Free bytes: " << free_bytes << std::endl;
   free_bytes -= 1024 * 1024 * 600;
 
   cudaDeviceSynchronize();
+
   size_t temp_free_bytes;
   cudaMemGetInfo(&temp_free_bytes, &total_bytes);
   std::cout << "Free bytes just before end of NeuralNet: " << temp_free_bytes
             << std::endl;
-  // {
-  // 	int n;
-  // 	std::cout << "waiting..\n";
-  // 	std::cin >> n;
-  // }
 
-  // data of time
+  // Data of time
   cudaEventCreate(&start_compute);
   cudaEventCreate(&stop_compute);
 

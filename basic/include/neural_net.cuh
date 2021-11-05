@@ -49,8 +49,8 @@ public:
   NeuralNet();
 
   NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
-            int batch_size, TensorFormat tensor_format, long long dropout_seed,
-            float softmax_eps, float init_std_dev, UpdateRule update_rule);
+            int batch_size, TensorFormat tensor_format, float softmax_eps,
+            float init_std_dev, UpdateRule update_rule);
 
   void getLoss(void *X, int *y, double learning_rate,
                std::vector<float> &fwd_vdnn_lag,
