@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
 
   int num_epoch = 1000;
   double learning_rate = 1e-1;
-  double learning_rate_decay = 0.01;
+  double learning_rate_decay = 0.001;
 
   Solver solver(&net, (void *)f_train_images, f_train_labels,
                 (void *)f_train_images, f_train_labels, num_epoch, SGD,
