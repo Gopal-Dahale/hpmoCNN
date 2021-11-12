@@ -45,8 +45,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   // Forward Propagation
   for (int i = 0; i < num_layers; i++)
   {
-//     if (train == false && i == num_layers - 1)
-//       break;
+    if (train == false && i == num_layers - 1)
+      break;
 
     if (layer_type[i] == CONV)
     {
@@ -165,8 +165,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   // Accuracy Computation
   if (train == false)
   {
-//     compareOutputCorrect(correct_count, y);
-    *scalar_loss = computeLoss(); // Loss Computation
+    compareOutputCorrect(correct_count, y);
+//     *scalar_loss = computeLoss(); // Loss Computation
     return;
   }
   *scalar_loss = computeLoss(); // Loss Computation
