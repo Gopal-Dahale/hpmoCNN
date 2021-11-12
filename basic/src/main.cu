@@ -181,13 +181,13 @@ int main(int argc, char *argv[])
   vector<uchar> train_labels, test_labels;
   readMNIST(train_images, test_images, train_labels, test_labels);
 
-  auto data = create_mini_MNIST(train_images, train_labels, num_train);
-  train_images = data.first;
-  train_labels = data.second;
+  // auto data = create_mini_MNIST(train_images, train_labels, num_train);
+  // train_images = data.first;
+  // train_labels = data.second;
 
-  data = create_mini_MNIST(test_images, test_labels, num_test);
-  test_images = data.first;
-  test_labels = data.second;
+  // data = create_mini_MNIST(test_images, test_labels, num_test);
+  // test_images = data.first;
+  // test_labels = data.second;
 
   assert(train_images.size() == train_labels.size());
   assert(test_images.size() == test_labels.size());
