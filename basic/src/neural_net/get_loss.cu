@@ -194,6 +194,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   }
   for (int i = num_layers - 1; i >= 0; i--)
   {
+    if (i > 0)
+    {
+      if (layer_type[i] == ACTV or layer_type[i] == SOFTMAX)
+      {
+        dlayer_input[i] = dlayer_input[i + 1];
+      }
+    }
     if (layer_type[i] == CONV)
     {
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
