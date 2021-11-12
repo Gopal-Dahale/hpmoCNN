@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
                 softmax_eps, init_std_dev, SGD);
 
-  int num_epoch = 1000;
+  int num_epoch = 100;
   double learning_rate = 1e-4;
   double learning_rate_decay = 1;
 
