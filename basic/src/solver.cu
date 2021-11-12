@@ -192,7 +192,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
                        &y_val[j * batch_size], learning_rate, false,
                        &temp_correct_count, NULL);
       correct_count += temp_correct_count;
-      cout << "Batch " << j << ": " << "loss = " <<temp_loss << "\n";
+      std :: cout << "Batch " << j << ": " << "loss = " <<temp_loss << "\n";
     }
     val_acc.push_back(correct_count);
     std::cout << "VAL_ACC: " << val_acc[i] << std::endl;
