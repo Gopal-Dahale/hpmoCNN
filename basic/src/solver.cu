@@ -24,24 +24,24 @@ Solver::Solver(NeuralNet *model, void *X_train, int *y_train, void *X_val,
   cudaEventCreate(&stop);
 }
 
-float Solver::step(int start_X, int start_y)
+float Solver::step(int start_X, int start_y, int *correct_count)
 {
   std::vector<float> t1, t2;
-  return this->step(start_X, start_y, t1, t2);
+  return this->step(start_X, start_y, t1, t2, correct_count);
 }
 
 float Solver::step(int start_X, int start_y, std::vector<float> &fwd_dnn_lag,
-                   std::vector<float> &bwd_dnn_lag)
+                   std::vector<float> &bwd_dnn_lag, int *correct_count)
 {
   float temp_loss;
 
   if (model->data_type == CUDNN_DATA_FLOAT)
     model->getLoss(&(((float *)X_train)[start_X]), &y_train[start_y],
-                   learning_rate, fwd_dnn_lag, bwd_dnn_lag, true, NULL,
+                   learning_rate, fwd_dnn_lag, bwd_dnn_lag, true, correct_count,
                    &temp_loss);
   else if (model->data_type == CUDNN_DATA_DOUBLE)
     model->getLoss(&(((double *)X_train)[start_X]), &y_train[start_y],
-                   learning_rate, fwd_dnn_lag, bwd_dnn_lag, true, NULL,
+                   learning_rate, fwd_dnn_lag, bwd_dnn_lag, true, correct_count,
                    &temp_loss);
 
   // float Salpha = -learning_rate;
@@ -182,16 +182,15 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
     {
       int start_sample = j * num_features * batch_size;
       int temp_correct_count=0;
-      float temp_loss=0;
-//       = step(start_sample, j * batch_size);
-      if (model->data_type == CUDNN_DATA_FLOAT)
-        model->getLoss(&(((float *)X_val)[start_sample]),
-                       &y_val[j * batch_size], learning_rate, false,
-                       &temp_correct_count, &temp_loss);
-      else if (model->data_type == CUDNN_DATA_DOUBLE)
-        model->getLoss(&(((double *)X_val)[start_sample]),
-                       &y_val[j * batch_size], learning_rate, false,
-                       &temp_correct_count, &temp_loss);
+      float temp_loss= step(start_sample, j * batch_size, &temp_correct_count);
+//       if (model->data_type == CUDNN_DATA_FLOAT)
+//         model->getLoss(&(((float *)X_val)[start_sample]),
+//                        &y_val[j * batch_size], learning_rate, false,
+//                        &temp_correct_count, &temp_loss);
+//       else if (model->data_type == CUDNN_DATA_DOUBLE)
+//         model->getLoss(&(((double *)X_val)[start_sample]),
+//                        &y_val[j * batch_size], learning_rate, false,
+//                        &temp_correct_count, &temp_loss);
       correct_count += temp_correct_count;
       std :: cout << "Batch " << j << ": " << "loss = " <<temp_loss << "\n";
     }
