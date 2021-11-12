@@ -182,15 +182,16 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
     {
       int start_sample = j * num_features * batch_size;
       int temp_correct_count=0;
-      float temp_loss = step(start_sample, j * batch_size);
-//       if (model->data_type == CUDNN_DATA_FLOAT)
-//         model->getLoss(&(((float *)X_val)[start_sample]),
-//                        &y_val[j * batch_size], learning_rate, false,
-//                        &temp_correct_count, &temp_loss);
-//       else if (model->data_type == CUDNN_DATA_DOUBLE)
-//         model->getLoss(&(((double *)X_val)[start_sample]),
-//                        &y_val[j * batch_size], learning_rate, false,
-//                        &temp_correct_count, NULL);
+      float temp_loss=0;
+//       = step(start_sample, j * batch_size);
+      if (model->data_type == CUDNN_DATA_FLOAT)
+        model->getLoss(&(((float *)X_val)[start_sample]),
+                       &y_val[j * batch_size], learning_rate, false,
+                       &temp_correct_count, &temp_loss);
+      else if (model->data_type == CUDNN_DATA_DOUBLE)
+        model->getLoss(&(((double *)X_val)[start_sample]),
+                       &y_val[j * batch_size], learning_rate, false,
+                       &temp_correct_count, &temp_loss);
       correct_count += temp_correct_count;
       std :: cout << "Batch " << j << ": " << "loss = " <<temp_loss << "\n";
     }
