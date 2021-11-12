@@ -2,13 +2,10 @@
 #include <cublas_v2.h>
 #include <cudnn.h>
 #include <curand.h>
-#include <iostream>
 #include <string>
 #include <time.h>
 
 #include "neural_net.cuh"
-
-using namespace std;
 
 template <typename T>
 __global__ void softmaxLossBackProp(int *y, T *SO, T *dSO, int batch_size,
@@ -46,9 +43,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   double Dalpha = 1.0, Dbeta = 0.0;
 
   // Forward Propagation
-  cout << "Forward Propagation: " << endl;
-  cout << "Num Layers: " << num_layers << endl;
-  cout << "Train: " << train << endl;
   for (int i = 0; i < num_layers; i++)
   {
     if (train == false && i == num_layers - 1)
@@ -56,14 +50,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     if (layer_type[i] == CONV)
     {
-      cout << "CONV Layer\n";
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
 
       // Computation
       checkCUDNN(cudnnConvolutionForward(
           cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],
           cur_params->filter_desc, cur_params->W, cur_params->conv_desc,
-          cur_params->fwd_algo, workspace, workspace_size, &beta,
+          cur_params->fwd_algo, this->workspace, this->workspace_size, &beta,
           cur_params->output_tensor, layer_input[i + 1]));
       checkCUDNN(cudnnAddTensor(cudnn_handle, &alpha, cur_params->bias_desc,
                                 cur_params->b, &alpha,
@@ -81,7 +74,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     else if (layer_type[i] == FULLY_CONNECTED)
     {
-      cout << "FC Layer\n";
       FCLayerParams *cur_params = (FCLayerParams *)params[i];
 
       if (data_type == CUDNN_DATA_FLOAT)
@@ -118,7 +110,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     }
     else if (layer_type[i] == POOLING)
     {
-      cout << "Pooling Layer\n";
       PoolingLayerParams *cur_params = (PoolingLayerParams *)params[i];
       checkCUDNN(
           cudnnPoolingForward(cudnn_handle, cur_params->pool_desc, &alpha,
@@ -156,7 +147,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     // synchronization the case in above if for ACTV and SOFTMAX never occurs
     if (layer_type[i + 1] == SOFTMAX)
     {
-      cout << "Softmax Layer\n";
       i++;
       if (train == true)
       {
@@ -183,7 +173,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   // Backward Propagation
   if (layer_type[num_layers - 1] == SOFTMAX)
   {
-    cout << "Softmax Layer Backward\n";
     if (data_type == CUDNN_DATA_FLOAT)
     {
       cudaMemset(dlayer_input[num_layers], 0,
@@ -207,7 +196,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   {
     if (layer_type[i] == CONV)
     {
-      cout << "CONV Layer Backward\n";
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
 
       if (cur_params->activation_mode != ACTIVATION_NONE)
@@ -227,13 +215,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       checkCUDNN(cudnnConvolutionBackwardFilter(
           cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],
           cur_params->output_tensor, dlayer_input[i + 1], cur_params->conv_desc,
-          cur_params->bwd_filter_algo, workspace, workspace_size, &beta,
-          cur_params->filter_desc, cur_params->dW));
+          cur_params->bwd_filter_algo, this->workspace, this->workspace_size,
+          &beta, cur_params->filter_desc, cur_params->dW));
       if (i > 0)
         checkCUDNN(cudnnConvolutionBackwardData(
             cudnn_handle, &alpha, cur_params->filter_desc, cur_params->W,
             cur_params->output_tensor, dlayer_input[i + 1],
-            cur_params->conv_desc, cur_params->bwd_data_algo, workspace,
+            cur_params->conv_desc, cur_params->bwd_data_algo, this->workspace,
             workspace_size, &beta, cur_params->input_tensor, dlayer_input[i]));
 
       cur_params->stepParams(cublas_handle, learning_rate);
@@ -241,7 +229,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     else if (layer_type[i] == FULLY_CONNECTED)
     {
-      cout << "FC Layer Backward\n";
       FCLayerParams *cur_params = (FCLayerParams *)params[i];
 
       if (cur_params->activation_mode != ACTIVATION_NONE)
@@ -306,7 +293,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     else if (layer_type[i] == POOLING)
     {
-      cout << "Pooling Layer Backward\n";
       PoolingLayerParams *cur_params = (PoolingLayerParams *)params[i];
       checkCUDNN(
           cudnnPoolingBackward(cudnn_handle, cur_params->pool_desc, &alpha,
@@ -318,7 +304,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     else if (layer_type[i] == ACTV)
     {
-      cout << "Actv Layer Backward\n";
       ActivationLayerParams *cur_params = (ActivationLayerParams *)params[i];
       checkCUDNN(cudnnActivationBackward(
           cudnn_handle, cur_params->actv_desc, &alpha, cur_params->input_tensor,
@@ -330,7 +315,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     else if (layer_type[i] == SOFTMAX)
     {
-      cout << "Softmax Layer Backward\n";
       SoftmaxLayerParams *cur_params = (SoftmaxLayerParams *)params[i];
       checkCUDNN(cudnnSoftmaxBackward(
           cudnn_handle, cur_params->algo, cur_params->mode, &alpha,

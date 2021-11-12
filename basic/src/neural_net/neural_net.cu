@@ -223,7 +223,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   // Allocate space for workspace
   size_t cur_workspace_size_1, cur_workspace_size_2, cur_workspace_size_3,
       cur_workspace_size;
-  workspace_size = 0;
+  this->workspace_size = 0;
   for (int i = 0; i < num_layers; i++)
   {
     if (layers[i].type == CONV)
@@ -240,12 +240,12 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
       cur_workspace_size = max(cur_workspace_size_1,
                                max(cur_workspace_size_2, cur_workspace_size_3));
       if (cur_workspace_size > workspace_size)
-        workspace_size = cur_workspace_size;
+        this->workspace_size = cur_workspace_size;
     }
   }
 
-  cudaMallocManaged(&workspace, workspace_size);
-  free_bytes = free_bytes - workspace_size;
+  cudaMallocManaged(&(this->workspace), this->workspace_size);
+  free_bytes = free_bytes - this->workspace_size;
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
 
