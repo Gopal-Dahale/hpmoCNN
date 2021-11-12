@@ -182,7 +182,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
     {
       int start_sample = j * num_features * batch_size;
       int temp_correct_count;
-      int temp_loss=0;
+      float temp_loss=0;
       if (model->data_type == CUDNN_DATA_FLOAT)
         model->getLoss(&(((float *)X_val)[start_sample]),
                        &y_val[j * batch_size], learning_rate, false,
