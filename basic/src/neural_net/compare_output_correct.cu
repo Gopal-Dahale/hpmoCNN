@@ -41,14 +41,14 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
         typecast_O, pred_y, batch_size, num_classes);
     for (int i = 0; i < batch_size; i++)
     {
-      std :: cout << "P: " << pred_y[i] << " A: " << y[i] << "  ";
+//       std :: cout << "P: " << pred_y[i] << " A: " << y[i] << "  ";
       if (pred_y[i] == y[i])
       {
         *correct_count = *correct_count + 1;
         tempf+=1;
       }
     }
-    std::cout << "\n";
+//     std::cout << "\n";
 //     if(p%15==0)
 //      {
 //         std::cout << "\nPREDICTIONS\n";
@@ -63,8 +63,8 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
 //         {
 //           std::cout << y[i] << " ";
 //         }
-        std::cout << "\n" << "Accuracy: " << *correct_count << "/" << batch_size << "\n";
-        std::cout << "tempf: " << tempf << "\n";
+//         std::cout << "\n" << "Accuracy: " << *correct_count << "/" << batch_size << "\n";
+//         std::cout << "tempf: " << tempf << "\n";
 //      }
   }
   else if (data_type == CUDNN_DATA_DOUBLE)
