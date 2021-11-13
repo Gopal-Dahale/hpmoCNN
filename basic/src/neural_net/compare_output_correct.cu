@@ -41,6 +41,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
         typecast_O, pred_y, batch_size, num_classes);
     for (int i = 0; i < batch_size; i++)
     {
+      std :: cout << "Predicted: " << pred_y[i] << "Actual: " << y[i] << "\n";
       if (pred_y[i] == y[i])
       {
         *correct_count = *correct_count + 1;
@@ -49,18 +50,18 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
     }
 //     if(p%15==0)
 //      {
-        std::cout << "\nPREDICTIONS\n";
-        // Print Predictions array
-        for (int i = 0; i < batch_size; i++)
-        {
-          std::cout << pred_y[i] << " ";
-        }
-        std::cout << "\nACTUAL\n";
-        // Print Actual array
-        for (int i = 0; i < batch_size; i++)
-        {
-          std::cout << y[i] << " ";
-        }
+//         std::cout << "\nPREDICTIONS\n";
+//         // Print Predictions array
+//         for (int i = 0; i < batch_size; i++)
+//         {
+//           std::cout << pred_y[i] << " ";
+//         }
+//         std::cout << "\nACTUAL\n";
+//         // Print Actual array
+//         for (int i = 0; i < batch_size; i++)
+//         {
+//           std::cout << y[i] << " ";
+//         }
         std::cout << "\n" << "Accuracy: " << *correct_count << "/" << batch_size << "\n";
         std::cout << "tempf: " << tempf << "\n";
 //      }
