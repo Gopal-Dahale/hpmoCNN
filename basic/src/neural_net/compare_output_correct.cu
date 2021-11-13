@@ -43,8 +43,8 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
       if (pred_y[i] == y[i])
         *correct_count = *correct_count + 1;
     }
-    if(p%15==0)
-     {
+//     if(p%15==0)
+//      {
         std::cout << "\nPREDICTIONS\n";
         // Print Predictions array
         for (int i = 0; i < batch_size; i++)
@@ -58,7 +58,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
           std::cout << y[i] << " ";
         }
         std::cout << "\n";
-     }
+//      }
   }
   else if (data_type == CUDNN_DATA_DOUBLE)
   {
