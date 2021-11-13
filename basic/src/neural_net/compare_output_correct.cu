@@ -32,7 +32,7 @@ __global__ void inferClass(T *O, int *pred_y, int batch_size, int num_classes)
 void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
 {
   *correct_count = 0;
-
+  static int p = 0;
   if (data_type == CUDNN_DATA_FLOAT)
   {
     float *typecast_O = (float *)layer_input[num_layers - 1];
@@ -42,19 +42,22 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
     {
       if (pred_y[i] == y[i])
         *correct_count = *correct_count + 1;
-      std::cout << "\nPREDICTIONS\n";
-      // Print Predictions array
-      for (int i = 0; i < batch_size; i++)
+      if(p%15==0)
       {
-        std::cout << pred_y[i] << " ";
+        std::cout << "\nPREDICTIONS\n";
+        // Print Predictions array
+        for (int i = 0; i < batch_size; i++)
+        {
+          std::cout << pred_y[i] << " ";
+        }
+        std::cout << "\nACTUAL\n";
+        // Print Actual array
+        for (int i = 0; i < batch_size; i++)
+        {
+          std::cout << y[i] << " ";
+        }
+        std::cout << "\n";
       }
-      std::cout << "\nACTUAL\n";
-      // Print Actual array
-      for (int i = 0; i < batch_size; i++)
-      {
-        std::cout << y[i] << " ";
-      }
-      std::cout << "\n";
     }
   }
   else if (data_type == CUDNN_DATA_DOUBLE)
@@ -68,4 +71,5 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
         *correct_count = *correct_count + 1;
     }
   }
+  p++;
 }
