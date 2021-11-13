@@ -41,6 +41,8 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
         typecast_O, pred_y, batch_size, num_classes);
     for (int i = 0; i < batch_size; i++)
     {
+      int temp = y[i];
+      int temp2 = pred_y[i];
 //       std :: cout << "P: " << pred_y[i] << " A: " << y[i] << "  ";
       if (pred_y[i] == y[i])
       {
