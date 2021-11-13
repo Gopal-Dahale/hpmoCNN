@@ -62,7 +62,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
           std::cout << y[i] << " ";
         }
         std::cout << "\n" << "Accuracy: " << *correct_count << "/" << batch_size << "\n";
-        std::cout << tempf << "\n";
+        std::cout << "tempf: " << tempf << "\n";
 //      }
   }
   else if (data_type == CUDNN_DATA_DOUBLE)
@@ -78,7 +78,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
         tempd+=1;
       }
     }
-    std::cout << tempd << "\n";
+    std::cout << "tempd: "  << tempd << "\n";
   }
   p++;
 }
