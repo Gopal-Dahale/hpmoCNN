@@ -166,6 +166,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   if (train == false)
   {
     compareOutputCorrect(correct_count, y);
+//     *scalar_loss = computeLoss(); // Loss Computation
     return;
   }
   *scalar_loss = computeLoss(); // Loss Computation

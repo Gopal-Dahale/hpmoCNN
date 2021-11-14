@@ -22,8 +22,8 @@ public:
          double learning_rate_decay, int num_train, int num_val);
   void train(std::vector<float> &loss, std::vector<int> &val_acc);
   float step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
-             std::vector<float> &bwd_vdnn_lag, bool train);
-  float step(int start_X, int start_y, bool train);
+             std::vector<float> &bwd_vdnn_lag, int *correct_count, bool train);
+  float step(int start_X, int start_y, int *correct_count, bool train);
   void checkAccuracy(void *X, int *y, int num_samples, int *num_correct);
 
   void getTrainTime(std::vector<float> &loss, std::vector<float> &time,
