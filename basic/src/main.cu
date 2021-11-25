@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
   train_images = dataset.training_images;
   test_images = dataset.test_images;
-  train_labels = dataset.training_images;
+  train_labels = dataset.training_labels;
   test_labels = dataset.test_labels;
 //   readMNIST(train_images, test_images, train_labels, test_labels);
 
