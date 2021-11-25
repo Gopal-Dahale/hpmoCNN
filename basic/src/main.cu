@@ -176,18 +176,18 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
 
 int main(int argc, char *argv[])
 {
-  int rows = 28, cols = 28, channels = 1;
+  int rows = 32, cols = 32, channels = 3;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
   
-//   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
-//   train_images = dataset.training_images;
-//   test_images = dataset.test_images;
-//   train_labels = dataset.training_labels;
-//   test_labels = dataset.test_labels;
+  auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
+  train_images = dataset.training_images;
+  test_images = dataset.test_images;
+  train_labels = dataset.training_labels;
+  test_labels = dataset.test_labels;
   
-//    cout << train_images.size() << " " << train_images[0].size() << "\n";
-  readMNIST(train_images, test_images, train_labels, test_labels);
+   cout << train_images.size() << " " << train_images[0].size() << "\n";
+//   readMNIST(train_images, test_images, train_labels, test_labels);
 
   // auto data = create_mini_MNIST(train_images, train_labels, num_train);
   // train_images = data.first;
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
   vector<LayerSpecifier> layer_specifier;
   {
     ConvDescriptor layer0;
-    layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
+    layer0.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
     LayerSpecifier temp;
     temp.initPointer(CONV);
     *((ConvDescriptor *)temp.params) = layer0;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor layer1;
-    layer1.initializeValues(3 * 28 * 28, 64, RELU);
+    layer1.initializeValues(3 * 32 * 32, 64, RELU);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer1;
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor layer2;
-    layer2.initializeValues(64, 10);
+    layer2.initializeValues(64, 100);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer2;
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
   }
   {
     SoftmaxDescriptor layer2_smax;
-    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1,
+    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 100, 1,
                                  1);
     LayerSpecifier temp;
     temp.initPointer(SOFTMAX);
