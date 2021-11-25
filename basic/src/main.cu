@@ -265,11 +265,27 @@ int main(int argc, char *argv[])
     layer_specifier.push_back(temp);
   }
   {
+    ConvDescriptor layer5;
+    layer0.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
+    LayerSpecifier temp;
+    temp.initPointer(CONV);
+    *((ConvDescriptor *)temp.params) = layer5;
+    layer_specifier.push_back(temp);
+  }
+  {
     FCDescriptor layer1;
     layer1.initializeValues(3 * 32 * 32, 64, RELU);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer1;
+    layer_specifier.push_back(temp);
+  }
+  {
+    FCDescriptor layer6;
+    layer1.initializeValues(64, 64, RELU);
+    LayerSpecifier temp;
+    temp.initPointer(FULLY_CONNECTED);
+    *((FCDescriptor *)temp.params) = layer6;
     layer_specifier.push_back(temp);
   }
   {
