@@ -44,12 +44,14 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
 //     cudaMemPrefetchAsync((int *)y, batch_size, cudaCpuDeviceId);
     for (int i = 0; i < batch_size; i++)
     {
+      std::cout << "Pred = " << pred_y[i] << " Actual = " << y[i] << " ";
       if (pred_y[i] == y[i])
       {
         *correct_count = *correct_count + 1;
         tempf+=1;
       }
     }
+    std::cout << "\n";
   }
   else if (data_type == CUDNN_DATA_DOUBLE)
   {
