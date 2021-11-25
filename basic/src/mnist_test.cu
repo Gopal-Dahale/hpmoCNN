@@ -2,14 +2,14 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include "cifar100_reader.cuh"
 #include "solver.cuh"
 
 using namespace std;
 
 typedef unsigned char uchar;
 
-int num_train = 60000, num_test = 10000;
+int num_train = 50000, num_test = 10000;
 
 int reverseInt(int n)
 {
@@ -115,7 +115,9 @@ void readMNIST(vector<vector<uchar>> &train_images,
 
 int main()
 {
-  int rows = 28, cols = 28, channels = 1;
+  
+  auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(50000,10000);
+  int rows = 32, cols = 32, channels = 1;
   float *f_train_images, *f_test_images;
   int *f_train_labels, *f_test_labels;
   // int rows = 28, cols = 28, channels = 1;
@@ -128,7 +130,12 @@ int main()
   {
     vector<vector<uchar>> train_images, test_images;
     vector<uchar> train_labels, test_labels;
-    readMNIST(train_images, test_images, train_labels, test_labels);
+    
+    train_images = dataset.training_images;
+    test_images = dataset.test_images;
+    train_labels = dataset.training_images;
+    test_labels = dataset.test_labels;
+//     readMNIST(train_images, test_images, train_labels, test_labels);
 
     for (int k = 0; k < num_train; k++)
     {
