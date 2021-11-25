@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
   vector<LayerSpecifier> layer_specifier;
   {
     ConvDescriptor layer0;
-    layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
+    layer0.initializeValues(1, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
     LayerSpecifier temp;
     temp.initPointer(CONV);
     *((ConvDescriptor *)temp.params) = layer0;
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor layer1;
-    layer1.initializeValues(3 * 28 * 28, 64, RELU);
+    layer1.initializeValues(3 * 32 * 32, 64, RELU);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer1;
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor layer2;
-    layer2.initializeValues(64, 10);
+    layer2.initializeValues(64, 100);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = layer2;
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
   }
   {
     SoftmaxDescriptor layer2_smax;
-    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1,
+    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 100, 1,
                                  1);
     LayerSpecifier temp;
     temp.initPointer(SOFTMAX);
