@@ -185,6 +185,8 @@ int main(int argc, char *argv[])
   test_images = dataset.test_images;
   train_labels = dataset.training_labels;
   test_labels = dataset.test_labels;
+  
+   cout << train_images.size() << " " << train_images[0].size() << "\n";
 //   readMNIST(train_images, test_images, train_labels, test_labels);
 
   // auto data = create_mini_MNIST(train_images, train_labels, num_train);
