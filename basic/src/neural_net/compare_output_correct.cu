@@ -39,8 +39,9 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
     float *typecast_O = (float *)layer_input[num_layers - 1];
     inferClass<float><<<ceil(1.0 * batch_size / BW), BW>>>(
         typecast_O, pred_y, batch_size, num_classes);
-    cudaMemPrefetchAsync((int *)pred_y, batch_size, cudaCpuDeviceId);
-    cudaMemPrefetchAsync((int *)y, batch_size, cudaCpuDeviceId);
+    cudaDeviceSynchronize();
+//     cudaMemPrefetchAsync((int *)pred_y, batch_size, cudaCpuDeviceId);
+//     cudaMemPrefetchAsync((int *)y, batch_size, cudaCpuDeviceId);
     for (int i = 0; i < batch_size; i++)
     {
 //       std :: cout << "P: " << pred_y[i] << " A: " << y[i] << "  ";
