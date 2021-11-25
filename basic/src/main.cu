@@ -9,7 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
+#include "cifar100_reader.cuh"
 #include "solver.cuh"
 
 using namespace std;
@@ -176,10 +176,16 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
 
 int main(int argc, char *argv[])
 {
-  int rows = 28, cols = 28, channels = 1;
+  int rows = 32, cols = 32, channels = 3;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
-  readMNIST(train_images, test_images, train_labels, test_labels);
+  
+  auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
+  train_images = dataset.training_images;
+  test_images = dataset.test_images;
+  train_labels = dataset.training_images;
+  test_labels = dataset.test_labels;
+//   readMNIST(train_images, test_images, train_labels, test_labels);
 
   // auto data = create_mini_MNIST(train_images, train_labels, num_train);
   // train_images = data.first;
