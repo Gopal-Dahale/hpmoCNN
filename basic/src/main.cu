@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
    cout << train_images.size() << " " << train_images[0].size() << "\n";
   for(int i=0;i<10;i++)
     {
-        cout << (int)dataset.training_labels[i] << "\n";
+        cout << (uint8_t)dataset.training_labels[i] << "\n";
     }
 //   readMNIST(train_images, test_images, train_labels, test_labels);
 
