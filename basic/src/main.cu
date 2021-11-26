@@ -9,7 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "cifar100_reader.cuh"
+#include "cifar100_reader.hpp"
 #include "solver.cuh"
 
 using namespace std;
