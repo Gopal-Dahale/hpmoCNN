@@ -123,9 +123,9 @@ void read_cifar10_file(Images &images, Labels &labels, const std::string &path,
 
     images.push_back(func());
 
-    for (std::size_t j = 2; j < 3074; ++j)
+    for (std::size_t j = 1; j < 3073; ++j)
     {
-      images[start + i][j - 1] = buffer[i * 3074 + j];
+      images[start + i][j - 1] = buffer[i * 3074 + j+1];
     }
   }
 }
