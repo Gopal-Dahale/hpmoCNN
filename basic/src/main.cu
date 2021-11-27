@@ -159,7 +159,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       n_rows = reverseInt(n_rows);
       f.read((char *)&n_cols, sizeof(n_cols));
       n_cols = reverseInt(n_cols);
-      std::cout << "images = " << n_images << " rows = " << n_rows << " cols = " << n_cols;
+//       std::cout << "images = " << n_images << " rows = " << n_rows << " cols = " << n_cols;
 
       for (int k = 0; k < n_images; k++)
       {
@@ -609,7 +609,7 @@ int main(int argc, char *argv[])
                 softmax_eps, init_std_dev, SGD);
 
   int num_epoch = 100;
-  double learning_rate = 1e-4;
+  double learning_rate = 1e-3;
   double learning_rate_decay = 1;
 
   Solver solver(&net, (void *)f_train_images, f_train_labels,
