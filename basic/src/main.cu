@@ -126,7 +126,6 @@ void readMNIST224(vector<vector<uchar>> &train_images,
                vector<vector<uchar>> &test_images, vector<uchar> &train_labels,
                vector<uchar> &test_labels)
 {
-  ../input/mnist224by224testdataset
   string filename_train_images = "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
