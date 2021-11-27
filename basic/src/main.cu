@@ -16,7 +16,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
-int num_train = 1000, num_test = 500;
+int num_train = 1500, num_test = 500;
 
 int reverseInt(int n)
 {
@@ -571,26 +571,10 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor part5_fc2;
-    part5_fc2.initializeValues(4096, 1000);
+    part5_fc2.initializeValues(4096, 10);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = part5_fc2;
-    layer_specifier.push_back(temp);
-  }
-  {
-    FCDescriptor part5_fc3;
-    part5_fc3.initializeValues(1000, 100);
-    LayerSpecifier temp;
-    temp.initPointer(FULLY_CONNECTED);
-    *((FCDescriptor *)temp.params) = part5_fc3;
-    layer_specifier.push_back(temp);
-  }
-  {
-    FCDescriptor part5_fc4;
-    part5_fc4.initializeValues(100, 10);
-    LayerSpecifier temp;
-    temp.initPointer(FULLY_CONNECTED);
-    *((FCDescriptor *)temp.params) = part5_fc4;
     layer_specifier.push_back(temp);
   }
   {
@@ -608,7 +592,7 @@ int main(int argc, char *argv[])
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
                 softmax_eps, init_std_dev, SGD);
 
-  int num_epoch = 100;
+  int num_epoch = 15;
   double learning_rate = 1e-3;
   double learning_rate_decay = 1;
 
