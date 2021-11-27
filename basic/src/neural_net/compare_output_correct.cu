@@ -58,7 +58,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
     double *typecast_O = (double *)layer_input[num_layers - 1];
     inferClass<double><<<ceil(1.0 * batch_size / BW), BW>>>(
         typecast_O, pred_y, batch_size, num_classes);
-    CudaDeviceSynchronize();
+    cudaDeviceSynchronize();
     for (int i = 0; i < batch_size; i++)
     {
       if (pred_y[i] == y[i])
