@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor part5_fc2;
-    part5_fc2.initializeValues(4096, 1000);
+    part5_fc2.initializeValues(4096, 1000, RELU);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = part5_fc2;
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor part5_fc3;
-    part5_fc3.initializeValues(1000, 100);
+    part5_fc3.initializeValues(1000, 100, RELU);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = part5_fc3;
@@ -587,7 +587,7 @@ int main(int argc, char *argv[])
   }
   {
     FCDescriptor part5_fc3;
-    part5_fc3.initializeValues(100, 10);
+    part5_fc3.initializeValues(100, 10, RELU);
     LayerSpecifier temp;
     temp.initPointer(FULLY_CONNECTED);
     *((FCDescriptor *)temp.params) = part5_fc3;
@@ -602,7 +602,7 @@ int main(int argc, char *argv[])
     layer_specifier.push_back(temp);
   }
 
-  int batch_size = 64;
+  int batch_size = 128;
   float softmax_eps = 1e-8;
   float init_std_dev = 0.01;
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
