@@ -47,6 +47,9 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   {
     if (train == false && i == num_layers - 1)
       break;
+    
+    if(i>1 && train = true)
+      cudaMemPrefetchasync(layer_input[i-1], layer_input_size[i-1], cudaCpuDeviceId, stream_memory);
 
     if (layer_type[i] == CONV)
     {
@@ -160,6 +163,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       // i--;
     }
     cudaStreamSynchronize(stream_compute);
+    cudaStreamSynchronize(stream_memory);
   }
 
   // Accuracy Computation
@@ -205,7 +209,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       {
         int device = -1;
         cudaGetDevice(&device);
-        cudaMemPrefetchAsync(&layer_input[i-1],layer_input_size[i-1],device,stream_memory);
+        cudaMemPrefetchAsync(layer_input[i-1],layer_input_size[i-1],device,stream_memory);
       }
     }
     if (layer_type[i] == CONV)
