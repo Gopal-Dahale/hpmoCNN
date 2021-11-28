@@ -347,5 +347,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaMemPrefetchAsync(layer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory);
     cudaMemPrefetchAsync(dlayer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory);
     cudaStreamSynchronize(stream_memory);
+    if(i==0)
+      cudaFree(layer_input[i]);
   }
 }
