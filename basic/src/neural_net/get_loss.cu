@@ -205,7 +205,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       {
         int device = -1;
         cudaGetDevice(&device);
-        cudaMemPrefetcg=hAsync(&layer_input[i-1],layer_input_size[i-1],device,stream_memory);
+        cudaMemPrefetchAsync(&layer_input[i-1],layer_input_size[i-1],device,stream_memory);
       }
     }
     if (layer_type[i] == CONV)
