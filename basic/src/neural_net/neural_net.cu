@@ -20,6 +20,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
                      UpdateRule update_rule)
 {
   cudaStreamCreate(&stream_compute);
+  cudaStreamCreate(&stream_memory);
 
   // create handle
   checkCUDNN(cudnnCreate(&cudnn_handle));
