@@ -202,6 +202,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
 
     cudaMallocManaged(&layer_input[i], input_size * data_type_size);
     cudaMallocManaged(&dlayer_input[i], input_size * data_type_size);
+    
+    layer_input_size[i] = input_size;
   }
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
