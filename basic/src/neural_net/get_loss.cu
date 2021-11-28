@@ -48,8 +48,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if (train == false && i == num_layers - 1)
       break;
     
-    if(i>1 && train = true)
-      cudaMemPrefetchasync(layer_input[i-1], layer_input_size[i-1], cudaCpuDeviceId, stream_memory);
+    if(i>1 && train == true)
+      cudaMemPrefetchAsync(layer_input[i-1], layer_input_size[i-1], cudaCpuDeviceId, stream_memory);
 
     if (layer_type[i] == CONV)
     {
