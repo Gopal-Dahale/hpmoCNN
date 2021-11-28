@@ -43,13 +43,20 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   double Dalpha = 1.0, Dbeta = 0.0;
 
   // Forward Propagation
+  cout << "Forward Propagation: "<< '\n';
   for (int i = 0; i < num_layers; i++)
   {
     if (train == false && i == num_layers - 1)
       break;
     
     if(i>1 && train == true)
+    {
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      cout << "Before Offload: " << free_bytes <<'\n'; 
       cudaMemPrefetchAsync(layer_input[i-1], layer_input_size[i-1]*data_type_size, cudaCpuDeviceId, stream_memory);
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      cout << "After Offload: " << free_bytes <<'\n';
+    }
 
     if (layer_type[i] == CONV)
     {
@@ -197,6 +204,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
           softmax_eps);
     }
   }
+
+  cout << "Backward Propagation: " << '\n';
   for (int i = num_layers - 1; i >= 0; i--)
   {
     if (i > 0)
@@ -207,9 +216,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
       else
       {
+        cudaMemGetInfo(&free_bytes, &total_bytes);
+        cout << "Before Prefetch: " << free_bytes <<'\n';
         int device = -1;
         cudaGetDevice(&device);
         cudaMemPrefetchAsync(layer_input[i-1],layer_input_size[i-1]*data_type_size,device,stream_memory);
+        cudaMemGetInfo(&free_bytes, &total_bytes);
+        cout << "After Prefetch: "<< free_bytes <<'\n';
       }
     }
     if (layer_type[i] == CONV)
@@ -218,8 +231,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       if (cur_params->activation_mode != ACTIVATION_NONE)
       {
-        cudaMemGetInfo(&free_bytes, &total_bytes);
-        std::cout << free_bytes << "\n";
         checkCUDNN(cudnnActivationBackward(
             cudnn_handle, cur_params->actv_desc, &alpha,
             cur_params->output_tensor, layer_input[i + 1],
@@ -344,10 +355,18 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       continue;
     }
     cudaStreamSynchronize(stream_compute);
+
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    cout << "Before Offload (layer and dlayer): "<< free_bytes <<'\n';
+
     cudaMemPrefetchAsync(layer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory);
     cudaMemPrefetchAsync(dlayer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory);
     cudaStreamSynchronize(stream_memory);
+
     if(i==0)
       cudaFree(layer_input[i]);
+    
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    cout << "After Offload (layer and dlayer): " << free_bytes<<'\n';
   }
 }
