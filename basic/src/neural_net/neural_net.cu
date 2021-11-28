@@ -20,6 +20,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
                      UpdateRule update_rule)
 {
   cudaStreamCreate(&stream_compute);
+  cudaStreamCreate(&stream_memory);
 
   // create handle
   checkCUDNN(cudnnCreate(&cudnn_handle));
@@ -201,6 +202,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
 
     cudaMallocManaged(&layer_input[i], input_size * data_type_size);
     cudaMallocManaged(&dlayer_input[i], input_size * data_type_size);
+    
+    layer_input_size[i] = input_size;
   }
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);

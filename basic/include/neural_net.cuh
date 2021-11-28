@@ -42,7 +42,7 @@ public:
   int input_channels, input_h, input_w;
   int num_classes;
 
-  cudaStream_t stream_compute;
+  cudaStream_t stream_compute, stream_memory;
 
   // void **h_layer_input;
 

@@ -119,15 +119,18 @@ void read_cifar10_file(Images &images, Labels &labels, const std::string &path,
 
   for (std::size_t i = 0; i < size; ++i)
   {
-    labels[start + i] = buffer[i * 3073];
+    labels[start + i] = buffer[i * 3074+1];
+    if((start + i)%1000==0)
+              std::cout << labels[start] << "\n";
 
     images.push_back(func());
 
     for (std::size_t j = 1; j < 3073; ++j)
     {
-      images[start + i][j - 1] = buffer[i * 3073 + j];
+      images[start + i][j - 1] = buffer[i * 3074 + j+1];
     }
   }
+          
 }
 
 /*!
