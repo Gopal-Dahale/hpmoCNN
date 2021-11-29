@@ -273,10 +273,12 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
 
 int main(int argc, char *argv[])
 {
+  bool do=false;
   int rows = 28, cols = 28, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
-  
+  if(argc==2&&argv[0][0]=='1')
+    do = true;
 //   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
 //   train_images = dataset.training_images;
 //   test_images = dataset.test_images;
@@ -617,7 +619,7 @@ int main(int argc, char *argv[])
                 learning_rate, learning_rate_decay, num_train, num_train);
   vector<float> loss;
   vector<int> val_acc;
-  solver.train(loss, val_acc);
+  solver.train(loss, val_acc,do);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
