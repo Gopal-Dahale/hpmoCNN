@@ -43,7 +43,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   double Dalpha = 1.0, Dbeta = 0.0;
 
   // Forward Propagation
-  std::cout << "Forward Propagation: "<< '\n';
+//   std::cout << "Forward Propagation: "<< '\n';
   for (int i = 0; i < num_layers; i++)
   {
     if (train == false && i == num_layers - 1)
@@ -205,7 +205,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     }
   }
 
-  std::cout << "Backward Propagation: " << '\n';
+//   std::cout << "Backward Propagation: " << '\n';
   for (int i = num_layers - 1; i >= 0; i--)
   {
     if (i > 0)
