@@ -279,6 +279,7 @@ int main(int argc, char *argv[])
   vector<uchar> train_labels, test_labels;
   if(argc==2&&argv[0][0]=='1')
     doo = true;
+  std::cout << "doo: " << doo << "\n";
 //   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
 //   train_images = dataset.training_images;
 //   test_images = dataset.test_images;
