@@ -239,7 +239,7 @@ void Solver::getTrainTime(std::vector<float> &loss, std::vector<float> &time,
 
       std::vector<float> cur_fwd_vdnn_lag, cur_bwd_vdnn_lag;
       float temp_loss = step(start_sample, j * batch_size, cur_fwd_vdnn_lag,
-                             cur_bwd_vdnn_lag, NULL, false);
+                             cur_bwd_vdnn_lag, NULL, false, false);
       cudaEventRecord(stop);
       cudaEventSynchronize(stop);
       cudaEventElapsedTime(&milli, start, stop);
