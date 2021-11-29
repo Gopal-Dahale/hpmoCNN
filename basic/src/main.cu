@@ -605,7 +605,7 @@ int main(int argc, char *argv[])
     layer_specifier.push_back(temp);
   }
 
-  int batch_size = 64;
+  int batch_size = 128;
   float softmax_eps = 1e-8;
   float init_std_dev = 0.01;
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
