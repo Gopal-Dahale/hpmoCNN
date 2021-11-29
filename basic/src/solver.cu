@@ -24,25 +24,25 @@ Solver::Solver(NeuralNet *model, void *X_train, int *y_train, void *X_val,
   cudaEventCreate(&stop);
 }
 
-float Solver::step(int start_X, int start_y, int *correct_count, bool train, bool do)
+float Solver::step(int start_X, int start_y, int *correct_count, bool train, bool doo)
 {
   std::vector<float> t1, t2;
-  return this->step(start_X, start_y, t1, t2, correct_count, train);
+  return this->step(start_X, start_y, t1, t2, correct_count, train, doo);
 }
 
 float Solver::step(int start_X, int start_y, std::vector<float> &fwd_dnn_lag,
-                   std::vector<float> &bwd_dnn_lag, int *correct_count, bool train,bool do)
+                   std::vector<float> &bwd_dnn_lag, int *correct_count, bool train,bool doo)
 {
   float temp_loss;
 
   if (model->data_type == CUDNN_DATA_FLOAT)
     model->getLoss(&(((float *)X_train)[start_X]), &y_train[start_y],
                    learning_rate, fwd_dnn_lag, bwd_dnn_lag, train, correct_count,
-                   &temp_loss,do);
+                   &temp_loss,doo);
   else if (model->data_type == CUDNN_DATA_DOUBLE)
     model->getLoss(&(((double *)X_train)[start_X]), &y_train[start_y],
                    learning_rate, fwd_dnn_lag, bwd_dnn_lag, train, correct_count,
-                   &temp_loss,do);
+                   &temp_loss,doo);
 
   // float Salpha = -learning_rate;
   // double Dalpha = -learning_rate;
@@ -149,7 +149,7 @@ float Solver::step(int start_X, int start_y, std::vector<float> &fwd_dnn_lag,
   return temp_loss;
 }
 
-void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,bool do)
+void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,bool doo)
 {
   int batch_size = model->batch_size;
   int num_train_batches = num_train / model->batch_size;
@@ -164,7 +164,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,bool do)
       float milli = 0;
       cudaEventRecord(start, model->stream_compute);
 
-      float temp_loss = step(start_sample, j * batch_size, NULL, true,do);
+      float temp_loss = step(start_sample, j * batch_size, NULL, true,doo);
 
       cudaEventRecord(stop, model->stream_compute);
       cudaEventSynchronize(stop);
@@ -182,7 +182,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,bool do)
     {
       int start_sample = j * num_features * batch_size;
       int temp_correct_count=0;
-      float temp_loss= step(start_sample, j * batch_size, &temp_correct_count, false, do);
+      float temp_loss= step(start_sample, j * batch_size, &temp_correct_count, false, doo);
 //       if (model->data_type == CUDNN_DATA_FLOAT)
 //         model->getLoss(&(((float *)X_val)[start_sample]),
 //                        &y_val[j * batch_size], learning_rate, false,
