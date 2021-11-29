@@ -55,9 +55,9 @@ public:
   void getLoss(void *X, int *y, double learning_rate,
                std::vector<float> &fwd_vdnn_lag,
                std::vector<float> &bwd_vdnn_lag, bool train = true,
-               int *correct_count = NULL, float *loss = NULL,bool do);
+               int *correct_count = NULL, float *loss = NULL,bool do=false);
   void getLoss(void *X, int *y, double learning_rate, bool train = true,
-               int *correct_count = NULL, float *loss = NULL,bool do);
+               int *correct_count = NULL, float *loss = NULL,bool do=false);
 
   void compareOutputCorrect(int *correct_count, int *y);
 
