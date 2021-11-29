@@ -168,7 +168,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       // i--;
     }
     cudaStreamSynchronize(stream_compute);
-    cudaStreamSynchronize(stream_memory);
+//     cudaStreamSynchronize(stream_memory);
 //     cudaMemGetInfo(&free_bytes, &total_bytes);
 //     std::cout << "After Offload and computation of current layer: " << free_bytes <<'\n';
   }
@@ -361,10 +361,10 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
 //     std::cout << "cudaMemPrefetchAsync: " <<cudaMemPrefetchAsync(layer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory) << '\n';
 //     std::cout << "cudaMemPrefetchAsync: " <<cudaMemPrefetchAsync(dlayer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory) << '\n';
-    cudaStreamSynchronize(stream_memory);
+//     cudaStreamSynchronize(stream_memory);
 
-    if(i==0)
-      cudaFree(layer_input[i]);
+//     if(i==0)
+//       cudaFree(layer_input[i]);
     
 //     cudaMemGetInfo(&free_bytes, &total_bytes);
 //     std::cout << "After Offload (layer and dlayer): " << free_bytes<<'\n';
