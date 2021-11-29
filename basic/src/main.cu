@@ -274,7 +274,7 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
 int main(int argc, char *argv[])
 {
   bool doo=false;
-  int rows = 28, cols = 28, channels = 1;
+  int rows = 224, cols = 224, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
   if(argc==2&&argv[1][0]=='1')
