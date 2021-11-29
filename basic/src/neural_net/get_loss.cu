@@ -30,7 +30,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, bool train,
 void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         std::vector<float> &fwd_dnn_lag,
                         std::vector<float> &bwd_dnn_lag, bool train,
-                        int *correct_count, float *scalar_loss)
+                        int *correct_count, float *scalar_loss, bool do)
 {
   cudaMemcpy(layer_input[0], X,
              batch_size * input_channels * input_h * input_w * data_type_size,
@@ -49,7 +49,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if (train == false && i == num_layers - 1)
       break;
     
-//     if(i>1 && train == true)
+    if(i>1 && train == true && do==true)
 //     {
 //       cudaMemGetInfo(&free_bytes, &total_bytes);
 //       std::cout << "Before Offload: " << free_bytes <<'\n'; 
@@ -217,6 +217,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
 //       else
 //       {
+            if(do==true){
 //         cudaMemGetInfo(&free_bytes, &total_bytes);
 //         std::cout << "Before Prefetch: " << free_bytes <<'\n';
         int device = -1;
@@ -225,6 +226,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       cudaMemPrefetchAsync(layer_input[i-1],layer_input_size[i-1]*data_type_size,device,stream_memory);// <<'\n';
 // //         cudaMemGetInfo(&free_bytes, &total_bytes);
 // //         std::cout << "After Prefetch: "<< free_bytes <<'\n';
+            }
 //       }
     }
     if (layer_type[i] == CONV)
@@ -360,11 +362,12 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
 //     cudaMemGetInfo(&free_bytes, &total_bytes);
 //     std::cout << "Before Offload (layer and dlayer): "<< free_bytes <<'\n';
-
+  if(do==true){
 //     std::cout << "cudaMemPrefetchAsync: " <<
     cudaMemPrefetchAsync(layer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory); //<< '\n';
 //     std::cout << "cudaMemPrefetchAsync: " <<
     cudaMemPrefetchAsync(dlayer_input[i+1], layer_input_size[i+1]*data_type_size, cudaCpuDeviceId, stream_memory); //<< '\n';
+  }
     cudaStreamSynchronize(stream_memory);
 
 //     if(i==0)
