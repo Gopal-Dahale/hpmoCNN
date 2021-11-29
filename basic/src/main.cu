@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
   int rows = 28, cols = 28, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
-  if(argc==2&&argv[0][0]=='1')
+  if(argc==2&&argv[1][0]=='1')
     doo = true;
   std::cout << "doo: " << doo << "\n";
 //   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
