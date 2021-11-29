@@ -111,8 +111,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
       if (cur_params->activation_mode != ACTIVATION_NONE)
       {
-        cudaMemGetInfo(&free_bytes, &total_bytes);
-        std::cout << "Before Offload: " << free_bytes <<'\n'; 
+//         cudaMemGetInfo(&free_bytes, &total_bytes);
+//         std::cout << "Before Offload: " << free_bytes <<'\n'; 
         checkCUDNN(cudnnActivationForward(
             cudnn_handle, cur_params->actv_desc, &alpha,
             cur_params->output_tensor, layer_input[i + 1], &beta,
