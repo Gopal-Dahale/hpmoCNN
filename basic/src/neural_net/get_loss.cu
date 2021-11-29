@@ -21,16 +21,16 @@ __global__ void softmaxLossBackProp(int *y, T *SO, T *dSO, int batch_size,
 }
 
 void NeuralNet::getLoss(void *X, int *y, double learning_rate, bool train,
-                        int *correct_count, float *loss)
+                        int *correct_count, float *loss, bool doo)
 {
   std::vector<float> t1, t2;
-  this->getLoss(X, y, learning_rate, t1, t2, train, correct_count, loss);
+  this->getLoss(X, y, learning_rate, t1, t2, train, correct_count, loss, doo);
 }
 
 void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         std::vector<float> &fwd_dnn_lag,
                         std::vector<float> &bwd_dnn_lag, bool train,
-                        int *correct_count, float *scalar_loss, bool do)
+                        int *correct_count, float *scalar_loss, bool doo)
 {
   cudaMemcpy(layer_input[0], X,
              batch_size * input_channels * input_h * input_w * data_type_size,
