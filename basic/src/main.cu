@@ -273,12 +273,12 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
 
 int main(int argc, char *argv[])
 {
-  bool do=false;
+  bool doo=false;
   int rows = 28, cols = 28, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
   if(argc==2&&argv[0][0]=='1')
-    do = true;
+    doo = true;
 //   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
 //   train_images = dataset.training_images;
 //   test_images = dataset.test_images;
