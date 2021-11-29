@@ -149,7 +149,7 @@ float Solver::step(int start_X, int start_y, std::vector<float> &fwd_dnn_lag,
   return temp_loss;
 }
 
-void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
+void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,bool do)
 {
   int batch_size = model->batch_size;
   int num_train_batches = num_train / model->batch_size;
@@ -164,7 +164,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
       float milli = 0;
       cudaEventRecord(start, model->stream_compute);
 
-      float temp_loss = step(start_sample, j * batch_size, NULL, true);
+      float temp_loss = step(start_sample, j * batch_size, NULL, true,do);
 
       cudaEventRecord(stop, model->stream_compute);
       cudaEventSynchronize(stop);
@@ -182,7 +182,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc)
     {
       int start_sample = j * num_features * batch_size;
       int temp_correct_count=0;
-      float temp_loss= step(start_sample, j * batch_size, &temp_correct_count, false);
+      float temp_loss= step(start_sample, j * batch_size, &temp_correct_count, false, do);
 //       if (model->data_type == CUDNN_DATA_FLOAT)
 //         model->getLoss(&(((float *)X_val)[start_sample]),
 //                        &y_val[j * batch_size], learning_rate, false,
@@ -213,10 +213,10 @@ void Solver::checkAccuracy(void *X, int *y, int num_samples, int *num_correct)
     int temp_correct_count;
     if (model->data_type == CUDNN_DATA_FLOAT)
       model->getLoss(&(((float *)X)[start_sample]), &y[i * batch_size],
-                     learning_rate, false, &temp_correct_count, NULL);
+                     learning_rate, false, &temp_correct_count, NULL,false,false);
     else if (model->data_type == CUDNN_DATA_DOUBLE)
       model->getLoss(&(((double *)X)[start_sample]), &y[i * batch_size],
-                     learning_rate, false, &temp_correct_count, NULL);
+                     learning_rate, false, &temp_correct_count, NULL,false,false);
     *num_correct = *num_correct + temp_correct_count;
   }
 }
