@@ -1,3 +1,4 @@
+#include "solver.cuh"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -9,8 +10,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "cifar100_reader.hpp"
-#include "solver.cuh"
 
 using namespace std;
 
@@ -120,23 +119,23 @@ void readMNIST(vector<vector<uchar>> &train_images,
   }
 }
 
-
-
 void readMNIST224(vector<vector<uchar>> &train_images,
-               vector<vector<uchar>> &test_images, vector<uchar> &train_labels,
-               vector<uchar> &test_labels)
+                  vector<vector<uchar>> &test_images,
+                  vector<uchar> &train_labels, vector<uchar> &test_labels)
 {
-  string filename_train_images = "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
+  string filename_train_images =
+      "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
-  string filename_test_images = "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
+  string filename_test_images =
+      "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
   for (int i = 0; i < 2; i++)
   {
-    int k = (i==0?30:5);
-    for(int j=0;j<k;j++)
+    int k = (i == 0 ? 30 : 5);
+    for (int j = 0; j < k; j++)
     {
       string filename;
       if (i == 0)
@@ -159,7 +158,8 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       n_rows = reverseInt(n_rows);
       f.read((char *)&n_cols, sizeof(n_cols));
       n_cols = reverseInt(n_cols);
-//       std::cout << "images = " << n_images << " rows = " << n_rows << " cols = " << n_cols;
+      //       std::cout << "images = " << n_images << " rows = " << n_rows << "
+      //       cols = " << n_cols;
 
       for (int k = 0; k < n_images; k++)
       {
@@ -215,7 +215,6 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   assert(train_images.size() == train_labels.size());
   assert(test_images.size() == test_labels.size());
 }
-
 
 auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels,
                        int size)
@@ -273,24 +272,23 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
 
 int main(int argc, char *argv[])
 {
-  bool doo=false;
+  bool doo = false;
   int rows = 224, cols = 224, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
-  if(argc==2&&argv[1][0]=='1')
+  if (argc == 2 && argv[1][0] == '1')
     doo = true;
   std::cout << "doo: " << doo << "\n";
-//   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
-//   train_images = dataset.training_images;
-//   test_images = dataset.test_images;
-//   train_labels = dataset.training_labels;
-//   test_labels = dataset.test_labels;
-  
-//    cout << train_images.size() << " " << train_images[0].size() << "\n";
-//   for(int i=0;i<10;i++)
-//     {
-//         cout << (uint8_t)dataset.training_labels[i] << "\n";
-//     }
+  //   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar,
+  //   uchar>(1000,500); train_images = dataset.training_images; test_images =
+  //   dataset.test_images; train_labels = dataset.training_labels; test_labels
+  //   = dataset.test_labels;
+
+  //    cout << train_images.size() << " " << train_images[0].size() << "\n";
+  //   for(int i=0;i<10;i++)
+  //     {
+  //         cout << (uint8_t)dataset.training_labels[i] << "\n";
+  //     }
   readMNIST224(train_images, test_images, train_labels, test_labels);
 
   // auto data = create_mini_MNIST(train_images, train_labels, num_train);
@@ -359,57 +357,58 @@ int main(int argc, char *argv[])
   }
 
   // Simple CNN
-//   vector<LayerSpecifier> layer_specifier;
-//   {
-//     ConvDescriptor layer0;
-//     layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
-//     LayerSpecifier temp;
-//     temp.initPointer(CONV);
-//     *((ConvDescriptor *)temp.params) = layer0;
-//     layer_specifier.push_back(temp);
-//   }
-// //   {
-// //     ConvDescriptor layer5;
-// //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
-// //     LayerSpecifier temp;
-// //     temp.initPointer(CONV);
-// //     *((ConvDescriptor *)temp.params) = layer5;
-// //     layer_specifier.push_back(temp);
-// //   }
-//   {
-//     FCDescriptor layer1;
-//     layer1.initializeValues(3 * 28 * 28, 64, RELU);
-//     LayerSpecifier temp;
-//     temp.initPointer(FULLY_CONNECTED);
-//     *((FCDescriptor *)temp.params) = layer1;
-//     layer_specifier.push_back(temp);
-//   }
-// //   {
-// //     FCDescriptor layer6;
-// //     layer6.initializeValues(64, 64, RELU);
-// //     LayerSpecifier temp;
-// //     temp.initPointer(FULLY_CONNECTED);
-// //     *((FCDescriptor *)temp.params) = layer6;
-// //     layer_specifier.push_back(temp);
-// //   }
-//   {
-//     FCDescriptor layer2;
-//     layer2.initializeValues(64, 10);
-//     LayerSpecifier temp;
-//     temp.initPointer(FULLY_CONNECTED);
-//     *((FCDescriptor *)temp.params) = layer2;
-//     layer_specifier.push_back(temp);
-//   }
-//   {
-//     SoftmaxDescriptor layer2_smax;
-//     layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1,
-//                                  1);
-//     LayerSpecifier temp;
-//     temp.initPointer(SOFTMAX);
-//     *((SoftmaxDescriptor *)temp.params) = layer2_smax;
-//     layer_specifier.push_back(temp);
-//   }
-  //VGG
+  //   vector<LayerSpecifier> layer_specifier;
+  //   {
+  //     ConvDescriptor layer0;
+  //     layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
+  //     LayerSpecifier temp;
+  //     temp.initPointer(CONV);
+  //     *((ConvDescriptor *)temp.params) = layer0;
+  //     layer_specifier.push_back(temp);
+  //   }
+  // //   {
+  // //     ConvDescriptor layer5;
+  // //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
+  // //     LayerSpecifier temp;
+  // //     temp.initPointer(CONV);
+  // //     *((ConvDescriptor *)temp.params) = layer5;
+  // //     layer_specifier.push_back(temp);
+  // //   }
+  //   {
+  //     FCDescriptor layer1;
+  //     layer1.initializeValues(3 * 28 * 28, 64, RELU);
+  //     LayerSpecifier temp;
+  //     temp.initPointer(FULLY_CONNECTED);
+  //     *((FCDescriptor *)temp.params) = layer1;
+  //     layer_specifier.push_back(temp);
+  //   }
+  // //   {
+  // //     FCDescriptor layer6;
+  // //     layer6.initializeValues(64, 64, RELU);
+  // //     LayerSpecifier temp;
+  // //     temp.initPointer(FULLY_CONNECTED);
+  // //     *((FCDescriptor *)temp.params) = layer6;
+  // //     layer_specifier.push_back(temp);
+  // //   }
+  //   {
+  //     FCDescriptor layer2;
+  //     layer2.initializeValues(64, 10);
+  //     LayerSpecifier temp;
+  //     temp.initPointer(FULLY_CONNECTED);
+  //     *((FCDescriptor *)temp.params) = layer2;
+  //     layer_specifier.push_back(temp);
+  //   }
+  //   {
+  //     SoftmaxDescriptor layer2_smax;
+  //     layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE,
+  //     10, 1,
+  //                                  1);
+  //     LayerSpecifier temp;
+  //     temp.initPointer(SOFTMAX);
+  //     *((SoftmaxDescriptor *)temp.params) = layer2_smax;
+  //     layer_specifier.push_back(temp);
+  //   }
+  // VGG
   vector<LayerSpecifier> layer_specifier;
   {
     ConvDescriptor part0_conv0;
@@ -620,7 +619,7 @@ int main(int argc, char *argv[])
                 learning_rate, learning_rate_decay, num_train, num_train);
   vector<float> loss;
   vector<int> val_acc;
-  solver.train(loss, val_acc,doo);
+  solver.train(loss, val_acc, doo);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
@@ -628,66 +627,16 @@ int main(int argc, char *argv[])
   std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   /** Store and load model from net object */
-//   net.save("model.txt");
-//   NeuralNet net2;
-//   net2.load("model.txt");
-//   Solver solver2(&net2, (void *)f_train_images, f_train_labels,
-//                  (void *)f_train_images, f_train_labels, num_epoch, SGD,
-//                  learning_rate, learning_rate_decay, num_train, num_train);
-//   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
-//   std::cout << "TEST NUM CORRECT:" << num_correct << endl;
+  //   net.save("model.txt");
+  //   NeuralNet net2;
+  //   net2.load("model.txt");
+  //   Solver solver2(&net2, (void *)f_train_images, f_train_labels,
+  //                  (void *)f_train_images, f_train_labels, num_epoch, SGD,
+  //                  learning_rate, learning_rate_decay, num_train, num_train);
+  //   solver.checkAccuracy(f_test_images, f_test_labels, num_test,
+  //   &num_correct); std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   //   solver.getTrainTime(loss, time, 100, fwd_vdnn_lag, bwd_vdnn_lag);
   //   printTimes(time, filename);
   //   printvDNNLag(fwd_vdnn_lag, bwd_vdnn_lag, filename);
 }
-
-/** NOT NEEDED AS OF NOW */
-// void printTimes(vector<float> &time, string filename) {
-//   float mean_time = 0.0;
-//   float std_dev = 0.0;
-//   int N = time.size();
-//   for (int i = 0; i < N; i++) {
-//     mean_time += time[i];
-//   }
-//   mean_time /= N;
-//   for (int i = 0; i < N; i++) {
-//     std_dev += pow(time[i] - mean_time, 2);
-//   }
-//   std_dev /= N;
-//   pow(std_dev, 0.5);
-//   cout << "Average time: " << mean_time << endl;
-//   cout << "Standard deviation: " << std_dev << endl;
-
-//   filename.append(".dat");
-//   fstream f;
-//   f.open(filename.c_str(), ios_base::out);
-
-//   for (int i = 0; i < N; i++) {
-//     f << time[i] << endl;
-//   }
-//   f << "mean_time: " << mean_time << endl;
-//   f << "standard_deviation: " << std_dev << endl;
-//   f.close();
-// }
-
-// void printvDNNLag(vector<vector<float> > &fwd_vdnn_lag, vector<vector<float>
-// > &bwd_vdnn_lag,
-//                   string filename) {
-//   filename.append("_lag.dat");
-
-//   fstream f;
-//   f.open(filename.c_str(), ios_base::out);
-
-//   int N = fwd_vdnn_lag.size();
-//   for (int i = 0; i < N; i++) {
-//     for (int j = 0; j < fwd_vdnn_lag[i].size(); j++) {
-//       f << "fwd" << j << ": " << fwd_vdnn_lag[i][j] << endl;
-//     }
-//     for (int j = 0; j < bwd_vdnn_lag[i].size(); j++) {
-//       f << "bwd" << j << ": " << bwd_vdnn_lag[i][j] << endl;
-//     }
-//     f << endl;
-//   }
-//   f.close();
-// }
