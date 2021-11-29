@@ -16,7 +16,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
-int num_train = 1500, num_test = 500;
+int num_train = 1000, num_test = 500;
 
 int reverseInt(int n)
 {
@@ -273,10 +273,13 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
 
 int main(int argc, char *argv[])
 {
+  bool doo=false;
   int rows = 224, cols = 224, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
-  
+  if(argc==2&&argv[1][0]=='1')
+    doo = true;
+  std::cout << "doo: " << doo << "\n";
 //   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar, uchar>(1000,500);
 //   train_images = dataset.training_images;
 //   test_images = dataset.test_images;
@@ -359,39 +362,39 @@ int main(int argc, char *argv[])
 //   vector<LayerSpecifier> layer_specifier;
 //   {
 //     ConvDescriptor layer0;
-//     layer0.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
+//     layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
 //     LayerSpecifier temp;
 //     temp.initPointer(CONV);
 //     *((ConvDescriptor *)temp.params) = layer0;
 //     layer_specifier.push_back(temp);
 //   }
-//   {
-//     ConvDescriptor layer5;
-//     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
-//     LayerSpecifier temp;
-//     temp.initPointer(CONV);
-//     *((ConvDescriptor *)temp.params) = layer5;
-//     layer_specifier.push_back(temp);
-//   }
+// //   {
+// //     ConvDescriptor layer5;
+// //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
+// //     LayerSpecifier temp;
+// //     temp.initPointer(CONV);
+// //     *((ConvDescriptor *)temp.params) = layer5;
+// //     layer_specifier.push_back(temp);
+// //   }
 //   {
 //     FCDescriptor layer1;
-//     layer1.initializeValues(3 * 32 * 32, 64, RELU);
+//     layer1.initializeValues(3 * 28 * 28, 64, RELU);
 //     LayerSpecifier temp;
 //     temp.initPointer(FULLY_CONNECTED);
 //     *((FCDescriptor *)temp.params) = layer1;
 //     layer_specifier.push_back(temp);
 //   }
-//   {
-//     FCDescriptor layer6;
-//     layer6.initializeValues(64, 64, RELU);
-//     LayerSpecifier temp;
-//     temp.initPointer(FULLY_CONNECTED);
-//     *((FCDescriptor *)temp.params) = layer6;
-//     layer_specifier.push_back(temp);
-//   }
+// //   {
+// //     FCDescriptor layer6;
+// //     layer6.initializeValues(64, 64, RELU);
+// //     LayerSpecifier temp;
+// //     temp.initPointer(FULLY_CONNECTED);
+// //     *((FCDescriptor *)temp.params) = layer6;
+// //     layer_specifier.push_back(temp);
+// //   }
 //   {
 //     FCDescriptor layer2;
-//     layer2.initializeValues(64, 100);
+//     layer2.initializeValues(64, 10);
 //     LayerSpecifier temp;
 //     temp.initPointer(FULLY_CONNECTED);
 //     *((FCDescriptor *)temp.params) = layer2;
@@ -399,7 +402,7 @@ int main(int argc, char *argv[])
 //   }
 //   {
 //     SoftmaxDescriptor layer2_smax;
-//     layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 100, 1,
+//     layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1,
 //                                  1);
 //     LayerSpecifier temp;
 //     temp.initPointer(SOFTMAX);
@@ -608,7 +611,7 @@ int main(int argc, char *argv[])
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
                 softmax_eps, init_std_dev, SGD);
 
-  int num_epoch = 15;
+  int num_epoch = 10;
   double learning_rate = 1e-3;
   double learning_rate_decay = 1;
 
@@ -617,7 +620,7 @@ int main(int argc, char *argv[])
                 learning_rate, learning_rate_decay, num_train, num_train);
   vector<float> loss;
   vector<int> val_acc;
-  solver.train(loss, val_acc);
+  solver.train(loss, val_acc,doo);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
@@ -625,14 +628,14 @@ int main(int argc, char *argv[])
   std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   /** Store and load model from net object */
-  net.save("model.txt");
-  NeuralNet net2;
-  net2.load("model.txt");
-  Solver solver2(&net2, (void *)f_train_images, f_train_labels,
-                 (void *)f_train_images, f_train_labels, num_epoch, SGD,
-                 learning_rate, learning_rate_decay, num_train, num_train);
-  solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
-  std::cout << "TEST NUM CORRECT:" << num_correct << endl;
+//   net.save("model.txt");
+//   NeuralNet net2;
+//   net2.load("model.txt");
+//   Solver solver2(&net2, (void *)f_train_images, f_train_labels,
+//                  (void *)f_train_images, f_train_labels, num_epoch, SGD,
+//                  learning_rate, learning_rate_decay, num_train, num_train);
+//   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
+//   std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   //   solver.getTrainTime(loss, time, 100, fwd_vdnn_lag, bwd_vdnn_lag);
   //   printTimes(time, filename);
