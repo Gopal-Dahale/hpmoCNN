@@ -24,25 +24,25 @@ Solver::Solver(NeuralNet *model, void *X_train, int *y_train, void *X_val,
   cudaEventCreate(&stop);
 }
 
-float Solver::step(int start_X, int start_y, int *correct_count, bool train)
+float Solver::step(int start_X, int start_y, int *correct_count, bool train, bool do)
 {
   std::vector<float> t1, t2;
   return this->step(start_X, start_y, t1, t2, correct_count, train);
 }
 
 float Solver::step(int start_X, int start_y, std::vector<float> &fwd_dnn_lag,
-                   std::vector<float> &bwd_dnn_lag, int *correct_count, bool train)
+                   std::vector<float> &bwd_dnn_lag, int *correct_count, bool train,bool do)
 {
   float temp_loss;
 
   if (model->data_type == CUDNN_DATA_FLOAT)
     model->getLoss(&(((float *)X_train)[start_X]), &y_train[start_y],
                    learning_rate, fwd_dnn_lag, bwd_dnn_lag, train, correct_count,
-                   &temp_loss);
+                   &temp_loss,do);
   else if (model->data_type == CUDNN_DATA_DOUBLE)
     model->getLoss(&(((double *)X_train)[start_X]), &y_train[start_y],
                    learning_rate, fwd_dnn_lag, bwd_dnn_lag, train, correct_count,
-                   &temp_loss);
+                   &temp_loss,do);
 
   // float Salpha = -learning_rate;
   // double Dalpha = -learning_rate;
