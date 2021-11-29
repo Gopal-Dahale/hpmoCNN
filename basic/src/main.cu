@@ -381,14 +381,14 @@ int main(int argc, char *argv[])
     *((FCDescriptor *)temp.params) = layer1;
     layer_specifier.push_back(temp);
   }
-  {
-    FCDescriptor layer6;
-    layer6.initializeValues(64, 64, RELU);
-    LayerSpecifier temp;
-    temp.initPointer(FULLY_CONNECTED);
-    *((FCDescriptor *)temp.params) = layer6;
-    layer_specifier.push_back(temp);
-  }
+//   {
+//     FCDescriptor layer6;
+//     layer6.initializeValues(64, 64, RELU);
+//     LayerSpecifier temp;
+//     temp.initPointer(FULLY_CONNECTED);
+//     *((FCDescriptor *)temp.params) = layer6;
+//     layer_specifier.push_back(temp);
+//   }
   {
     FCDescriptor layer2;
     layer2.initializeValues(64, 10);
