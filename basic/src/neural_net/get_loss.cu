@@ -49,7 +49,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if (train == false && i == num_layers - 1)
       break;
     
-    if(i>1 && train == true && do0==true)
+    if(i>1 && train == true && doo==true)
 //     {
 //       cudaMemGetInfo(&free_bytes, &total_bytes);
 //       std::cout << "Before Offload: " << free_bytes <<'\n'; 
