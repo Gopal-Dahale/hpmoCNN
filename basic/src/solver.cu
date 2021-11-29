@@ -213,10 +213,10 @@ void Solver::checkAccuracy(void *X, int *y, int num_samples, int *num_correct)
     int temp_correct_count;
     if (model->data_type == CUDNN_DATA_FLOAT)
       model->getLoss(&(((float *)X)[start_sample]), &y[i * batch_size],
-                     learning_rate, false, &temp_correct_count, NULL,false,false);
+                     learning_rate, false, &temp_correct_count, NULL,false);
     else if (model->data_type == CUDNN_DATA_DOUBLE)
       model->getLoss(&(((double *)X)[start_sample]), &y[i * batch_size],
-                     learning_rate, false, &temp_correct_count, NULL,false,false);
+                     learning_rate, false, &temp_correct_count, NULL,false);
     *num_correct = *num_correct + temp_correct_count;
   }
 }
