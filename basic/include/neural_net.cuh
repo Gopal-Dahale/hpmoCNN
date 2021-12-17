@@ -8,10 +8,22 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <queue>
+#include <utility>
 
 #include "layer_params.cuh"
 #include "user_iface.cuh"
 #include "utils.cuh"
+
+struct comp {
+    constexpr bool operator()(
+        pair<size_t, int> const& a,
+        pair<size_t, int> const& b)
+        const noexcept
+    {
+        return (a.first < b.first || a.second > b.second);
+    }
+};
 
 class NeuralNet
 {
@@ -23,7 +35,7 @@ public:
   float softmax_eps;
   void *one_vec;
   float init_std_dev;
-
+  priority_queue<pair, vector<pair<size_t,int>>, comp> layer_input_pq;
   std::vector<LayerOp> layer_type;
   int num_layers;
   cudnnHandle_t cudnn_handle;
