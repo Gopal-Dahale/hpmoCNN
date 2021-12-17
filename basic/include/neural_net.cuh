@@ -38,6 +38,7 @@ public:
   priority_queue<pair, vector<pair<size_t,int>>, comp> layer_input_pq;
   std::vector<LayerOp> layer_type;
   int num_layers;
+  bool *offloaded;
   cudnnHandle_t cudnn_handle;
   cublasHandle_t cublas_handle;
   curandGenerator_t curand_gen;
