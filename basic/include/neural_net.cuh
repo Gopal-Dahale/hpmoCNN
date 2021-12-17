@@ -28,7 +28,7 @@ struct comp {
 class NeuralNet
 {
 public:
-  void **layer_input, **dlayer_input, **params;
+  void **layer_input, **dlayer_input, **params, **h_layer_input;
   int *layer_input_size;
   int *y, *pred_y;
   float *loss;
