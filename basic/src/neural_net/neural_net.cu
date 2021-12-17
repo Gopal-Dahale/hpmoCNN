@@ -194,7 +194,6 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
 //       cudaMallocManaged(&layer_input[i + 1], input_size * data_type_size);
 //       cudaMallocManaged(&dlayer_input[i + 1], input_size * data_type_size);
       layer_input_size[i + 1] = input_size;
-      layer_input_pq.push(make_pair(input_size, i+1);
       if (i == 0)
       {
         input_channels = user_params->channels;
@@ -207,7 +206,6 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
 
 //     cudaMallocManaged(&layer_input[i], input_size * data_type_size);
 //     cudaMallocManaged(&dlayer_input[i], input_size * data_type_size);
-    layer_input_pq.push(make_pair(input_size, i);
     layer_input_size[i] = input_size;
   }
   cudaDeviceSynchronize();
