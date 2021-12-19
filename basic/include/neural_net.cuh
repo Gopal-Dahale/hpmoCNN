@@ -35,7 +35,7 @@ public:
   float softmax_eps;
   void *one_vec;
   float init_std_dev;
-  std::priority_queue<std::pair, std::vector<std::pair<size_t,int>>, comp> layer_input_pq;
+  std::priority_queue<std::pair<size_t,int>, std::vector<std::pair<size_t,int>>, comp> layer_input_pq;
   std::vector<LayerOp> layer_type;
   int num_layers;
   bool *offloaded;
