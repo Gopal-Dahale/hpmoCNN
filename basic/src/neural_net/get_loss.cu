@@ -47,7 +47,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 //   std::cout << "Forward Propagation: "<< '\n';
   for (int i = 0; i < num_layers; i++)
   {
-    vector<int> free_layer;
+    std::vector<int> free_layer;
     if (train == false && i == num_layers - 1)
       break;
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
@@ -58,7 +58,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if(free_bytes - 1024 * 1024 * 1024 <= layer_input_size[i + 2] * data_type_size)
     {
       int temp_free_bytes = 0;
-      while(temp_free_bytes - 1024 * 1024 * 1024 <= layer_input_size[i + 2] * data_type_size || layer_input_pq.empty()==true)
+      while(temp_free_bytes - 1024 * 1024 * 1024 <= layer_input_size[i + 2] * data_type_size || layer_input_pq.empty()!=true)
       {
         int temp = layer_input_pq.top().first;
         free_layer.push_back(temp);
