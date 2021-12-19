@@ -52,7 +52,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       break;
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
     if(i>0)
-      layer_input_pq.push(make_pair(layer_input_size[i], i);
+      layer_input_pq.push({layer_input_size[i], i});
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "Before Offload and computation of current layer: " << free_bytes <<'\n';
     if(free_bytes - 1024 * 1024 * 1024 <= layer_input_size[i + 2] * data_type_size)
@@ -63,7 +63,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
         int temp = layer_input_pq.top().first;
         free_layer.push_back(temp);
         temp_free_bytes += layer_input_pq.top().second * data_type_size;
-        offloaded = true;
+        offloaded[temp] = true;
         cudaMemcpyAsync(h_layer_input[temp], layer_input[temp], layer_input_size[temp] * data_type_size, cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();
       }
@@ -195,7 +195,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaStreamSynchronize(stream_compute);
     cudaStreamSynchronize(stream_memory);
     for(int c=0;c<free_layer.size();c++)
-      cudaFree(layer_input[free_layer[c]);
+      cudaFree(layer_input[free_layer[c]]);
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Offload and computation of current layer: " << free_bytes <<'\n';
   }
@@ -246,13 +246,15 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
       if(offloaded[i-1])
       {
-        cudaMalloc(&layer_input[layer_to_prefetch], layer_input_size[layer_to_prefetch] * data_type_size);
-        if (i-1 != 0) {
-						cudaMemcpyAsync(layer_input[i-1], h_layer_input[i-1], layer_input_size[i-1] * data_type_size, cudaMemcpyHostToDevice, stream_memory);
-					}
-					else {
-						cudaMemcpyAsync(layer_input[i-1], X, layer_input_size[i-1] * data_type_size, cudaMemcpyHostToDevice, stream_memory);
-					}
+        cudaMalloc(&layer_input[i-1], layer_input_size[i-1] * data_type_size);
+        if (i-1 != 0)
+	{
+		cudaMemcpyAsync(layer_input[i-1], h_layer_input[i-1], layer_input_size[i-1] * data_type_size, cudaMemcpyHostToDevice, stream_memory);
+	}
+	else
+	{
+		cudaMemcpyAsync(layer_input[i-1], X, layer_input_size[i-1] * data_type_size, cudaMemcpyHostToDevice, stream_memory);
+	}
       }
       cudaMalloc(&dlayer_input[i], layer_input_size[i] * data_type_size);
 // //       else
@@ -411,7 +413,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaStreamSynchronize(stream_memory);
     
     cudaFree(layer_input[i + 1]);
-    cudaFree(d_layer_input[i + 1]);
+    cudaFree(dlayer_input[i + 1]);
 
     if(i==0)
       cudaFree(layer_input[i]);
