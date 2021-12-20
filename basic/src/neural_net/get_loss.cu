@@ -51,9 +51,10 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   // Forward Propagation
   std::cout << "Forward Propagation starts: " << '\n';
   int buffer_bytes = 1024 * 1024 * 1024; // 1GB
+  std::vector<int> free_layer;           // Which layers to free
   for (int i = 0; i < num_layers; i++)
   {
-    std::vector<int> free_layer;
+
     if (train == false && i == num_layers - 1)
       break;
 
@@ -240,12 +241,15 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaStreamSynchronize(stream_memory);
     for (int c = 0; c < free_layer.size(); c++)
       cudaFree(layer_input[free_layer[c]]);
+    free_layer.clear();
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Offload and computation of layer " << i << " : "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
   std::cout << "Forward Propagation ends: " << '\n';
 
+  /***************************************************************************/
+  /************************ Offloaded layers Displayed ***********************/
   int flag = false;
   for (int c = 0; c < num_layers; c++)
     if (offloaded[c])
@@ -262,8 +266,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   }
   else
     std::cout << "\nNo Offloaded Layers: ";
-
   std::cout << '\n';
+  /***************************************************************************/
 
   // Accuracy Computation
   if (train == false)
@@ -517,4 +521,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   // Empty the priority queue
   while (!layer_input_pq.empty())
     layer_input_pq.pop();
+
+  // Make offloaded array to all false
+  for (int c = 0; c < num_layers; c++)
+    offloaded[c] = false;
 }
