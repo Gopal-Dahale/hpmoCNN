@@ -210,6 +210,12 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
 
+  std::cout << "\nOffloaded Layers: ";
+  for (int c = 0; c < num_layers; c++)
+    if (offloaded[c])
+      std::cout << c << " ";
+  std::cout << '\n';
+
   // Accuracy Computation
   if (train == false)
   {
