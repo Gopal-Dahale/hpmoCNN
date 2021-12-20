@@ -248,7 +248,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   }
   std::cout << "Forward Propagation ends: " << '\n';
 
-  /***************************************************************************/
   /************************ Offloaded layers Displayed ***********************/
   int flag = false;
   for (int c = 0; c < num_layers; c++)
@@ -269,7 +268,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   std::cout << '\n';
   /***************************************************************************/
 
-  // Accuracy Computation
+  /************************** Accuracy Computation **************************/
   if (train == false)
   {
     compareOutputCorrect(correct_count, y);
@@ -277,13 +276,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     //     *scalar_loss = computeLoss(); // Loss Computation
     return;
   }
+  /***************************************************************************/
+
   *scalar_loss = computeLoss(); // Loss Computation
 
   cudaMalloc(&dlayer_input[num_layers],
              batch_size * num_classes * data_type_size);
 
-  // Backward Propagation
-  std::cout << "Backward Propagation starts: " << '\n';
   if (layer_type[num_layers - 1] == SOFTMAX)
   {
     if (data_type == CUDNN_DATA_FLOAT)
@@ -306,7 +305,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     }
   }
 
-  //   std::cout << "Backward Propagation: " << '\n';
+  std::cout << "Backward Propagation starts: " << '\n';
   for (int i = num_layers - 1; i >= 0; i--)
   {
     if (i > 0)
@@ -499,8 +498,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       cudaFree(layer_input[i]);
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    std::cout << "freed up feature map and its derivative after 1 layer of BP: "
-              << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
+    std::cout << "freed up feature map and its derivative after layer " << i
+              << " of BP: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
   std::cout << "Backward Propagation ends: " << '\n';
 
