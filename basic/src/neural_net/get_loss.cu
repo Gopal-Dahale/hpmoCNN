@@ -49,7 +49,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << std::endl;
 
   // Forward Propagation
-  //   std::cout << "Forward Propagation: "<< '\n';
+  std::cout << "Forward Propagation starts: " << '\n';
   int buffer_bytes = 1024 * 1024 * 1024; // 1GB
   for (int i = 0; i < num_layers; i++)
   {
@@ -244,11 +244,25 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::cout << "After Offload and computation of layer " << i << " : "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
+  std::cout << "Forward Propagation ends: " << '\n';
 
-  std::cout << "\nOffloaded Layers: ";
+  int flag = false;
   for (int c = 0; c < num_layers; c++)
     if (offloaded[c])
-      std::cout << c << " ";
+    {
+      flag = true;
+      break;
+    }
+  if (flag)
+  {
+    std::cout << "\nOffloaded Layers: ";
+    for (int c = 0; c < num_layers; c++)
+      if (offloaded[c])
+        std::cout << c << " ";
+  }
+  else
+    std::cout << "\nNo Offloaded Layers: ";
+
   std::cout << '\n';
 
   // Accuracy Computation
@@ -265,6 +279,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
              batch_size * num_classes * data_type_size);
 
   // Backward Propagation
+  std::cout << "Backward Propagation starts: " << '\n';
   if (layer_type[num_layers - 1] == SOFTMAX)
   {
     if (data_type == CUDNN_DATA_FLOAT)
@@ -483,6 +498,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::cout << "freed up feature map and its derivative after 1 layer of BP: "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
+  std::cout << "Backward Propagation ends: " << '\n';
+
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "free mem before final free: "
             << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
