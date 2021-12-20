@@ -418,8 +418,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if(i==0)
       cudaFree(layer_input[i]);
     
-//     cudaMemGetInfo(&free_bytes, &total_bytes);
-//     std::cout << "freed up feature map and its derivative: " << free_bytes<<'\n';
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    std::cout << "freed up feature map and its derivative after 1 layer of BP: " << free_bytes<<'\n';
   }
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "free mem after 1FP1BP: " << free_bytes<<'\n';
