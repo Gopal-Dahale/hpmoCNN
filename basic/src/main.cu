@@ -357,57 +357,57 @@ int main(int argc, char *argv[])
   }
 
   // Simple CNN
-  //   vector<LayerSpecifier> layer_specifier;
-  //   {
-  //     ConvDescriptor layer0;
-  //     layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(CONV);
-  //     *((ConvDescriptor *)temp.params) = layer0;
-  //     layer_specifier.push_back(temp);
-  //   }
-  // //   {
-  // //     ConvDescriptor layer5;
-  // //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
-  // //     LayerSpecifier temp;
-  // //     temp.initPointer(CONV);
-  // //     *((ConvDescriptor *)temp.params) = layer5;
-  // //     layer_specifier.push_back(temp);
-  // //   }
-  //   {
-  //     FCDescriptor layer1;
-  //     layer1.initializeValues(3 * 28 * 28, 64, RELU);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(FULLY_CONNECTED);
-  //     *((FCDescriptor *)temp.params) = layer1;
-  //     layer_specifier.push_back(temp);
-  //   }
-  // //   {
-  // //     FCDescriptor layer6;
-  // //     layer6.initializeValues(64, 64, RELU);
-  // //     LayerSpecifier temp;
-  // //     temp.initPointer(FULLY_CONNECTED);
-  // //     *((FCDescriptor *)temp.params) = layer6;
-  // //     layer_specifier.push_back(temp);
-  // //   }
-  //   {
-  //     FCDescriptor layer2;
-  //     layer2.initializeValues(64, 10);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(FULLY_CONNECTED);
-  //     *((FCDescriptor *)temp.params) = layer2;
-  //     layer_specifier.push_back(temp);
-  //   }
-  //   {
-  //     SoftmaxDescriptor layer2_smax;
-  //     layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE,
-  //     10, 1,
-  //                                  1);
-  //     LayerSpecifier temp;
-  //     temp.initPointer(SOFTMAX);
-  //     *((SoftmaxDescriptor *)temp.params) = layer2_smax;
-  //     layer_specifier.push_back(temp);
-  //   }
+//     vector<LayerSpecifier> layer_specifier;
+//     {
+//       ConvDescriptor layer0;
+//       layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
+//       LayerSpecifier temp;
+//       temp.initPointer(CONV);
+//       *((ConvDescriptor *)temp.params) = layer0;
+//       layer_specifier.push_back(temp);
+//     }
+//   //   {
+//   //     ConvDescriptor layer5;
+//   //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
+//   //     LayerSpecifier temp;
+//   //     temp.initPointer(CONV);
+//   //     *((ConvDescriptor *)temp.params) = layer5;
+//   //     layer_specifier.push_back(temp);
+//   //   }
+//     {
+//       FCDescriptor layer1;
+//       layer1.initializeValues(3 * 28 * 28, 64, RELU);
+//       LayerSpecifier temp;
+//       temp.initPointer(FULLY_CONNECTED);
+//       *((FCDescriptor *)temp.params) = layer1;
+//       layer_specifier.push_back(temp);
+//     }
+//   //   {
+//   //     FCDescriptor layer6;
+//   //     layer6.initializeValues(64, 64, RELU);
+//   //     LayerSpecifier temp;
+//   //     temp.initPointer(FULLY_CONNECTED);
+//   //     *((FCDescriptor *)temp.params) = layer6;
+//   //     layer_specifier.push_back(temp);
+//   //   }
+//     {
+//       FCDescriptor layer2;
+//       layer2.initializeValues(64, 10);
+//       LayerSpecifier temp;
+//       temp.initPointer(FULLY_CONNECTED);
+//       *((FCDescriptor *)temp.params) = layer2;
+//       layer_specifier.push_back(temp);
+//     }
+//     {
+//       SoftmaxDescriptor layer2_smax;
+//       layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE,
+//       10, 1,
+//                                    1);
+//       LayerSpecifier temp;
+//       temp.initPointer(SOFTMAX);
+//       *((SoftmaxDescriptor *)temp.params) = layer2_smax;
+//       layer_specifier.push_back(temp);
+//     }
   // VGG
   vector<LayerSpecifier> layer_specifier;
   {
