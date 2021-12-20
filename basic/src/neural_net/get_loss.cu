@@ -54,8 +54,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if(i>0)
       layer_input_pq.push({layer_input_size[i], i});
     cudaMemGetInfo(&free_bytes, &total_bytes);
-//     std::cout << "Before Offload and computation of current layer: " << free_bytes <<'\n';
-    if(free_bytes - 1024 * 1024 * 1024 <= layer_input_size[i + 2] * data_type_size)
+    std::cout << "Before Offload and computation of current layer: " << free_bytes <<'\n';
+    if(i+2<num_layers && free_bytes - 1024 * 1024 * 1024 <= layer_input_size[i + 2] * data_type_size)
     {
       int temp_free_bytes = 0;
       while(temp_free_bytes - 1024 * 1024 * 1024 <= layer_input_size[i + 2] * data_type_size || layer_input_pq.empty()!=true)
@@ -197,7 +197,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     for(int c=0;c<free_layer.size();c++)
       cudaFree(layer_input[free_layer[c]]);
     cudaMemGetInfo(&free_bytes, &total_bytes);
-//     std::cout << "After Offload and computation of current layer: " << free_bytes <<'\n';
+    std::cout << "After Offload and computation of current layer: " << free_bytes <<'\n';
   }
 
   // Accuracy Computation
@@ -421,4 +421,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 //     cudaMemGetInfo(&free_bytes, &total_bytes);
 //     std::cout << "freed up feature map and its derivative: " << free_bytes<<'\n';
   }
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    std::cout << "free mem after 1FP1BP: " << free_bytes<<'\n';
 }
