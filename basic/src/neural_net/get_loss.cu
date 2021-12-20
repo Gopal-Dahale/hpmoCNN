@@ -50,6 +50,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
   // Forward Propagation
   //   std::cout << "Forward Propagation: "<< '\n';
+  int buffer_bytes = 1024 * 1024 * 1024; // 1GB
   for (int i = 0; i < num_layers; i++)
   {
     std::vector<int> free_layer;
@@ -64,23 +65,42 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "Before Offload and computation of layer " << i << " : "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
-    if (i + 2 < num_layers && free_bytes - 1024 * 1024 * 1024 <=
-                                  layer_input_size[i + 2] * data_type_size)
+    if (i + 2 < num_layers &&
+        free_bytes - buffer_bytes <= layer_input_size[i + 2] * data_type_size)
     {
+      /***************** Dhruv's Logic *****************************/
+      // int temp_free_bytes = 0;
+      // while (temp_free_bytes - buffer_bytes <=
+      //            layer_input_size[i + 2] * data_type_size ||
+      //        layer_input_pq.empty() != true)
+      // {
+      //   int temp = layer_input_pq.top().first;
+      //   free_layer.push_back(temp);
+      //   temp_free_bytes += layer_input_pq.top().second * data_type_size;
+      //   offloaded[temp] = true;
+      //   cudaMemcpyAsync(h_layer_input[temp], layer_input[temp],
+      //                   layer_input_size[temp] * data_type_size,
+      //                   cudaMemcpyDeviceToHost, stream_memory);
+      //   layer_input_pq.pop();
+      // }
+      /*************************************************************/
+
+      /***************** Gopal's Logic *****************************/
       int temp_free_bytes = 0;
-      while (temp_free_bytes - 1024 * 1024 * 1024 <=
-                 layer_input_size[i + 2] * data_type_size ||
-             layer_input_pq.empty() != true)
+      while ((temp_free_bytes - buffer_bytes) <=
+                 (layer_input_size[i + 2] * data_type_size) ||
+             (layer_input_pq.empty() != true))
       {
-        int temp = layer_input_pq.top().first;
+        int temp = layer_input_pq.top().second;
         free_layer.push_back(temp);
-        temp_free_bytes += layer_input_pq.top().second * data_type_size;
+        temp_free_bytes += layer_input_pq.top().first * data_type_size;
         offloaded[temp] = true;
         cudaMemcpyAsync(h_layer_input[temp], layer_input[temp],
                         layer_input_size[temp] * data_type_size,
                         cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();
       }
+      /*************************************************************/
     }
 
     //     if(i>1 && train == true && doo==true)
