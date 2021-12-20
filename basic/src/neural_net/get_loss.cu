@@ -329,8 +329,9 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                           layer_input_size[i - 1] * data_type_size,
                           cudaMemcpyHostToDevice, stream_memory);
         }
+        cudaMalloc(&dlayer_input[i],
+                   layer_input_size[i] * data_type_size); // Careful
       }
-      cudaMalloc(&dlayer_input[i], layer_input_size[i] * data_type_size);
       // //       else
       // //       {
       //             if(doo==true){
