@@ -93,8 +93,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       /***************** Gopal's Logic *****************************/
       long long int temp_free_bytes = free_bytes;
       while ((temp_free_bytes - buffer_bytes) <=
-                 (layer_input_size[i + 2] * data_type_size) ||
-             (layer_input_pq.empty() != true))
+                 (layer_input_size[i + 2] * data_type_size) &&
+             (!layer_input_pq.empty()))
       {
         int temp = layer_input_pq.top().second;
         std::cout << "Layer to offload: " << temp << std::endl;
@@ -496,4 +496,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "free mem after 1FP1BP: "
             << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
+
+  // Empty the priority queue
+  while (!layer_input_pq.empty())
+    layer_input_pq.pop();
 }
