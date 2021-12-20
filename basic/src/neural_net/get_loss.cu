@@ -68,6 +68,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if (i + 2 < num_layers &&
         free_bytes - buffer_bytes <= layer_input_size[i + 2] * data_type_size)
     {
+      std::cout << "GPU memory is low, offloading to CPU" << std::endl;
+      std::cout << (free_bytes - buffer_bytes) / float(buffer_bytes) << " <= "
+                << layer_input_size[i + 2] * data_type_size /
+                       float(buffer_bytes)
+                << '\n';
       /***************** Dhruv's Logic *****************************/
       // int temp_free_bytes = 0;
       // while (temp_free_bytes - buffer_bytes <=
@@ -86,14 +91,17 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       /*************************************************************/
 
       /***************** Gopal's Logic *****************************/
-      int temp_free_bytes = 0;
+      int temp_free_bytes = free_bytes;
       while ((temp_free_bytes - buffer_bytes) <=
                  (layer_input_size[i + 2] * data_type_size) ||
              (layer_input_pq.empty() != true))
       {
         int temp = layer_input_pq.top().second;
+        std::cout << "Layer to offload: " << temp << std::endl;
         free_layer.push_back(temp);
         temp_free_bytes += layer_input_pq.top().first * data_type_size;
+        std::cout << "Free gigabytes in GPU: "
+                  << temp_free_bytes / float(buffer_bytes) << std::endl;
         offloaded[temp] = true;
         cudaMemcpyAsync(h_layer_input[temp], layer_input[temp],
                         layer_input_size[temp] * data_type_size,
