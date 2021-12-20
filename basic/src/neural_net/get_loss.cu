@@ -91,13 +91,15 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       /*************************************************************/
 
       /***************** Gopal's Logic *****************************/
-      int temp_free_bytes = free_bytes;
+      long long int temp_free_bytes = free_bytes;
       while ((temp_free_bytes - buffer_bytes) <=
                  (layer_input_size[i + 2] * data_type_size) ||
              (layer_input_pq.empty() != true))
       {
         int temp = layer_input_pq.top().second;
         std::cout << "Layer to offload: " << temp << std::endl;
+        std::cout << "Size of the layer to offload: "
+                  << layer_input_pq.top().first << std::endl;
         free_layer.push_back(temp);
         temp_free_bytes += layer_input_pq.top().first * data_type_size;
         std::cout << "Free gigabytes in GPU: "
