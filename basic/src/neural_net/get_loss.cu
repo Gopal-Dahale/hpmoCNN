@@ -246,6 +246,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
       if(offloaded[i-1])
       {
+	std::cout << "Prefetching layer " << i-1 << "\n";
         cudaMalloc(&layer_input[i-1], layer_input_size[i-1] * data_type_size);
         if (i-1 != 0)
 	{
