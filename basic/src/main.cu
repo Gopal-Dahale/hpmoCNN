@@ -276,13 +276,14 @@ int main(int argc, char *argv[])
   int rows = 224, cols = 224, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
-  if (argc == 2 && argv[1][0] == '1')
-    doo = true;
-  std::cout << "doo: " << doo << "\n";
+
+  //   if (argc == 2 && argv[1][0] == '1')
+  //     doo = true;
+  //   std::cout << "doo: " << doo << "\n";
   //   auto dataset = cifar::read_dataset<std::vector, std::vector, uchar,
   //   uchar>(1000,500); train_images = dataset.training_images; test_images =
-  //   dataset.test_images; train_labels = dataset.training_labels; test_labels
-  //   = dataset.test_labels;
+  //   dataset.test_images; train_labels = dataset.training_labels;
+  //   test_labels = dataset.test_labels;
 
   //    cout << train_images.size() << " " << train_images[0].size() << "\n";
   //   for(int i=0;i<10;i++)
@@ -357,57 +358,57 @@ int main(int argc, char *argv[])
   }
 
   // Simple CNN
-//     vector<LayerSpecifier> layer_specifier;
-//     {
-//       ConvDescriptor layer0;
-//       layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
-//       LayerSpecifier temp;
-//       temp.initPointer(CONV);
-//       *((ConvDescriptor *)temp.params) = layer0;
-//       layer_specifier.push_back(temp);
-//     }
-//   //   {
-//   //     ConvDescriptor layer5;
-//   //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
-//   //     LayerSpecifier temp;
-//   //     temp.initPointer(CONV);
-//   //     *((ConvDescriptor *)temp.params) = layer5;
-//   //     layer_specifier.push_back(temp);
-//   //   }
-//     {
-//       FCDescriptor layer1;
-//       layer1.initializeValues(3 * 28 * 28, 64, RELU);
-//       LayerSpecifier temp;
-//       temp.initPointer(FULLY_CONNECTED);
-//       *((FCDescriptor *)temp.params) = layer1;
-//       layer_specifier.push_back(temp);
-//     }
-//   //   {
-//   //     FCDescriptor layer6;
-//   //     layer6.initializeValues(64, 64, RELU);
-//   //     LayerSpecifier temp;
-//   //     temp.initPointer(FULLY_CONNECTED);
-//   //     *((FCDescriptor *)temp.params) = layer6;
-//   //     layer_specifier.push_back(temp);
-//   //   }
-//     {
-//       FCDescriptor layer2;
-//       layer2.initializeValues(64, 10);
-//       LayerSpecifier temp;
-//       temp.initPointer(FULLY_CONNECTED);
-//       *((FCDescriptor *)temp.params) = layer2;
-//       layer_specifier.push_back(temp);
-//     }
-//     {
-//       SoftmaxDescriptor layer2_smax;
-//       layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE,
-//       10, 1,
-//                                    1);
-//       LayerSpecifier temp;
-//       temp.initPointer(SOFTMAX);
-//       *((SoftmaxDescriptor *)temp.params) = layer2_smax;
-//       layer_specifier.push_back(temp);
-//     }
+  //     vector<LayerSpecifier> layer_specifier;
+  //     {
+  //       ConvDescriptor layer0;
+  //       layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
+  //       LayerSpecifier temp;
+  //       temp.initPointer(CONV);
+  //       *((ConvDescriptor *)temp.params) = layer0;
+  //       layer_specifier.push_back(temp);
+  //     }
+  //   //   {
+  //   //     ConvDescriptor layer5;
+  //   //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
+  //   //     LayerSpecifier temp;
+  //   //     temp.initPointer(CONV);
+  //   //     *((ConvDescriptor *)temp.params) = layer5;
+  //   //     layer_specifier.push_back(temp);
+  //   //   }
+  //     {
+  //       FCDescriptor layer1;
+  //       layer1.initializeValues(3 * 28 * 28, 64, RELU);
+  //       LayerSpecifier temp;
+  //       temp.initPointer(FULLY_CONNECTED);
+  //       *((FCDescriptor *)temp.params) = layer1;
+  //       layer_specifier.push_back(temp);
+  //     }
+  //   //   {
+  //   //     FCDescriptor layer6;
+  //   //     layer6.initializeValues(64, 64, RELU);
+  //   //     LayerSpecifier temp;
+  //   //     temp.initPointer(FULLY_CONNECTED);
+  //   //     *((FCDescriptor *)temp.params) = layer6;
+  //   //     layer_specifier.push_back(temp);
+  //   //   }
+  //     {
+  //       FCDescriptor layer2;
+  //       layer2.initializeValues(64, 10);
+  //       LayerSpecifier temp;
+  //       temp.initPointer(FULLY_CONNECTED);
+  //       *((FCDescriptor *)temp.params) = layer2;
+  //       layer_specifier.push_back(temp);
+  //     }
+  //     {
+  //       SoftmaxDescriptor layer2_smax;
+  //       layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE,
+  //       10, 1,
+  //                                    1);
+  //       LayerSpecifier temp;
+  //       temp.initPointer(SOFTMAX);
+  //       *((SoftmaxDescriptor *)temp.params) = layer2_smax;
+  //       layer_specifier.push_back(temp);
+  //     }
   // VGG
   vector<LayerSpecifier> layer_specifier;
   {
@@ -604,15 +605,21 @@ int main(int argc, char *argv[])
     layer_specifier.push_back(temp);
   }
 
-  int batch_size = 128;
+  int batch_size = ((argc > 1) ? atoi(argv[1]) : 64);
   float softmax_eps = 1e-8;
   float init_std_dev = 0.01;
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
                 softmax_eps, init_std_dev, SGD);
 
-  int num_epoch = 10;
-  double learning_rate = 1e-3;
+  int num_epoch = ((argc > 2) ? atoi(argv[2]) : 10);
+  double learning_rate = ((argc > 3) ? atof(argv[3]) : 0.01);
   double learning_rate_decay = 1;
+
+  /*********** Display configuration ***********/
+
+  cout << "batch_size: " << batch_size << endl;
+  cout << "num_epoch: " << num_epoch << endl;
+  cout << "learning_rate: " << learning_rate << endl;
 
   Solver solver(&net, (void *)f_train_images, f_train_labels,
                 (void *)f_train_images, f_train_labels, num_epoch, SGD,
