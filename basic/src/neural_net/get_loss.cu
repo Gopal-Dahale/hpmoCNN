@@ -50,12 +50,15 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::vector<int> free_layer;
     if (train == false && i == num_layers - 1)
       break;
+
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
+
     if (i > 0)
       layer_input_pq.push({layer_input_size[i], i});
+
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "Before Offload and computation of current layer: "
-              << free_bytes << '\n';
+              << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
     if (i + 2 < num_layers && free_bytes - 1024 * 1024 * 1024 <=
                                   layer_input_size[i + 2] * data_type_size)
     {
@@ -204,7 +207,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       cudaFree(layer_input[free_layer[c]]);
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Offload and computation of current layer: "
-              << free_bytes << '\n';
+              << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
 
   // Accuracy Computation
@@ -437,10 +440,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "freed up feature map and its derivative after 1 layer of BP: "
-              << free_bytes << '\n';
+              << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
   cudaMemGetInfo(&free_bytes, &total_bytes);
-  std::cout << "free mem before final free: " << free_bytes << '\n';
+  std::cout << "free mem before final free: "
+            << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   for (int k = 0; k < num_layers; k++)
   {
     if (layer_input[k] != NULL)
@@ -449,5 +453,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       cudaFree(dlayer_input[k]);
   }
   cudaMemGetInfo(&free_bytes, &total_bytes);
-  std::cout << "free mem after 1FP1BP: " << free_bytes << '\n';
+  std::cout << "free mem after 1FP1BP: "
+            << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 }
