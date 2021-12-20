@@ -57,7 +57,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       layer_input_pq.push({layer_input_size[i], i});
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    std::cout << "Before Offload and computation of current layer: "
+    std::cout << "Before Offload and computation of layer " << i << " : "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
     if (i + 2 < num_layers && free_bytes - 1024 * 1024 * 1024 <=
                                   layer_input_size[i + 2] * data_type_size)
@@ -206,7 +206,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     for (int c = 0; c < free_layer.size(); c++)
       cudaFree(layer_input[free_layer[c]]);
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    std::cout << "After Offload and computation of current layer: "
+    std::cout << "After Offload and computation of layer " << i << " : "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
 
