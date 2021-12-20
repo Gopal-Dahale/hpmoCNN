@@ -43,6 +43,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   float Salpha = 1.0, Sbeta = 0.0;
   double Dalpha = 1.0, Dbeta = 0.0;
 
+  // Display layer_input_size in bytes
+  for (int c = 0; c < num_layers; c++)
+    std::cout << "layer_input_size[" << c << "] = " << layer_input_size[c]
+              << std::endl;
+
   // Forward Propagation
   //   std::cout << "Forward Propagation: "<< '\n';
   for (int i = 0; i < num_layers; i++)
