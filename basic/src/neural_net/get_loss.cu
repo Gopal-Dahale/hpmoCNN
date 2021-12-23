@@ -50,7 +50,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
   // Display layer_input_size in bytes
   for (int c = 0; c < num_layers; c++)
-    std::cout << "layer_input_size[" << c << "] = " << layer_input_size[c]
+    std::cout << "layer_input_size[" << c << "] = " << layer_input_size[c] * data_type_size
               << std::endl;
 
   // Forward Propagation
