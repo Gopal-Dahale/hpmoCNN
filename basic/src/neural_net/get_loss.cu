@@ -37,7 +37,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   cudaMalloc(&layer_input[0], layer_input_size[0] * data_type_size);
   cudaMemGetInfo(&free_bytes, &total_bytes);
   int aft0 = free_bytes;
-  std::cout << "Allocated to layer 0: " << (aft0-bef0) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+  std::cout << "Allocated to layer 0: " << (bef0-aft0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
   cudaMemcpy(layer_input[0], X,
              batch_size * input_channels * input_h * input_w * data_type_size,
              cudaMemcpyHostToDevice);
@@ -68,7 +68,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
     cudaMemGetInfo(&free_bytes, &total_bytes);
     int aft = free_bytes;
-    std::cout << "Allocated to layer " << i+1 << ": " << (aft-bef) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+    std::cout << "Allocated to layer " << i+1 << ": " << (bef-aft) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
     if (i > 0)
       layer_input_pq.push({layer_input_size[i], i});
@@ -299,7 +299,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   cudaMalloc(&dlayer_input[num_layers], batch_size * num_classes * data_type_size);
   cudaMemGetInfo(&free_bytes, &total_bytes);
   int aft1 = free_bytes;
-  std::cout << "Allocated to dlayer " << num_layers << ": " << (aft1-bef1) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+  std::cout << "Allocated to dlayer " << num_layers << ": " << (bef1-aft1) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
 
   if (layer_type[num_layers - 1] == SOFTMAX)
@@ -355,7 +355,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       cudaMalloc(&dlayer_input[i], layer_input_size[i] * data_type_size);
       cudaMemGetInfo(&free_bytes, &total_bytes);
       int aft2 = free_bytes;
-      std::cout << "Allocated to dlayer " << i << ": " << (aft2-bef2) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+      std::cout << "Allocated to dlayer " << i << ": " << (bef2-aft2) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
       
       // //       else
       // //       {
@@ -527,14 +527,14 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaFree(layer_input[i + 1]);
     cudaMemGetInfo(&free_bytes, &total_bytes);
     int aft3 = free_bytes;
-    std::cout << "freed to layer " << i+1 << ": " << (aft3-bef3) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+    std::cout << "freed to layer " << i+1 << ": " << (bef3-aft3) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
     
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    int bef = free_bytes;
+    int bef4 = free_bytes;
     cudaFree(dlayer_input[i + 1]);
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    int aft = free_bytes;
-    std::cout << "freed to dlayer " << i+1 << ": " << (aft-bef) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+    int aft4 = free_bytes;
+    std::cout << "freed to dlayer " << i+1 << ": " << (bef4-aft4) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
     if (i == 0)
       cudaFree(layer_input[i]);
