@@ -295,11 +295,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   
   
   cudaMemGetInfo(&free_bytes, &total_bytes);
-  int bef0 = free_bytes;
+  int bef1 = free_bytes;
   cudaMalloc(&dlayer_input[num_layers], batch_size * num_classes * data_type_size);
   cudaMemGetInfo(&free_bytes, &total_bytes);
-  int aft0 = free_bytes;
-  std::cout << "Allocated to dlayer " << num_layers << ": " << (aft0-bef0) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+  int aft1 = free_bytes;
+  std::cout << "Allocated to dlayer " << num_layers << ": " << (aft1-bef1) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
 
   if (layer_type[num_layers - 1] == SOFTMAX)
@@ -351,11 +351,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
       
       cudaMemGetInfo(&free_bytes, &total_bytes);
-      int bef0 = free_bytes;
+      int bef2 = free_bytes;
       cudaMalloc(&dlayer_input[i], layer_input_size[i] * data_type_size);
       cudaMemGetInfo(&free_bytes, &total_bytes);
-      int aft0 = free_bytes;
-      std::cout << "Allocated to dlayer " << i << ": " << (aft0-bef0) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+      int aft2 = free_bytes;
+      std::cout << "Allocated to dlayer " << i << ": " << (aft2-bef2) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
       
       // //       else
       // //       {
@@ -523,11 +523,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::cout << "BP After Derivative of Layer " << i << ": " << free_bytes << "\n" ; 
     
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    int bef = free_bytes;
+    int bef3 = free_bytes;
     cudaFree(layer_input[i + 1]);
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    int aft = free_bytes;
-    std::cout << "freed to layer " << i+1 << ": " << (aft-bef) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+    int aft3 = free_bytes;
+    std::cout << "freed to layer " << i+1 << ": " << (aft3-bef3) / (1024.0 * 1024.0 * 1024.0) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
     
     cudaMemGetInfo(&free_bytes, &total_bytes);
     int bef = free_bytes;
