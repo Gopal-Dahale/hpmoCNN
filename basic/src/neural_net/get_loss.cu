@@ -258,6 +258,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "Before Synchronization " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
     cudaStreamSynchronize(stream_compute);
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    std::cout << "After Synchronization " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
     cudaStreamSynchronize(stream_memory);
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Computation of Layer " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ; 
@@ -542,6 +544,9 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     //     layer_input_size[i+1]*data_type_size, cudaCpuDeviceId,
     //     stream_memory); //<< '\n';
     //   }
+    
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    std::cout << "After Synchronization " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
     cudaStreamSynchronize(stream_memory);
     
     cudaMemGetInfo(&free_bytes, &total_bytes);
