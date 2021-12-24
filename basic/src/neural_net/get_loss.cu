@@ -147,10 +147,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
           cur_params->filter_desc, cur_params->W, cur_params->conv_desc,
           cur_params->fwd_algo, this->workspace, this->workspace_size, &beta,
           cur_params->output_tensor, layer_input[i + 1]));
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      std::cout << "After cudnnConvolutionForward " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
       checkCUDNN(cudnnAddTensor(cudnn_handle, &alpha, cur_params->bias_desc,
                                 cur_params->b, &alpha,
                                 cur_params->output_tensor, layer_input[i + 1]));
-
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      std::cout << "After cudnnAddTensor " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
       // If activation required
       if (cur_params->activation_mode != ACTIVATION_NONE)
       {
@@ -159,6 +162,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
             cur_params->output_tensor, layer_input[i + 1], &beta,
             cur_params->output_tensor, layer_input[i + 1]));
       }
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      std::cout << "After cudnnActivationForward " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
     }
 
     else if (layer_type[i] == FULLY_CONNECTED)
@@ -250,6 +255,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       }
       // i--;
     }
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    std::cout << "Before Synchronization " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
     cudaStreamSynchronize(stream_compute);
     cudaStreamSynchronize(stream_memory);
     cudaMemGetInfo(&free_bytes, &total_bytes);
@@ -389,22 +396,35 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
             cur_params->output_tensor, layer_input[i + 1], &beta,
             cur_params->output_tensor, dlayer_input[i + 1]));
       }
+      
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      std::cout << "After cudnnActivationBackward " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
 
       checkCUDNN(cudnnConvolutionBackwardBias(
           cudnn_handle, &alpha, cur_params->output_tensor, dlayer_input[i + 1],
           &beta, cur_params->bias_desc, cur_params->db));
 
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      std::cout << "After cudnnConvolutionBackwardBias " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
+      
       checkCUDNN(cudnnConvolutionBackwardFilter(
           cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],
           cur_params->output_tensor, dlayer_input[i + 1], cur_params->conv_desc,
           cur_params->bwd_filter_algo, this->workspace, this->workspace_size,
           &beta, cur_params->filter_desc, cur_params->dW));
+      
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      std::cout << "After cudnnConvolutionBackwardFilter " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
+      
       if (i > 0)
         checkCUDNN(cudnnConvolutionBackwardData(
             cudnn_handle, &alpha, cur_params->filter_desc, cur_params->W,
             cur_params->output_tensor, dlayer_input[i + 1],
             cur_params->conv_desc, cur_params->bwd_data_algo, this->workspace,
             workspace_size, &beta, cur_params->input_tensor, dlayer_input[i]));
+      
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      std::cout << "After cudnnConvolutionBackwardData " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
 
       cur_params->stepParams(cublas_handle, learning_rate);
     }
@@ -505,6 +525,9 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
           cur_params->input_tensor, dlayer_input[i]));
       continue;
     }
+    
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    std::cout << "Before Synchronization " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
     cudaStreamSynchronize(stream_compute);
 
     //     cudaMemGetInfo(&free_bytes, &total_bytes);
@@ -539,7 +562,16 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::cout << "freed to dlayer " << i+1 << ": " << (aft4-bef4) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
     if (i == 0)
+    {
       cudaFree(layer_input[i]);
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      int aft5 = free_bytes;
+      std::cout << "freed to layer " << i << ": " << (aft5-aft4) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+      cudaFree(dlayer_input[i]);
+      cudaMemGetInfo(&free_bytes, &total_bytes);
+      int aft6 = free_bytes;
+      std::cout << "freed to layer " << i << ": " << (aft6-aft5) << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+    }
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "freed up feature map and its derivative after layer " << i
