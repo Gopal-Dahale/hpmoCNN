@@ -271,6 +271,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       cudaFree(this->workspace);
     for (int c = 0; c < free_layer.size(); c++)
       cudaFree(layer_input[free_layer[c]]);
+    if(train == false && offloaded[i] == false)
+      cudaFree(layer_input[i]);
     free_layer.clear();
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Offload and computation of layer " << i << " : "
@@ -346,7 +348,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   {
     if (i > 0)
     {
-      if (layer_type[i] == ACTV or layer_type[i] == SOFTMAX)
+      if (layer_type[i] == ACTV || layer_type[i] == SOFTMAX)
         dlayer_input[i] = dlayer_input[i + 1];
       if (offloaded[i - 1])
       {
