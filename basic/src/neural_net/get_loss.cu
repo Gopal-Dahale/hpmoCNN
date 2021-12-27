@@ -141,6 +141,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     {
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
 
+      this->workspace_size = cur_params->fwd_workspace_size;
+
       cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size);
 
       // Computation
