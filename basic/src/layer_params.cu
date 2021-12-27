@@ -159,6 +159,7 @@ size_t ConvLayerParams::getWorkspaceSize(
     if (fwd_perf[0].memory > free_bytes)
       outOfMemory();
     fwd_algo = fwd_perf[0].algo;
+    fwd_workspace_size = fwd_perf[0].memory;
     return fwd_perf[0].memory;
   }
   else if (conv_direction == BWD_FILTER)
@@ -166,6 +167,7 @@ size_t ConvLayerParams::getWorkspaceSize(
     if (bwd_filter_perf[0].memory > free_bytes)
       outOfMemory();
     bwd_filter_algo = bwd_filter_perf[0].algo;
+    bwd_filter_workspace_size = bwd_filter_perf[0].memory;
     return bwd_filter_perf[0].memory;
   }
   else if (conv_direction == BWD_DATA)
@@ -173,6 +175,7 @@ size_t ConvLayerParams::getWorkspaceSize(
     if (bwd_data_perf[0].memory > free_bytes)
       outOfMemory();
     bwd_data_algo = bwd_data_perf[0].algo;
+    bwd_data_workspace_size = bwd_data_perf[0].memory;
     return bwd_data_perf[0].memory;
   }
   return 0;

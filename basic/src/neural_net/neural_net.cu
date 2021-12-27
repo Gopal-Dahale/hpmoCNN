@@ -254,8 +254,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
     }
   }
 
-  cudaMalloc(&(this->workspace), this->workspace_size);
-  free_bytes = free_bytes - this->workspace_size;
+  // cudaMalloc(&(this->workspace), this->workspace_size);
+  // free_bytes = free_bytes - this->workspace_size;
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
 

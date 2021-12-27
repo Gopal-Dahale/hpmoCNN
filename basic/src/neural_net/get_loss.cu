@@ -141,6 +141,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     {
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
 
+      cudaMalloc(this->workspace, cur_params->fwd_workspace_size);
+
       // Computation
       checkCUDNN(cudnnConvolutionForward(
           cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],
@@ -263,6 +265,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaStreamSynchronize(stream_memory);
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Computation of Layer " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ; 
+    if(layer_type[i] == CONV)
+      cudaFree(this->workspace);
     for (int c = 0; c < free_layer.size(); c++)
       cudaFree(layer_input[free_layer[c]]);
     free_layer.clear();
@@ -401,6 +405,17 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       
       cudaMemGetInfo(&free_bytes, &total_bytes);
       std::cout << "After cudnnActivationBackward " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
+
+      size_t temp_data_wksp;
+
+      if(i==0)
+        temp_data_wksp = 0;
+      else
+        temp_data_wksp = cur_params->bwd_data_workspace_size;
+      
+      this->workspace_size = ((cur_params->bwd_filter_workspace_size>temp_data_wksp)?cur_params->bwd_filter_workspace_size:temp_data_wksp);
+
+      cudaMalloc(this->workspace, this->workspace_size);
 
       checkCUDNN(cudnnConvolutionBackwardBias(
           cudnn_handle, &alpha, cur_params->output_tensor, dlayer_input[i + 1],
@@ -548,8 +563,11 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Synchronization " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
     cudaStreamSynchronize(stream_memory);
-    
-    cudaMemGetInfo(&free_bytes, &total_bytes);
+
+    if (layer_type[i] == CONV)
+      cudaFree(this->workspace);
+
+      cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "BP After Derivative of Layer " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ; 
     
     cudaMemGetInfo(&free_bytes, &total_bytes);
