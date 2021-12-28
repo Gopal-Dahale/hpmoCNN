@@ -247,8 +247,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
               ->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_FILTER);
       cur_workspace_size = max(cur_workspace_size_1,
                                max(cur_workspace_size_2, cur_workspace_size_3));
-      std::cout << "Workspace for " << i << ": " << cur_workspace_size / (1024.0 * 1024.0 * 1024.0)
-                << std::endl;
+      std::cout << "Workspace for " << i << ": " << cur_workspace_size_1 / (1024.0 * 1024.0 * 1024.0) << " " << cur_workspace_size_2 / (1024.0 * 1024.0 * 1024.0) << " " << cur_workspace_size_3 / (1024.0 * 1024.0 * 1024.0) << "\n";
       if (cur_workspace_size > workspace_size)
         this->workspace_size = cur_workspace_size;
     }
