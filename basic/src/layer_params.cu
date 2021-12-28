@@ -156,11 +156,12 @@ size_t ConvLayerParams::getWorkspaceSize(
 {
   if (conv_direction == FWD)
   {
-    if (fwd_perf[0].memory > 6*1024*1024*1024)
+    if (fwd_perf[0].memory / (1024.0 * 1024.0 * 1024.0))
+    {> 6)
     {
       for (int i = 0; i < fwd_ret_count; i++)
       {
-        if (fwd_perf[i].status == CUDNN_STATUS_SUCCESS && fwd_perf[i].memory < 6 * 1024 * 1024 * 1024)
+        if (fwd_perf[i].status == CUDNN_STATUS_SUCCESS && fwd_perf[i].memory / (1024.0 * 1024.0 * 1024.0) < 6)
         {
           fwd_algo = fwd_perf[i].algo;
           fwd_workspace_size = fwd_perf[i].memory;
@@ -173,15 +174,15 @@ size_t ConvLayerParams::getWorkspaceSize(
     fwd_algo = fwd_perf[0].algo;
     fwd_workspace_size = fwd_perf[0].memory;
     return fwd_perf[0].memory;
-  }
+    }
   else if (conv_direction == BWD_FILTER)
   {
-    if (bwd_filter_perf[0].memory > 6 * 1024 * 1024 * 1024)
+    if (bwd_filter_perf[0].memory / (1024.0 * 1024.0 * 1024.0) > 6)
     {
       for (int i = 0; i < bwd_filter_ret_count; i++)
       {
         if (bwd_filter_perf[i].status == CUDNN_STATUS_SUCCESS &&
-            bwd_filter_perf[i].memory < 6 * 1024 * 1024 * 1024)
+            bwd_filter_perf[i].memory / (1024.0 * 1024.0 * 1024.0) < 6)
         {
           bwd_filter_algo = bwd_filter_perf[i].algo;
           bwd_filter_workspace_size = bwd_filter_perf[0].memory;
@@ -197,12 +198,12 @@ size_t ConvLayerParams::getWorkspaceSize(
   }
   else if (conv_direction == BWD_DATA)
   {
-    if (bwd_filter_perf[0].memory > 6 * 1024 * 1024 * 1024)
+    if (bwd_filter_perf[0].memory / (1024.0 * 1024.0 * 1024.0) > 6)
     {
       for (int i = 0; i < bwd_data_ret_count; i++)
       {
         if (bwd_data_perf[i].status == CUDNN_STATUS_SUCCESS &&
-            bwd_data_perf[i].memory < 6 * 1024 * 1024 * 1024)
+            bwd_data_perf[i].memory / (1024.0 * 1024.0 * 1024.0) < 6)
         {
           bwd_data_algo = bwd_data_perf[i].algo;
           bwd_data_workspace_size = bwd_data_perf[i].memory;
