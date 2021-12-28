@@ -419,7 +419,10 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       
       this->workspace_size = ((cur_params->bwd_filter_workspace_size>temp_data_wksp)?cur_params->bwd_filter_workspace_size:temp_data_wksp);
 
-      cudaMalloc(&(this->workspace), this->workspace_size);
+      if(i == 1)
+        std::cout << this->workspace_size << "\n";
+
+      std::cout << cudaMalloc(&(this->workspace), this->workspace_size) << "\n";
 
       checkCUDNN(cudnnConvolutionBackwardBias(
           cudnn_handle, &alpha, cur_params->output_tensor, dlayer_input[i + 1],
