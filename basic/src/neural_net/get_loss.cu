@@ -427,12 +427,14 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       cudaMemGetInfo(&free_bytes, &total_bytes);
       std::cout << "After cudnnConvolutionBackwardBias " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
-      
-      checkCUDNN(cudnnConvolutionBackwardFilter(
-          cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],
-          cur_params->output_tensor, dlayer_input[i + 1], cur_params->conv_desc,
-          cur_params->bwd_filter_algo, this->workspace, this->workspace_size,
-          &beta, cur_params->filter_desc, cur_params->dW));
+      if (this->workspace == NULL)
+        std::cout << "workspace problem\n";
+
+        checkCUDNN(cudnnConvolutionBackwardFilter(
+            cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],
+            cur_params->output_tensor, dlayer_input[i + 1], cur_params->conv_desc,
+            cur_params->bwd_filter_algo, this->workspace, this->workspace_size,
+            &beta, cur_params->filter_desc, cur_params->dW));
       
       cudaMemGetInfo(&free_bytes, &total_bytes);
       std::cout << "After cudnnConvolutionBackwardFilter " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n" ;
