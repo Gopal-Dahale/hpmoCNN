@@ -156,8 +156,8 @@ size_t ConvLayerParams::getWorkspaceSize(
 {
   if (conv_direction == FWD)
   {
-    if (fwd_perf[0].memory / (1024.0 * 1024.0 * 1024.0))
-    {> 6)
+    if (fwd_perf[0].memory / (1024.0 * 1024.0 * 1024.0)
+    > 6)
     {
       for (int i = 0; i < fwd_ret_count; i++)
       {
