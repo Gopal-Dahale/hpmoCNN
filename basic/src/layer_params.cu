@@ -185,7 +185,7 @@ size_t ConvLayerParams::getWorkspaceSize(
             bwd_filter_perf[i].memory / (1024.0 * 1024.0 * 1024.0) < 6)
         {
           bwd_filter_algo = bwd_filter_perf[i].algo;
-          bwd_filter_workspace_size = bwd_filter_perf[0].memory;
+          bwd_filter_workspace_size = bwd_filter_perf[i].memory;
           return bwd_filter_perf[i].memory;
         }
       }
