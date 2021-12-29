@@ -33,6 +33,8 @@ float NeuralNet::computeLoss()
           (double *)layer_input[num_layers], this->y, loss, batch_size,
           num_classes, softmax_eps);
   }
+ 
+  cudaMemPrefetchAsync((float *)loss, batch_size, cudaCpuDeviceId);
   float total_loss = 0.0;
   for (int i = 0; i < batch_size; i++)
     total_loss += loss[i];

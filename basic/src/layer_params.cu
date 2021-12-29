@@ -58,20 +58,6 @@ void ConvLayerParams::initializeValues(
       cudnn_handle, input_tensor, filter_desc, conv_desc, output_tensor,
       fwd_req_count, &fwd_ret_count, fwd_perf));
 
-  // std::cout << "Printing forward conv algo perf\n";
-  // std::cout << "CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM: " <<
-  // CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM << std::endl; for (int i = 0; i <
-  // fwd_ret_count; i++) { 	std::cout << i << std::endl; 	std::cout << "algo:
-  // " << fwd_perf[i].algo << std::endl; 	std::cout << "status: " <<
-  // cudnnGetErrorString(fwd_perf[i].status) << std::endl; 	std::cout <<
-  // "time(ms): " << fwd_perf[i].time << std::endl; 	std::cout <<
-  // "memory(MB):
-  // "
-  // << fwd_perf[i].memory * 1.0 / 1024 / 1024 << std::endl; 	std::cout <<
-  // "mathType: " << fwd_perf[i].mathType << std::endl; 	std::cout <<
-  // std::endl;
-  // }
-
   bwd_filter_req_count = 10;
   bwd_filter_perf = (cudnnConvolutionBwdFilterAlgoPerf_t *)malloc(
       bwd_filter_req_count * sizeof(cudnnConvolutionBwdFilterAlgoPerf_t));
@@ -79,34 +65,12 @@ void ConvLayerParams::initializeValues(
       cudnn_handle, input_tensor, output_tensor, conv_desc, filter_desc,
       bwd_filter_req_count, &bwd_filter_ret_count, bwd_filter_perf));
 
-  // std::cout << "Printing bwdfilter conv algo perf\n";
-  // std::cout << "CUDNN_CONVOLUTION_BWD_FILTER_ALGO_1 " <<
-  // CUDNN_CONVOLUTION_BWD_FILTER_ALGO_1 << std::endl; for (int i = 0; i <
-  // bwd_filter_ret_count; i++) { 	std::cout << i << std::endl; 	std::cout <<
-  // "algo: " << bwd_filter_perf[i].algo << std::endl; 	std::cout << "status: "
-  // << cudnnGetErrorString(bwd_filter_perf[i].status) << std::endl; std::cout
-  // << "time(ms): " << bwd_filter_perf[i].time << std::endl; 	std::cout <<
-  // "memory(MB): " << bwd_filter_perf[i].memory * 1.0 / 1024 / 1024 <<
-  // std::endl; 	std::cout << "mathType: " << bwd_filter_perf[i].mathType <<
-  // std::endl; 	std::cout << std::endl;
-  // }
   bwd_data_req_count = 10;
   bwd_data_perf = (cudnnConvolutionBwdDataAlgoPerf_t *)malloc(
       bwd_data_req_count * sizeof(cudnnConvolutionBwdDataAlgoPerf_t));
   checkCUDNN(cudnnFindConvolutionBackwardDataAlgorithm(
       cudnn_handle, filter_desc, output_tensor, conv_desc, input_tensor,
       bwd_data_req_count, &bwd_data_ret_count, bwd_data_perf));
-
-  // std::cout << "Printing bwddata conv algo perf\n";
-  // for (int i = 0; i < bwd_data_ret_count; i++) {
-  // 	std::cout << i << std::endl;
-  // 	std::cout << "algo: " << bwd_data_perf[i].algo << std::endl;
-  // 	std::cout << "status: " << cudnnGetErrorString(bwd_data_perf[i].status)
-  // << std::endl; 	std::cout << "time(ms): " << bwd_data_perf[i].time <<
-  // std::endl; 	std::cout << "memory(MB): " << bwd_data_perf[i].memory * 1.0
-  // / 1024 / 1024 << std::endl; 	std::cout << "mathType: " <<
-  // bwd_data_perf[i].mathType << std::endl; 	std::cout << std::endl;
-  // }
 
   this->update_rule = update_rule;
 
@@ -140,11 +104,11 @@ void ConvLayerParams::allocateSpace(curandGenerator_t curand_gen,
 {
   if (kernel_size % 2 != 0)
     kernel_size += 1;
-  cudaMallocManaged(&W, kernel_size * data_type_size);
-  cudaMallocManaged(&b, C_out * data_type_size);
+  cudaMalloc(&W, kernel_size * data_type_size);
+  cudaMalloc(&b, C_out * data_type_size);
 
-  cudaMallocManaged(&dW, kernel_size * data_type_size);
-  cudaMallocManaged(&db, C_out * data_type_size);
+  cudaMalloc(&dW, kernel_size * data_type_size);
+  cudaMalloc(&db, C_out * data_type_size);
 
   if (data_type == CUDNN_DATA_FLOAT)
   {
@@ -192,23 +156,65 @@ size_t ConvLayerParams::getWorkspaceSize(
 {
   if (conv_direction == FWD)
   {
+    if (fwd_perf[0].memory / (1024.0 * 1024.0 * 1024.0)
+    > 6)
+    {
+      for (int i = 0; i < fwd_ret_count; i++)
+      {
+        if (fwd_perf[i].status == CUDNN_STATUS_SUCCESS && fwd_perf[i].memory / (1024.0 * 1024.0 * 1024.0) < 6)
+        {
+          fwd_algo = fwd_perf[i].algo;
+          fwd_workspace_size = fwd_perf[i].memory;
+          return fwd_perf[i].memory;
+        }
+      }
+    }
     if (fwd_perf[0].memory > free_bytes)
       outOfMemory();
     fwd_algo = fwd_perf[0].algo;
+    fwd_workspace_size = fwd_perf[0].memory;
     return fwd_perf[0].memory;
-  }
+    }
   else if (conv_direction == BWD_FILTER)
   {
+    if (bwd_filter_perf[0].memory / (1024.0 * 1024.0 * 1024.0) > 6)
+    {
+      for (int i = 0; i < bwd_filter_ret_count; i++)
+      {
+        if (bwd_filter_perf[i].status == CUDNN_STATUS_SUCCESS &&
+            bwd_filter_perf[i].memory / (1024.0 * 1024.0 * 1024.0) < 6)
+        {
+          bwd_filter_algo = bwd_filter_perf[i].algo;
+          bwd_filter_workspace_size = bwd_filter_perf[i].memory;
+          return bwd_filter_perf[i].memory;
+        }
+      }
+    }
     if (bwd_filter_perf[0].memory > free_bytes)
       outOfMemory();
     bwd_filter_algo = bwd_filter_perf[0].algo;
+    bwd_filter_workspace_size = bwd_filter_perf[0].memory;
     return bwd_filter_perf[0].memory;
   }
   else if (conv_direction == BWD_DATA)
   {
+    if (bwd_filter_perf[0].memory / (1024.0 * 1024.0 * 1024.0) > 6)
+    {
+      for (int i = 0; i < bwd_data_ret_count; i++)
+      {
+        if (bwd_data_perf[i].status == CUDNN_STATUS_SUCCESS &&
+            bwd_data_perf[i].memory / (1024.0 * 1024.0 * 1024.0) < 6)
+        {
+          bwd_data_algo = bwd_data_perf[i].algo;
+          bwd_data_workspace_size = bwd_data_perf[i].memory;
+          return bwd_data_perf[i].memory;
+        }
+      }
+    }
     if (bwd_data_perf[0].memory > free_bytes)
       outOfMemory();
     bwd_data_algo = bwd_data_perf[0].algo;
+    bwd_data_workspace_size = bwd_data_perf[0].memory;
     return bwd_data_perf[0].memory;
   }
   return 0;
@@ -263,11 +269,11 @@ void FCLayerParams::allocateSpace(curandGenerator_t curand_gen,
   int wt_alloc_size = weight_matrix_size;
   if (wt_alloc_size % 2 != 0)
     wt_alloc_size += 1;
-  cudaMallocManaged(&W, wt_alloc_size * data_type_size);
-  cudaMallocManaged(&b, C_out * data_type_size);
+  cudaMalloc(&W, wt_alloc_size * data_type_size);
+  cudaMalloc(&b, C_out * data_type_size);
 
-  cudaMallocManaged(&dW, wt_alloc_size * data_type_size);
-  cudaMallocManaged(&db, C_out * data_type_size);
+  cudaMalloc(&dW, wt_alloc_size * data_type_size);
+  cudaMalloc(&db, C_out * data_type_size);
 
   if (data_type == CUDNN_DATA_FLOAT)
   {
@@ -289,17 +295,6 @@ void FCLayerParams::stepParams(cublasHandle_t cublas_handle,
   float Salpha = -learning_rate;
   double Dalpha = -learning_rate;
 
-  // {
-  // 	float *db_h = (float *)malloc(C_out * sizeof(float));
-  // 	checkCudaErrors(cudaMemcpy(db_h, db, C_out * sizeof(float),
-  // cudaMemcpyDeviceToHost)); 	for (int i = 0; i < C_out; i++) { std::cout <<
-  // db_h[i] << ' ';
-  // 	}
-  // 	std::cout << "\n";
-  // 	int n;
-  // 	std::cin >> n;
-  // }
-
   if (update_rule == SGD)
   {
     if (data_type == CUDNN_DATA_FLOAT)
@@ -318,16 +313,6 @@ void FCLayerParams::stepParams(cublasHandle_t cublas_handle,
                   1);
     }
   }
-  // {
-  // 	float *db_h = (float *)malloc(C_out * sizeof(float));
-  // 	checkCudaErrors(cudaMemcpy(db_h, b, C_out * sizeof(float),
-  // cudaMemcpyDeviceToHost)); 	for (int i = 0; i < C_out; i++) { std::cout <<
-  // db_h[i] << ' ';
-  // 	}
-  // 	std::cout << "\n";
-  // 	int n;
-  // 	std::cin >> n;
-  // }
 }
 
 void PoolingLayerParams::initializeValues(PoolingDescriptor *user_params,
