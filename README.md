@@ -36,7 +36,16 @@ The following layers have been implemented
 - Using Upsampled mnist dataset.
 - Working offload/prefetch mechanism with min-heap implementation.
 
-| Batch Size   | Val_acc      | Test_acc |
-| ------------ | ------------ | -------- |
-| Content Cell | Content Cell | sa       |
-| Content Cell | Content Cell | sa       |
+Results for main224
+
+- 5 epochs
+- 0.01 learning rate
+- 1000 train
+- 500 test
+
+| Batch Size | Val_acc | Test_acc |
+| ---------- | ------- | -------- |
+| 128        | 106     | 54       |
+| 256        | NEM     | NEM      |
+
+NEM - Not enough memory
