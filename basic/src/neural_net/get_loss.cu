@@ -76,8 +76,21 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "Before Offload and computation of layer " << i << " : "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
-    if (i + 2 < num_layers &&
-        free_bytes - buffer_bytes <= layer_input_size[i + 2] * data_type_size) {
+
+    size_t temp_free_bytes = free_bytes;                  // Current free bytes
+    size_t free_memory = temp_free_bytes - buffer_bytes;  // Free memory
+    size_t layer_size =
+        layer_input_size[i + 2] * data_type_size;  // Size of the layer
+
+    // Decrement free_memory by i+2 th layer fwd workspace size.
+    // This make sures that i+2 the layer can be allocated smoothly when
+    // needed
+    if (layer_type[i + 2] == CONV) {
+      ConvLayerParams *cur_params = (ConvLayerParams *)params[i + 2];
+      layer_size += cur_params->fwd_workspace_size;
+    }
+
+    if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
       std::cout << "GPU memory is low, offloading to CPU" << std::endl;
       std::cout << (free_bytes - buffer_bytes) / float(buffer_bytes) << " <= "
                 << layer_input_size[i + 2] * data_type_size /
@@ -85,18 +98,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                 << '\n';
 
       /************* Heap logic with workspace fix ********************/
-      size_t temp_free_bytes = free_bytes;  // Current free bytes
-      size_t free_memory = temp_free_bytes - buffer_bytes;  // Free memory
-      size_t layer_size =
-          layer_input_size[i + 2] * data_type_size;  // Size of the layer
 
-      // Decrement free_memory by i+2 th layer fwd workspace size.
-      // This make sures that i+2 the layer can be allocated smoothly when
-      // needed
-      if (layer_type[i + 2] == CONV) {
-        ConvLayerParams *cur_params = (ConvLayerParams *)params[i + 2];
-        layer_size += cur_params->fwd_workspace_size;
-      }
       bool cond1 = (free_memory <= layer_size);
       bool cond2 = (!layer_input_pq.empty());
 
@@ -113,7 +115,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                                                  // of the heap
         std::cout << "Layer to offload: " << temp << std::endl;
         std::cout << "Size of the layer to offload: "
-                  << layer_input_pq.top().first << std::endl;
+                  << layer_input_pq.top().first * data_type_size << std::endl;
         free_layer.push_back(temp);  // Add the layer index to the free layer
                                      // vector
 
