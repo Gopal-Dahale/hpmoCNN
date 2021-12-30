@@ -93,7 +93,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       // This make sures that i+2 the layer can be allocated smoothly when
       // needed
       if (layer_type[i + 2] == CONV) {
-        free_memory -= ((ConvLayerParams *)params[i + 2])->fwd_workspace_size;
+        ConvLayerParams *cur_params = (ConvLayerParams *)params[i + 2];
+        std::cout << "Conv layer " << i + 2
+                  << " fwd workspace size: " << cur_params->fwd_workspace_size
+                  << std::endl;
+        free_memory -= cur_params->fwd_workspace_size;
+        std::cout << "Free memory after decrementing fwd workspace size: "
+                  << free_memory / (1024.0 * 1024.0 * 1024.0) << '\n';
       }
 
       // While the free memory is less than or equal to the (i+2)th layer input
