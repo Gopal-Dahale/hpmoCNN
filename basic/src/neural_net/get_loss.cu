@@ -68,7 +68,10 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::cout << "Allocated to layer " << i + 1 << ": " << (bef - aft)
               << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
-    if (i > 0) layer_input_pq.push({layer_input_size[i], i});
+    // Push the layer_input_size + weights_size to the heap of ith layer
+    if (i > 0) {
+      layer_input_pq.push({layer_input_size[i], i});
+    }
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "Before Offload and computation of layer " << i << " : "
@@ -81,24 +84,46 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                        float(buffer_bytes)
                 << '\n';
 
-      /***************** Gopal's Logic *****************************/
-      long long int temp_free_bytes = free_bytes;
-      while ((temp_free_bytes - buffer_bytes) <=
-                 (layer_input_size[i + 2] * data_type_size) &&
+      /************* Heap logic with workspace fix ********************/
+      long long int temp_free_bytes = free_bytes;  // Current free bytes
+      long long int free_memory =
+          temp_free_bytes - buffer_bytes;  // Free memory
+
+      // Decrement free_memory by i+2 th layer fwd workspace size.
+      // This make sures that i+2 the layer can be allocated smoothly when
+      // needed
+      if (layer_type[i + 2] == CONV) {
+        free_memory -= ((ConvLayerParams *)params[i + 2])->fwd_workspace_size;
+      }
+
+      // While the free memory is less than or equal to the (i+2)th layer input
+      // size or the heap is not empty
+      while (free_memory <= (layer_input_size[i + 2] * data_type_size) &&
              (!layer_input_pq.empty())) {
-        int temp = layer_input_pq.top().second;
+        int temp = layer_input_pq.top().second;  // Get the layer index on top
+                                                 // of the heap
         std::cout << "Layer to offload: " << temp << std::endl;
         std::cout << "Size of the layer to offload: "
                   << layer_input_pq.top().first << std::endl;
-        free_layer.push_back(temp);
+        free_layer.push_back(temp);  // Add the layer index to the free layer
+                                     // vector
+
+        // Update the free bytes
         temp_free_bytes += layer_input_pq.top().first * data_type_size;
         std::cout << "Free gigabytes in GPU: "
                   << temp_free_bytes / float(buffer_bytes) << std::endl;
-        offloaded[temp] = true;
+        offloaded[temp] = true;  // Mark the layer as offloaded
+
+        // Copy the layer to host
+        // Only offload layer_input and not workspace
         cudaMemcpyAsync(h_layer_input[temp], layer_input[temp],
                         layer_input_size[temp] * data_type_size,
                         cudaMemcpyDeviceToHost, stream_memory);
-        layer_input_pq.pop();
+        layer_input_pq.pop();  // Remove the layer from the heap
+        free_memory = temp_free_bytes - buffer_bytes;
+
+        if (layer_type[i + 2] == CONV)
+          free_memory -= ((ConvLayerParams *)params[i + 2])->fwd_workspace_size;
       }
       /*************************************************************/
     }
@@ -238,12 +263,18 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Computation of Layer " << i << ": "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
-    if (layer_type[i] == CONV) cudaFree(this->workspace);
+
+    if (layer_type[i] == CONV) cudaFree(this->workspace);  // free workspace
+
     for (int c = 0; c < free_layer.size(); c++)
-      cudaFree(layer_input[free_layer[c]]);
+      cudaFree(layer_input[free_layer[c]]);  // free layer_input
+
     if (train == false && offloaded[i] == false) cudaFree(layer_input[i]);
-    free_layer.clear();
+
+    free_layer.clear();  // clear free_layer
+
     cudaMemGetInfo(&free_bytes, &total_bytes);
+
     std::cout << "After Offload and computation of layer " << i << " : "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
@@ -307,6 +338,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if (i > 0) {
       if (layer_type[i] == ACTV || layer_type[i] == SOFTMAX)
         dlayer_input[i] = dlayer_input[i + 1];
+
+      // Prefetching
       if (offloaded[i - 1]) {
         std::cout << "Prefetching layer " << i - 1 << "\n";
         cudaMalloc(&layer_input[i - 1],
@@ -372,9 +405,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
         temp_data_wksp = cur_params->bwd_data_workspace_size;
 
       this->workspace_size =
-          ((cur_params->bwd_filter_workspace_size > temp_data_wksp)
-               ? cur_params->bwd_filter_workspace_size
-               : temp_data_wksp);
+          max(cur_params->bwd_filter_workspace_size, temp_data_wksp);
 
       if (i == 1) std::cout << this->workspace_size << "\n";
 

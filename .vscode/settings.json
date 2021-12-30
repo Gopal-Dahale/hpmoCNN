@@ -70,6 +70,8 @@
     "xloctime": "cpp",
     "xtree": "cpp",
     "set": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "deque": "cpp",
+    "queue": "cpp"
   }
 }
