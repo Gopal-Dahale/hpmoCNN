@@ -1,4 +1,9 @@
-#include "solver.cuh"
+/**
+ * Original MNIST Dataset
+ * Small CNN
+ * CONV -> FC -> FC -> SOFTMAX
+ */
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -11,23 +16,22 @@
 #include <unordered_map>
 #include <vector>
 
+#include "solver.cuh"
+
 using namespace std;
 
 typedef unsigned char uchar;
 
 int num_train = 1000, num_test = 500;
 
-int reverseInt(int n)
-{
+int reverseInt(int n) {
   const int bytes = 4;
   unsigned char ch[bytes];
-  for (int i = 0; i < bytes; i++)
-  {
+  for (int i = 0; i < bytes; i++) {
     ch[i] = (n >> i * 8) & 255;
   }
   int p = 0;
-  for (int i = 0; i < bytes; i++)
-  {
+  for (int i = 0; i < bytes; i++) {
     p += (int)ch[i] << (bytes - i - 1) * 8;
   }
   return p;
@@ -35,8 +39,7 @@ int reverseInt(int n)
 
 void readMNIST(vector<vector<uchar>> &train_images,
                vector<vector<uchar>> &test_images, vector<uchar> &train_labels,
-               vector<uchar> &test_labels)
-{
+               vector<uchar> &test_labels) {
   string filename_train_images = "data/train-images.idx3-ubyte";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
@@ -44,8 +47,7 @@ void readMNIST(vector<vector<uchar>> &train_images,
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
-  for (int i = 0; i < 2; i++)
-  {
+  for (int i = 0; i < 2; i++) {
     string filename;
     if (i == 0)
       filename = filename_train_images;
@@ -53,8 +55,7 @@ void readMNIST(vector<vector<uchar>> &train_images,
       filename = filename_test_images;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open())
-      printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
@@ -67,12 +68,10 @@ void readMNIST(vector<vector<uchar>> &train_images,
     f.read((char *)&n_cols, sizeof(n_cols));
     n_cols = reverseInt(n_cols);
 
-    for (int k = 0; k < n_images; k++)
-    {
+    for (int k = 0; k < n_images; k++) {
       vector<uchar> temp;
       temp.reserve(n_rows * n_cols);
-      for (int j = 0; j < n_rows * n_cols; j++)
-      {
+      for (int j = 0; j < n_rows * n_cols; j++) {
         uchar t = 0;
         f.read((char *)&t, sizeof(t));
         temp.push_back(t);
@@ -86,8 +85,7 @@ void readMNIST(vector<vector<uchar>> &train_images,
   }
 
   // read train/test labels
-  for (int i = 0; i < 2; i++)
-  {
+  for (int i = 0; i < 2; i++) {
     string filename;
     if (i == 0)
       filename = filename_train_labels;
@@ -95,8 +93,7 @@ void readMNIST(vector<vector<uchar>> &train_images,
       filename = filename_test_labels;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open())
-      printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_labels = 0;
@@ -105,8 +102,7 @@ void readMNIST(vector<vector<uchar>> &train_images,
     f.read((char *)&n_labels, sizeof(n_labels));
     n_labels = reverseInt(n_labels);
 
-    for (int k = 0; k < n_labels; k++)
-    {
+    for (int k = 0; k < n_labels; k++) {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
       if (i == 0)
@@ -121,8 +117,7 @@ void readMNIST(vector<vector<uchar>> &train_images,
 
 void readMNIST224(vector<vector<uchar>> &train_images,
                   vector<vector<uchar>> &test_images,
-                  vector<uchar> &train_labels, vector<uchar> &test_labels)
-{
+                  vector<uchar> &train_labels, vector<uchar> &test_labels) {
   string filename_train_images =
       "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
@@ -132,11 +127,9 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
-  for (int i = 0; i < 2; i++)
-  {
+  for (int i = 0; i < 2; i++) {
     int k = (i == 0 ? 30 : 5);
-    for (int j = 0; j < k; j++)
-    {
+    for (int j = 0; j < k; j++) {
       string filename;
       if (i == 0)
         filename = filename_train_images;
@@ -145,8 +138,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       filename = filename + to_string(j) + ".idx3-ubyte";
 
       ifstream f(filename.c_str(), ios::binary);
-      if (!f.is_open())
-        printf("Cannot read MNIST from %s\n", filename.c_str());
+      if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
 
       // read metadata
       int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
@@ -161,12 +153,10 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       //       std::cout << "images = " << n_images << " rows = " << n_rows << "
       //       cols = " << n_cols;
 
-      for (int k = 0; k < n_images; k++)
-      {
+      for (int k = 0; k < n_images; k++) {
         vector<uchar> temp;
         temp.reserve(n_rows * n_cols);
-        for (int j = 0; j < n_rows * n_cols; j++)
-        {
+        for (int j = 0; j < n_rows * n_cols; j++) {
           uchar t = 0;
           f.read((char *)&t, sizeof(t));
           temp.push_back(t);
@@ -181,8 +171,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   }
 
   // read train/test labels
-  for (int i = 0; i < 2; i++)
-  {
+  for (int i = 0; i < 2; i++) {
     string filename;
     if (i == 0)
       filename = filename_train_labels;
@@ -190,8 +179,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       filename = filename_test_labels;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open())
-      printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_labels = 0;
@@ -200,8 +188,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
     f.read((char *)&n_labels, sizeof(n_labels));
     n_labels = reverseInt(n_labels);
 
-    for (int k = 0; k < n_labels; k++)
-    {
+    for (int k = 0; k < n_labels; k++) {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
       if (i == 0)
@@ -217,29 +204,24 @@ void readMNIST224(vector<vector<uchar>> &train_images,
 }
 
 auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels,
-                       int size)
-{
+                       int size) {
   unordered_map<int, vector<int>> m;
-  for (int i = 0; i < labels.size(); i++)
-    m[(int)labels[i]].push_back(i);
+  for (int i = 0; i < labels.size(); i++) m[(int)labels[i]].push_back(i);
 
   int bucket = size / 10;
 
-  random_device rd;           // Initialize the random_device
-  mt19937_64 generator(rd()); // Seed the engine
+  random_device rd;            // Initialize the random_device
+  mt19937_64 generator(rd());  // Seed the engine
   set<int> results;
   vector<int> indices;
 
-  for (auto &i : m)
-  {
+  for (auto &i : m) {
     // Specify the range of numbers to generate, in this case [min, max]
     uniform_int_distribution<int> dist{0, (int)i.second.size()};
 
-    while (results.size() < bucket)
-      results.insert(dist(generator));
+    while (results.size() < bucket) results.insert(dist(generator));
 
-    for (auto &j : results)
-      indices.push_back(i.second[j]);
+    for (auto &j : results) indices.push_back(i.second[j]);
 
     results.clear();
   }
@@ -254,8 +236,7 @@ auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels,
 
   // extract data from images and labels vectors using indices vector and put
   // them in mini_images and mini_labels
-  for (int i = 0; i < indices.size(); i++)
-  {
+  for (int i = 0; i < indices.size(); i++) {
     mini_images.push_back(images[indices[i]]);
     mini_labels.push_back(labels[indices[i]]);
   }
@@ -270,8 +251,7 @@ void printTimes(vector<float> &time, string filename);
 void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
                   vector<vector<float>> &bwd_vdnn_lag, string filename);
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   bool doo = false;
   int rows = 28, cols = 28, channels = 1;
   vector<vector<uchar>> train_images, test_images;
@@ -312,15 +292,13 @@ int main(int argc, char *argv[])
   f_test_images = (float *)malloc(num_test * input_size * sizeof(float));
   f_test_labels = (int *)malloc(num_test * sizeof(int));
 
-  for (int k = 0; k < num_train; k++)
-  {
+  for (int k = 0; k < num_train; k++) {
     for (int j = 0; j < input_size; j++)
       f_train_images[k * input_size + j] = (float)train_images[k][j];
     f_train_labels[k] = (int)train_labels[k];
   }
 
-  for (int k = 0; k < num_test; k++)
-  {
+  for (int k = 0; k < num_test; k++) {
     for (int j = 0; j < input_size; j++)
       f_test_images[k * input_size + j] = (float)test_images[k][j];
     f_test_labels[k] = (int)test_labels[k];
@@ -329,88 +307,82 @@ int main(int argc, char *argv[])
   float *mean_image;
   mean_image = (float *)malloc(input_size * sizeof(float));
 
-  for (int i = 0; i < input_size; i++)
-  {
+  for (int i = 0; i < input_size; i++) {
     mean_image[i] = 0;
     for (int k = 0; k < num_train; k++)
       mean_image[i] += f_train_images[k * input_size + i];
     mean_image[i] /= num_train;
   }
 
-  for (int i = 0; i < num_train; i++)
-  {
+  for (int i = 0; i < num_train; i++) {
     for (int j = 0; j < input_size; j++)
       f_train_images[i * input_size + j] -= mean_image[j];
   }
 
-  for (int i = 0; i < input_size; i++)
-  {
+  for (int i = 0; i < input_size; i++) {
     mean_image[i] = 0;
     for (int k = 0; k < num_test; k++)
       mean_image[i] += f_test_images[k * input_size + i];
     mean_image[i] /= num_test;
   }
 
-  for (int i = 0; i < num_test; i++)
-  {
+  for (int i = 0; i < num_test; i++) {
     for (int j = 0; j < input_size; j++)
       f_test_images[i * input_size + j] -= mean_image[j];
   }
 
   // Simple CNN
-      vector<LayerSpecifier> layer_specifier;
-      {
-        ConvDescriptor layer0;
-        layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
-        LayerSpecifier temp;
-        temp.initPointer(CONV);
-        *((ConvDescriptor *)temp.params) = layer0;
-        layer_specifier.push_back(temp);
-      }
-    //   {
-    //     ConvDescriptor layer5;
-    //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
-    //     LayerSpecifier temp;
-    //     temp.initPointer(CONV);
-    //     *((ConvDescriptor *)temp.params) = layer5;
-    //     layer_specifier.push_back(temp);
-    //   }
-      {
-        FCDescriptor layer1;
-        layer1.initializeValues(3 * 28 * 28, 64, RELU);
-        LayerSpecifier temp;
-        temp.initPointer(FULLY_CONNECTED);
-        *((FCDescriptor *)temp.params) = layer1;
-        layer_specifier.push_back(temp);
-      }
-    //   {
-    //     FCDescriptor layer6;
-    //     layer6.initializeValues(64, 64, RELU);
-    //     LayerSpecifier temp;
-    //     temp.initPointer(FULLY_CONNECTED);
-    //     *((FCDescriptor *)temp.params) = layer6;
-    //     layer_specifier.push_back(temp);
-    //   }
-      {
-        FCDescriptor layer2;
-        layer2.initializeValues(64, 10);
-        LayerSpecifier temp;
-        temp.initPointer(FULLY_CONNECTED);
-        *((FCDescriptor *)temp.params) = layer2;
-        layer_specifier.push_back(temp);
-      }
-      {
-        SoftmaxDescriptor layer2_smax;
-        layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE,
-        10, 1,
-                                     1);
-        LayerSpecifier temp;
-        temp.initPointer(SOFTMAX);
-        *((SoftmaxDescriptor *)temp.params) = layer2_smax;
-        layer_specifier.push_back(temp);
-      }
+  vector<LayerSpecifier> layer_specifier;
+  {
+    ConvDescriptor layer0;
+    layer0.initializeValues(1, 3, 3, 3, 28, 28, 1, 1, 1, 1, RELU);
+    LayerSpecifier temp;
+    temp.initPointer(CONV);
+    *((ConvDescriptor *)temp.params) = layer0;
+    layer_specifier.push_back(temp);
+  }
+  //   {
+  //     ConvDescriptor layer5;
+  //     layer5.initializeValues(3, 3, 3, 3, 32, 32, 1, 1, 1, 1, RELU);
+  //     LayerSpecifier temp;
+  //     temp.initPointer(CONV);
+  //     *((ConvDescriptor *)temp.params) = layer5;
+  //     layer_specifier.push_back(temp);
+  //   }
+  {
+    FCDescriptor layer1;
+    layer1.initializeValues(3 * 28 * 28, 64, RELU);
+    LayerSpecifier temp;
+    temp.initPointer(FULLY_CONNECTED);
+    *((FCDescriptor *)temp.params) = layer1;
+    layer_specifier.push_back(temp);
+  }
+  //   {
+  //     FCDescriptor layer6;
+  //     layer6.initializeValues(64, 64, RELU);
+  //     LayerSpecifier temp;
+  //     temp.initPointer(FULLY_CONNECTED);
+  //     *((FCDescriptor *)temp.params) = layer6;
+  //     layer_specifier.push_back(temp);
+  //   }
+  {
+    FCDescriptor layer2;
+    layer2.initializeValues(64, 10);
+    LayerSpecifier temp;
+    temp.initPointer(FULLY_CONNECTED);
+    *((FCDescriptor *)temp.params) = layer2;
+    layer_specifier.push_back(temp);
+  }
+  {
+    SoftmaxDescriptor layer2_smax;
+    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1,
+                                 1);
+    LayerSpecifier temp;
+    temp.initPointer(SOFTMAX);
+    *((SoftmaxDescriptor *)temp.params) = layer2_smax;
+    layer_specifier.push_back(temp);
+  }
   // VGG
-  
 
   int batch_size = ((argc > 1) ? atoi(argv[1]) : 64);
   float softmax_eps = 1e-8;
