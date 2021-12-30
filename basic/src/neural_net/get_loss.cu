@@ -85,42 +85,30 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                 << '\n';
 
       /************* Heap logic with workspace fix ********************/
-      long long int temp_free_bytes = free_bytes;  // Current free bytes
-      long long int free_memory =
-          temp_free_bytes - buffer_bytes;  // Free memory
+      size_t temp_free_bytes = free_bytes;  // Current free bytes
+      size_t free_memory = temp_free_bytes - buffer_bytes;  // Free memory
+      size_t layer_size =
+          layer_input_size[i + 2] * data_type_size;  // Size of the layer
 
       // Decrement free_memory by i+2 th layer fwd workspace size.
       // This make sures that i+2 the layer can be allocated smoothly when
       // needed
       if (layer_type[i + 2] == CONV) {
         ConvLayerParams *cur_params = (ConvLayerParams *)params[i + 2];
-        std::cout << "Conv layer " << i + 2 << " fwd workspace size: "
-                  << cur_params->fwd_workspace_size / (1024.0 * 1024.0 * 1024.0)
-                  << std::endl;
-        free_memory -= cur_params->fwd_workspace_size;
-        std::cout << "Free memory after decrementing fwd workspace size: "
-                  << free_memory / (1024.0 * 1024.0 * 1024.0) << '\n';
+        layer_size += cur_params->fwd_workspace_size;
       }
-      // Display free_memory and layer_input_size[i+2]
-      std::cout << "Free memory: " << free_memory / (1024.0 * 1024.0 * 1024.0)
-                << " layer_input_size[" << i + 2 << "]: "
-                << layer_input_size[i + 2] * data_type_size /
-                       (1024.0 * 1024.0 * 1024.0)
-                << '\n';
-      // Display size of layer_input_pq
-      std::cout << "Size of layer_input_pq: " << layer_input_pq.size() << '\n';
-
-      bool cond1 = (free_memory <= (layer_input_size[i + 2] * data_type_size));
+      bool cond1 = (free_memory <= layer_size);
       bool cond2 = (!layer_input_pq.empty());
-      std::cout << "cond1: " << cond1 << " cond2: " << cond2 << '\n';
 
-      // Display cond
-      std::cout << "Condition: " << cond1 && cond2 << '\n';
+      // Display cond1 and cond2
+      std::cout << "cond1: " << cond1 << " cond2: " << cond2 << std::endl;
+
+      // Display cond1 && cond2
+      std::cout << "Condition: " << (cond1 && cond2) << std::endl;
 
       // While the free memory is less than or equal to the (i+2)th layer
       // input size or the heap is not empty
-      while ((free_memory <= (layer_input_size[i + 2] * data_type_size)) &&
-             (!layer_input_pq.empty())) {
+      while ((free_memory <= layer_size) && (!layer_input_pq.empty())) {
         int temp = layer_input_pq.top().second;  // Get the layer index on top
                                                  // of the heap
         std::cout << "Layer to offload: " << temp << std::endl;
@@ -142,9 +130,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();  // Remove the layer from the heap
         free_memory = temp_free_bytes - buffer_bytes;
-
-        if (layer_type[i + 2] == CONV)
-          free_memory -= ((ConvLayerParams *)params[i + 2])->fwd_workspace_size;
       }
       /*************************************************************/
     }
