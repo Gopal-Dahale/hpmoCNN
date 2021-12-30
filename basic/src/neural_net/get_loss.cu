@@ -101,10 +101,18 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
         std::cout << "Free memory after decrementing fwd workspace size: "
                   << free_memory / (1024.0 * 1024.0 * 1024.0) << '\n';
       }
+      // Display free_memory and layer_input_size[i+2]
+      std::cout << "Free memory: " << free_memory / (1024.0 * 1024.0 * 1024.0)
+                << " layer_input_size[" << i + 2 << "]: "
+                << layer_input_size[i + 2] * data_type_size /
+                       (1024.0 * 1024.0 * 1024.0)
+                << '\n';
+      // Display size of layer_input_pq
+      std::cout << "Size of layer_input_pq: " << layer_input_pq.size() << '\n';
 
       // While the free memory is less than or equal to the (i+2)th layer input
       // size or the heap is not empty
-      while (free_memory <= (layer_input_size[i + 2] * data_type_size) &&
+      while ((free_memory <= (layer_input_size[i + 2] * data_type_size)) &&
              (!layer_input_pq.empty())) {
         int temp = layer_input_pq.top().second;  // Get the layer index on top
                                                  // of the heap
