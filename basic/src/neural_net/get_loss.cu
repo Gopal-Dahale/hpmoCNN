@@ -110,8 +110,14 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       // Display size of layer_input_pq
       std::cout << "Size of layer_input_pq: " << layer_input_pq.size() << '\n';
 
-      // While the free memory is less than or equal to the (i+2)th layer input
-      // size or the heap is not empty
+      bool cond =
+          ((free_memory <= (layer_input_size[i + 2] * data_type_size)) &&
+           (!layer_input_pq.empty()));
+      // Display cond
+      std::cout << "Condition: " << cond << '\n';
+
+      // While the free memory is less than or equal to the (i+2)th layer
+      // input size or the heap is not empty
       while ((free_memory <= (layer_input_size[i + 2] * data_type_size)) &&
              (!layer_input_pq.empty())) {
         int temp = layer_input_pq.top().second;  // Get the layer index on top
