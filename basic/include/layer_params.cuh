@@ -6,25 +6,24 @@
 #include "user_iface.cuh"
 #include "utils.cuh"
 
-enum workspaceStatus_t
-{
+enum workspaceStatus_t {
   WORKSPACE_STATUS_SUCCESS,
   WORKSPACE_STATUS_OUT_OF_MEMORY
 };
 
-#define checkWORKSPACE(expression)                                             \
-  {                                                                            \
-    workspaceStatus_t status = (expression);                                   \
-    if (status != WORKSPACE_STATUS_SUCCESS)                                    \
-    {                                                                          \
-      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__     \
-                << ": " << std::endl;                                          \
-      std::exit(EXIT_FAILURE);                                                 \
-    }                                                                          \
+const size_t WORKSPACE_SIZE_LIMIT = 3;  // GB
+
+#define checkWORKSPACE(expression)                                         \
+  {                                                                        \
+    workspaceStatus_t status = (expression);                               \
+    if (status != WORKSPACE_STATUS_SUCCESS) {                              \
+      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ \
+                << ": " << std::endl;                                      \
+      std::exit(EXIT_FAILURE);                                             \
+    }                                                                      \
   }
 
-struct ConvLayerParams
-{
+struct ConvLayerParams {
   void *W, *b;
   void *dW, *db;
   cudnnTensorDescriptor_t input_tensor, output_tensor, bias_desc;
@@ -36,12 +35,7 @@ struct ConvLayerParams
   size_t fwd_workspace_size, bwd_filter_workspace_size, bwd_data_workspace_size;
   int C_in, C_out, filter_h, filter_w;
   int kernel_size;
-  enum ConvDirection
-  {
-    FWD,
-    BWD_FILTER,
-    BWD_DATA
-  };
+  enum ConvDirection { FWD, BWD_FILTER, BWD_DATA };
   UpdateRule update_rule;
   cudnnDataType_t data_type;
   ActivationMode activation_mode;
@@ -68,8 +62,7 @@ struct ConvLayerParams
   void stepParams(cublasHandle_t cublas_handle, double learning_rate);
 };
 
-struct FCLayerParams
-{
+struct FCLayerParams {
   void *W, *b;
   void *dW, *db;
   int C_in, C_out;
@@ -89,8 +82,7 @@ struct FCLayerParams
   void stepParams(cublasHandle_t cublas_handle, double learning_rate);
 };
 
-struct PoolingLayerParams
-{
+struct PoolingLayerParams {
   cudnnTensorDescriptor_t input_tensor;
   cudnnTensorDescriptor_t output_tensor;
 
@@ -103,8 +95,7 @@ struct PoolingLayerParams
   void allocateSpace(size_t &free_bytes);
 };
 
-struct ActivationLayerParams
-{
+struct ActivationLayerParams {
   cudnnActivationDescriptor_t actv_desc;
   cudnnTensorDescriptor_t input_tensor;
 
@@ -115,8 +106,7 @@ struct ActivationLayerParams
   void allocateSpace(size_t &free_bytes);
 };
 
-struct SoftmaxLayerParams
-{
+struct SoftmaxLayerParams {
   cudnnTensorDescriptor_t input_tensor;
   cudnnSoftmaxAlgorithm_t algo;
   cudnnSoftmaxMode_t mode;
