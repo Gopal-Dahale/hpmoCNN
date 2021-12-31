@@ -51,9 +51,9 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::cout << "layer_input_size[" << c
               << "] = " << layer_input_size[c] * data_type_size << std::endl;
 
-  // Forward Propagation
+  /************************ Forward Propagation starts ***********************/
   std::cout << "Forward Propagation starts: " << '\n';
-  int buffer_bytes = 1024 * 1024 * 1024;  // 1GB
+  size_t buffer_bytes = 1024 * 1024 * 1024;  // 1GB
   int ttl_allocated = 0;
   std::vector<int> free_layer;  // Which layers to free
   for (int i = 0; i < num_layers; i++) {
@@ -85,7 +85,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     // Decrement free_memory by i+2 th layer fwd workspace size.
     // This make sures that i+2 the layer can be allocated smoothly when
     // needed
-    if (layer_type[i + 2] == CONV) {
+    if ((i + 2 < num_layers) && (layer_type[i + 2] == CONV)) {
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i + 2];
       layer_size += cur_params->fwd_workspace_size;
     }
@@ -115,7 +115,9 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                                                  // of the heap
         std::cout << "Layer to offload: " << temp << std::endl;
         std::cout << "Size of the layer to offload: "
-                  << layer_input_pq.top().first * data_type_size << std::endl;
+                  << layer_input_pq.top().first * data_type_size /
+                         float(buffer_bytes)
+                  << std::endl;
         free_layer.push_back(temp);  // Add the layer index to the free layer
                                      // vector
 
@@ -272,14 +274,15 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     std::cout << "After Computation of Layer " << i << ": "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
+    /**************************** Free up memory ****************************/
     if (layer_type[i] == CONV) cudaFree(this->workspace);  // free workspace
 
     for (int c = 0; c < free_layer.size(); c++)
       cudaFree(layer_input[free_layer[c]]);  // free layer_input
 
     if (train == false && offloaded[i] == false) cudaFree(layer_input[i]);
-
     free_layer.clear();  // clear free_layer
+    /**********************************************************************/
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
 
@@ -287,6 +290,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
   std::cout << "Forward Propagation ends: " << '\n';
+  /************************ Forward Propagation ends ***********************/
 
   /************************ Offloaded layers Displayed ***********************/
   int flag = false;
@@ -341,6 +345,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     }
   }
 
+  /************************ Backward Propagation starts ***********************/
   std::cout << "Backward Propagation starts: " << '\n';
   for (int i = num_layers - 1; i >= 0; i--) {
     if (i > 0) {
@@ -370,21 +375,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       int aft2 = free_bytes;
       std::cout << "Allocated to dlayer " << i << ": " << (bef2 - aft2)
                 << " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
-
-      // //       else
-      // //       {
-      //             if(doo==true){
-      // //         cudaMemGetInfo(&free_bytes, &total_bytes);
-      // //         std::cout << "Before Prefetch: " << free_bytes <<'\n';
-      //         int device = -1;
-      //         cudaGetDevice(&device);
-      // //         std::cout << "cudaMemPrefetchAsync: " <<
-      //       cudaMemPrefetchAsync(layer_input[i-1],layer_input_size[i-1]*data_type_size,device,stream_memory);//
-      //       <<'\n';
-      // // //         cudaMemGetInfo(&free_bytes, &total_bytes);
-      // // //         std::cout << "After Prefetch: "<< free_bytes <<'\n';
-      //             }
-      // //       }
     }
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "BP Before Derivative of Layer " << i << ": "
@@ -547,19 +537,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
     cudaStreamSynchronize(stream_compute);
 
-    //     cudaMemGetInfo(&free_bytes, &total_bytes);
-    //     std::cout << "Before Offload (layer and dlayer): "<< free_bytes
-    //     <<'\n';
-    //   if(doo==true){
-    //     std::cout << "cudaMemPrefetchAsync: " <<
-    //     cudaMemPrefetchAsync(layer_input[i+1],
-    //     layer_input_size[i+1]*data_type_size, cudaCpuDeviceId,
-    //     stream_memory); //<< '\n'; std::cout << "cudaMemPrefetchAsync: " <<
-    //     cudaMemPrefetchAsync(dlayer_input[i+1],
-    //     layer_input_size[i+1]*data_type_size, cudaCpuDeviceId,
-    //     stream_memory); //<< '\n';
-    //   }
-
     cudaMemGetInfo(&free_bytes, &total_bytes);
     std::cout << "After Synchronization " << i << ": "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
@@ -605,6 +582,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << " of BP: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
   std::cout << "Backward Propagation ends: " << '\n';
+  /************************ Backward Propagation ends ***********************/
 
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "free mem before final free: "
