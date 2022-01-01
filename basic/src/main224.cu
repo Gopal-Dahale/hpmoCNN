@@ -58,8 +58,8 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   int num_test_files = min((int)(ceil(num_test / float(images_per_file))), 5);
 
   for (int i = 0; i < 2; i++) {
-    int k = (i == 0 ? num_train_files : num_test_files);
-    for (int j = 0; j < k; j++) {
+    int num_files = (i == 0 ? num_train_files : num_test_files);
+    for (int j = 0; j < num_files; j++) {
       string filename;
       if (i == 0)
         filename = filename_train_images;
@@ -165,9 +165,14 @@ int main(int argc, char *argv[]) {
           "num-train", "Number of training examples to use",
           cxxopts::value<int>()->default_value("1000"))(
           "num-test", "Number of testing examples to use",
-          cxxopts::value<int>()->default_value("500"));
+          cxxopts::value<int>()->default_value("500"))("help", "Print Usage");
 
   auto result = options.parse(argc, argv);
+  if (result.count("help")) {
+    std::cout << options.help() << std::endl;
+    exit(0);
+  }
+
   num_train = result["num-train"].as<int>();
   num_test = result["num-test"].as<int>();
 
@@ -440,9 +445,6 @@ int main(int argc, char *argv[]) {
   double learning_rate = result["learning-rate"].as<double>();
   double learning_rate_decay = result["learning-rate-decay"].as<double>();
 
-  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
-                softmax_eps, init_std_dev, SGD);
-
   /************************ Display configuration *************************/
   cout << "batch_size: " << batch_size << endl;
   cout << "softmax_eps: " << softmax_eps << endl;
@@ -454,6 +456,8 @@ int main(int argc, char *argv[]) {
   cout << "num_test: " << num_test << endl;
 
   /*************************** Train & Test ***************************/
+  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
+                softmax_eps, init_std_dev, SGD);
   Solver solver(&net, (void *)f_train_images, f_train_labels,
                 (void *)f_train_images, f_train_labels, num_epoch, SGD,
                 learning_rate, learning_rate_decay, num_train, num_train);
