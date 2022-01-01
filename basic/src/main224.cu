@@ -41,14 +41,14 @@ void readMNIST224(vector<vector<uchar>> &train_images,
                   vector<vector<uchar>> &test_images,
                   vector<uchar> &train_labels, vector<uchar> &test_labels,
                   int num_train, int num_test) {
-  // string filename_train_images =
-  //     "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
-  string filename_train_images = "data/train-images";
+  string filename_train_images =
+      "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
+  // string filename_train_images = "data/train-images";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
-  // string filename_test_images =
-  //     "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
-  string filename_test_images = "data/t10k-images";
+  string filename_test_images =
+      "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
+  // string filename_test_images = "data/t10k-images";
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
