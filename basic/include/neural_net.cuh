@@ -15,18 +15,15 @@
 #include "user_iface.cuh"
 #include "utils.cuh"
 
-struct comp
-{
+struct comp {
   constexpr bool operator()(std::pair<size_t, int> const &a,
-                            std::pair<size_t, int> const &b) const noexcept
-  {
+                            std::pair<size_t, int> const &b) const noexcept {
     return (a.first < b.first || a.second > b.second);
   }
 };
 
-class NeuralNet
-{
-public:
+class NeuralNet {
+ public:
   void **layer_input, **dlayer_input, **params, **h_layer_input;
   int *layer_input_size;
   int *y, *pred_y;
@@ -79,16 +76,6 @@ public:
 
   void save(std::string path);
   void load(std::string path);
-
-  // data of time
-  cudaEvent_t start_compute, stop_compute;
-  //   void getComputationTime(void *X, int *y, double learning_rate,
-  //                           std::vector<float> &fwd_computation_time,
-  //                           std::vector<float> &bwd_computation_time);
-  cudaEvent_t start_transfer, stop_transfer;
-  //   void getTransferTime(void *X, int *y, double learning_rate,
-  //   std::vector<float> &fwd_transfer_time,
-  //                        std::vector<float> &bwd_transfer_time);
 };
 
 #endif
