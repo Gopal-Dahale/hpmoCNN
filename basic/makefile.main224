@@ -4,8 +4,9 @@ SOURCE	= src/utils.cu src/user_iface.cu src/solver.cu $(NEURAL_NET) src/layer_pa
 HEADER	= 
 OUT	= main
 CC	 = nvcc
-INC_DIR = ./include
-FLAGS	 = -I $(INC_DIR)
+INC_DIR_BASIC = ./include/
+INC_DIR_EXTERN = ../cxxopts/include/ 
+FLAGS	 = -I$(INC_DIR_BASIC) -I$(INC_DIR_EXTERN)
 LFLAGS	 = 
 
 all: $(SOURCE)

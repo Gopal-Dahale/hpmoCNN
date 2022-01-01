@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "cxxopts.hpp"
 #include "solver.cuh"
 
 using namespace std;
@@ -38,57 +39,60 @@ int reverseInt(int n) {
 
 void readMNIST224(vector<vector<uchar>> &train_images,
                   vector<vector<uchar>> &test_images,
-                  vector<uchar> &train_labels, vector<uchar> &test_labels) {
-  string filename_train_images =
-      "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
+                  vector<uchar> &train_labels, vector<uchar> &test_labels,
+                  int num_train, int num_test) {
+  // string filename_train_images =
+  //     "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
+  string filename_train_images = "data/train-images";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
-  string filename_test_images =
-      "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
+  // string filename_test_images =
+  //     "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
+  string filename_test_images = "data/t10k-images";
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
   for (int i = 0; i < 2; i++) {
-    int k = (i == 0 ? 30 : 5);
-    for (int j = 0; j < k; j++) {
-      string filename;
-      if (i == 0)
-        filename = filename_train_images;
-      else
-        filename = filename_test_images;
-      filename = filename + to_string(j) + ".idx3-ubyte";
+    string filename;
+    if (i == 0)
+      filename = filename_train_images;
+    else
+      filename = filename_test_images;
+    filename = filename + ".idx3-ubyte";
 
-      ifstream f(filename.c_str(), ios::binary);
-      if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    ifstream f(filename.c_str(), ios::binary);
+    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
 
-      // read metadata
-      int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
-      f.read((char *)&magic_number, sizeof(magic_number));
-      magic_number = reverseInt(magic_number);
-      f.read((char *)&n_images, sizeof(n_images));
-      n_images = reverseInt(n_images);
-      f.read((char *)&n_rows, sizeof(n_rows));
-      n_rows = reverseInt(n_rows);
-      f.read((char *)&n_cols, sizeof(n_cols));
-      n_cols = reverseInt(n_cols);
-      //       std::cout << "images = " << n_images << " rows = " << n_rows << "
-      //       cols = " << n_cols;
+    // read metadata
+    int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
+    f.read((char *)&magic_number, sizeof(magic_number));
+    magic_number = reverseInt(magic_number);
+    f.read((char *)&n_images, sizeof(n_images));
+    n_images = reverseInt(n_images);
+    f.read((char *)&n_rows, sizeof(n_rows));
+    n_rows = reverseInt(n_rows);
+    f.read((char *)&n_cols, sizeof(n_cols));
+    n_cols = reverseInt(n_cols);
 
-      for (int k = 0; k < n_images; k++) {
-        vector<uchar> temp;
-        temp.reserve(n_rows * n_cols);
-        for (int j = 0; j < n_rows * n_cols; j++) {
-          uchar t = 0;
-          f.read((char *)&t, sizeof(t));
-          temp.push_back(t);
-        }
-        if (i == 0)
-          train_images.push_back(temp);
-        else
-          test_images.push_back(temp);
+    if (i == 0)
+      n_images = min(n_images, num_train);
+    else
+      n_images = min(n_images, num_test);
+
+    for (int k = 0; k < n_images; k++) {
+      vector<uchar> temp;
+      temp.reserve(n_rows * n_cols);
+      for (int j = 0; j < n_rows * n_cols; j++) {
+        uchar t = 0;
+        f.read((char *)&t, sizeof(t));
+        temp.push_back(t);
       }
-      f.close();
+      if (i == 0)
+        train_images.push_back(temp);
+      else
+        test_images.push_back(temp);
     }
+    f.close();
   }
 
   // read train/test labels
@@ -109,6 +113,11 @@ void readMNIST224(vector<vector<uchar>> &train_images,
     f.read((char *)&n_labels, sizeof(n_labels));
     n_labels = reverseInt(n_labels);
 
+    if (i == 0)
+      n_labels = min(n_labels, num_train);
+    else
+      n_labels = min(n_labels, num_test);
+
     for (int k = 0; k < n_labels; k++) {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
@@ -117,9 +126,9 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       else
         test_labels.push_back(t);
     }
-
     f.close();
   }
+
   assert(train_images.size() == train_labels.size());
   assert(test_images.size() == test_labels.size());
 }
@@ -129,12 +138,44 @@ void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
                   vector<vector<float>> &bwd_vdnn_lag, string filename);
 
 int main(int argc, char *argv[]) {
+  /******************* Parse command line arguments ********************/
+  cxxopts::Options options(
+      "hpmoCNN",
+      "High Performance Memory Optimal Convolutional Neural Network");
+
+  options.add_options()(
+      "batch-size", "Batch Size",
+      cxxopts::value<int>()->default_value("64"))  // a bool parameter
+      ("softmax-eps", "softmax eps",
+       cxxopts::value<float>()->default_value("1e-8"))(
+          "init-std-dev", "initial standard deviation",
+          cxxopts::value<float>()->default_value("0.01"))(
+          "epochs", "Number of epochs",
+          cxxopts::value<int>()->default_value("5"))(
+          "learning-rate", "Learning Rate",
+          cxxopts::value<double>()->default_value("0.01"))(
+          "learning-rate-decay", "Learning Rate Decay",
+          cxxopts::value<double>()->default_value("1"))(
+          "num-train", "Number of training examples to use",
+          cxxopts::value<int>()->default_value("1000"))(
+          "num-test", "Number of testing examples to use",
+          cxxopts::value<int>()->default_value("500"));
+
+  auto result = options.parse(argc, argv);
+  num_train = result["num-train"].as<int>();
+  num_test = result["num-test"].as<int>();
+
+  /******************* Read Dataset ************************************/
+
   bool doo = false;
   int rows = 224, cols = 224, channels = 1;
   vector<vector<uchar>> train_images, test_images;
   vector<uchar> train_labels, test_labels;
 
-  readMNIST224(train_images, test_images, train_labels, test_labels);
+  cout << "Reading MNIST dataset...  ";
+
+  readMNIST224(train_images, test_images, train_labels, test_labels, num_train,
+               num_test);
 
   assert(train_images.size() == train_labels.size());
   assert(test_images.size() == test_labels.size());
@@ -187,7 +228,9 @@ int main(int argc, char *argv[]) {
       f_test_images[i * input_size + j] -= mean_image[j];
   }
 
-  // VGG Net
+  cout << "Done" << endl;
+
+  /******************* VGG NET ************************************/
   vector<LayerSpecifier> layer_specifier;
   {
     ConvDescriptor part0_conv0;
@@ -383,22 +426,28 @@ int main(int argc, char *argv[]) {
     layer_specifier.push_back(temp);
   }
 
-  int batch_size = ((argc > 1) ? atoi(argv[1]) : 64);
-  float softmax_eps = 1e-8;
-  float init_std_dev = 0.01;
+  /**************************** Configuration ****************************/
+  int batch_size = result["batch-size"].as<int>();
+  float softmax_eps = result["softmax-eps"].as<float>();
+  float init_std_dev = result["init-std-dev"].as<float>();
+  int num_epoch = result["epochs"].as<int>();
+  double learning_rate = result["learning-rate"].as<double>();
+  double learning_rate_decay = result["learning-rate-decay"].as<double>();
+
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
                 softmax_eps, init_std_dev, SGD);
 
-  int num_epoch = ((argc > 2) ? atoi(argv[2]) : 10);
-  double learning_rate = ((argc > 3) ? atof(argv[3]) : 0.01);
-  double learning_rate_decay = 1;
-
-  /*********** Display configuration ***********/
-
+  /************************ Display configuration *************************/
   cout << "batch_size: " << batch_size << endl;
+  cout << "softmax_eps: " << softmax_eps << endl;
+  cout << "init_std_dev: " << init_std_dev << endl;
   cout << "num_epoch: " << num_epoch << endl;
   cout << "learning_rate: " << learning_rate << endl;
+  cout << "learning_rate_decay: " << learning_rate_decay << endl;
+  cout << "num_train: " << num_train << endl;
+  cout << "num_test: " << num_test << endl;
 
+  /*************************** Train & Test ***************************/
   Solver solver(&net, (void *)f_train_images, f_train_labels,
                 (void *)f_train_images, f_train_labels, num_epoch, SGD,
                 learning_rate, learning_rate_decay, num_train, num_train);
