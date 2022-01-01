@@ -29,19 +29,19 @@ void save_metrics(vector<float> &loss, vector<int> &val_acc,
                   unordered_map<string, double> &configs) {
   fstream f;
 
-  f.open("../../batch_times.txt", ios::out);
+  f.open("../batch_times.txt", ios::out);
   for (auto &i : batch_times) f << i << endl;
   f.close();
 
-  f.open("../../loss.txt", ios::out);
+  f.open("../loss.txt", ios::out);
   for (auto &i : loss) f << i << endl;
   f.close();
 
-  f.open("../../val_acc.txt", ios::out);
+  f.open("../val_acc.txt", ios::out);
   for (auto &i : val_acc) f << i << endl;
   f.close();
 
-  f.open("../../configs.txt", ios::out);
+  f.open("../configs.txt", ios::out);
   for (auto &i : configs) f << i.first << " " << i.second << endl;
   f.close();
 }
