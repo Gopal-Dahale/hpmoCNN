@@ -8,8 +8,7 @@
 
 #include "neural_net.cuh"
 
-NeuralNet::NeuralNet()
-{
+NeuralNet::NeuralNet() {
   this->num_layers = 0;
   this->batch_size = 0;
 }
@@ -17,8 +16,7 @@ NeuralNet::NeuralNet()
 NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
                      int batch_size, TensorFormat tensor_format,
                      float softmax_eps, float init_std_dev,
-                     UpdateRule update_rule)
-{
+                     UpdateRule update_rule) {
   cudaStreamCreate(&stream_compute);
   cudaStreamCreate(&stream_memory);
 
@@ -37,14 +35,12 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   std::cout << "Free gigabytes at start: "
             << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
 
-  if (data_type == DATA_FLOAT)
-  {
+  if (data_type == DATA_FLOAT) {
     this->data_type = CUDNN_DATA_FLOAT;
     data_type_size = sizeof(float);
   }
 
-  else if (data_type == DATA_DOUBLE)
-  {
+  else if (data_type == DATA_DOUBLE) {
     this->data_type = CUDNN_DATA_DOUBLE;
     data_type_size = sizeof(double);
   }
@@ -67,36 +63,28 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   params = (void **)malloc(num_layers * sizeof(void *));
 
   LayerDimension current_output_size;
-  for (int i = 0; i < num_layers; i++)
-  {
+  for (int i = 0; i < num_layers; i++) {
     layer_type.push_back(layers[i].type);
-    if (layers[i].type == CONV)
-    {
+    if (layers[i].type == CONV) {
       ConvDescriptor *user_params = (ConvDescriptor *)layers[i].params;
       params[i] = malloc(sizeof(ConvLayerParams));
       ((ConvLayerParams *)params[i])
           ->initializeValues(cudnn_handle, user_params, this->data_type,
                              batch_size, this->tensor_format, data_type_size,
                              current_output_size, update_rule);
-    }
-    else if (layers[i].type == FULLY_CONNECTED)
-    {
+    } else if (layers[i].type == FULLY_CONNECTED) {
       FCDescriptor *user_params = (FCDescriptor *)layers[i].params;
       params[i] = malloc(sizeof(FCLayerParams));
       ((FCLayerParams *)params[i])
           ->initializeValues(user_params, batch_size, this->tensor_format,
                              this->data_type, current_output_size, update_rule);
-    }
-    else if (layers[i].type == POOLING)
-    {
+    } else if (layers[i].type == POOLING) {
       PoolingDescriptor *user_params = (PoolingDescriptor *)layers[i].params;
       params[i] = malloc(sizeof(PoolingLayerParams));
       ((PoolingLayerParams *)params[i])
           ->initializeValues(user_params, this->data_type, this->tensor_format,
                              batch_size, current_output_size);
-    }
-    else if (layers[i].type == ACTV)
-    {
+    } else if (layers[i].type == ACTV) {
       ActivationDescriptor *user_params =
           (ActivationDescriptor *)layers[i].params;
       params[i] = malloc(sizeof(ActivationLayerParams));
@@ -105,8 +93,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
                              batch_size, current_output_size);
     }
 
-    else if (layers[i].type == SOFTMAX)
-    {
+    else if (layers[i].type == SOFTMAX) {
       SoftmaxDescriptor *user_params = (SoftmaxDescriptor *)layers[i].params;
       params[i] = malloc(sizeof(SoftmaxLayerParams));
       ((SoftmaxLayerParams *)params[i])
@@ -115,20 +102,18 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
     }
   }
 
-  h_layer_input = (void **)malloc((num_layers + 1) * sizeof(void *)); // host
+  h_layer_input = (void **)malloc((num_layers + 1) * sizeof(void *));  // host
   offloaded =
-      (bool *)calloc((num_layers + 1), sizeof(bool)); // Offloaded layers index
+      (bool *)calloc((num_layers + 1), sizeof(bool));  // Offloaded layers index
 
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "Free gigabytes just before allocate space: "
             << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
 
   // Allocate space for parameters
-  for (int i = 0; i < num_layers; i++)
-  {
+  for (int i = 0; i < num_layers; i++) {
     size_t input_size;
-    if (layers[i].type == CONV)
-    {
+    if (layers[i].type == CONV) {
       ConvDescriptor *user_params = (ConvDescriptor *)layers[i].params;
       ((ConvLayerParams *)params[i])
           ->allocateSpace(curand_gen, this->data_type, data_type_size,
@@ -136,56 +121,44 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
 
       input_size = batch_size * user_params->input_channels *
                    user_params->input_h * user_params->input_w;
-      if (i == 0)
-      {
+      if (i == 0) {
         input_channels = user_params->input_channels;
         input_h = user_params->input_h;
         input_w = user_params->input_w;
       }
-    }
-    else if (layers[i].type == FULLY_CONNECTED)
-    {
+    } else if (layers[i].type == FULLY_CONNECTED) {
       FCDescriptor *user_params = (FCDescriptor *)layers[i].params;
       ((FCLayerParams *)params[i])
           ->allocateSpace(curand_gen, this->data_type, data_type_size,
                           init_std_dev, free_bytes);
       input_size = batch_size * user_params->input_channels;
-      if (i == 0)
-      {
+      if (i == 0) {
         input_channels = user_params->input_channels;
         input_h = 1;
         input_w = 1;
       }
-    }
-    else if (layers[i].type == POOLING)
-    {
+    } else if (layers[i].type == POOLING) {
       PoolingDescriptor *user_params = (PoolingDescriptor *)layers[i].params;
       ((PoolingLayerParams *)params[i])->allocateSpace(free_bytes);
       input_size = batch_size * user_params->input_channels *
                    user_params->input_h * user_params->input_w;
-      if (i == 0)
-      {
+      if (i == 0) {
         input_channels = user_params->input_channels;
         input_h = user_params->input_h;
         input_w = user_params->input_w;
       }
-    }
-    else if (layers[i].type == ACTV)
-    {
+    } else if (layers[i].type == ACTV) {
       ActivationDescriptor *user_params =
           (ActivationDescriptor *)layers[i].params;
       ((ActivationLayerParams *)params[i])->allocateSpace(free_bytes);
       input_size =
           batch_size * user_params->channels * user_params->h * user_params->w;
-      if (i == 0)
-      {
+      if (i == 0) {
         input_channels = user_params->channels;
         input_h = user_params->h;
         input_w = user_params->w;
       }
-    }
-    else if (layers[i].type == SOFTMAX)
-    {
+    } else if (layers[i].type == SOFTMAX) {
       SoftmaxDescriptor *user_params = (SoftmaxDescriptor *)layers[i].params;
       ((SoftmaxLayerParams *)params[i])->allocateSpace(free_bytes);
       input_size =
@@ -196,14 +169,12 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
       //       data_type_size); cudaMallocManaged(&dlayer_input[i + 1],
       //       input_size * data_type_size);
       layer_input_size[i + 1] = input_size;
-      if (i == 0)
-      {
+      if (i == 0) {
         input_channels = user_params->channels;
         input_h = user_params->h;
         input_w = user_params->w;
       }
-      if (i == num_layers - 1)
-        num_classes = user_params->channels;
+      if (i == num_layers - 1) num_classes = user_params->channels;
     }
 
     //     cudaMallocManaged(&layer_input[i], input_size * data_type_size);
@@ -232,10 +203,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   size_t cur_workspace_size_1, cur_workspace_size_2, cur_workspace_size_3,
       cur_workspace_size;
   this->workspace_size = 0;
-  for (int i = 0; i < num_layers; i++)
-  {
-    if (layers[i].type == CONV)
-    {
+  for (int i = 0; i < num_layers; i++) {
+    if (layers[i].type == CONV) {
       cur_workspace_size_1 =
           ((ConvLayerParams *)params[i])
               ->getWorkspaceSize(free_bytes, ConvLayerParams::FWD);
@@ -247,7 +216,10 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
               ->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_FILTER);
       cur_workspace_size = max(cur_workspace_size_1,
                                max(cur_workspace_size_2, cur_workspace_size_3));
-      std::cout << "Workspace for " << i << ": " << cur_workspace_size_1 / (1024.0 * 1024.0 * 1024.0) << " " << cur_workspace_size_2 / (1024.0 * 1024.0 * 1024.0) << " " << cur_workspace_size_3 / (1024.0 * 1024.0 * 1024.0) << "\n";
+      std::cout << "Workspace for " << i << ": "
+                << cur_workspace_size_1 / (1024.0 * 1024.0 * 1024.0) << " "
+                << cur_workspace_size_2 / (1024.0 * 1024.0 * 1024.0) << " "
+                << cur_workspace_size_3 / (1024.0 * 1024.0 * 1024.0) << "\n";
       if (cur_workspace_size > workspace_size)
         this->workspace_size = cur_workspace_size;
     }
@@ -259,8 +231,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   cudaMemGetInfo(&free_bytes, &total_bytes);
 
   // Leave 600 MB and use the rest
-  std::cout << "Free gigabytes after workspace: " << free_bytes / (1024.0 * 1024.0 * 1024.0)
-            << std::endl;
+  std::cout << "Free gigabytes after workspace: "
+            << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
   free_bytes -= 1024 * 1024 * 600;
 
   cudaDeviceSynchronize();
@@ -269,11 +241,4 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   cudaMemGetInfo(&temp_free_bytes, &total_bytes);
   std::cout << "Free gigabytes just before end of NeuralNet: "
             << temp_free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
-
-  // Data of time
-  cudaEventCreate(&start_compute);
-  cudaEventCreate(&stop_compute);
-
-  cudaEventCreate(&start_transfer);
-  cudaEventCreate(&stop_transfer);
 }

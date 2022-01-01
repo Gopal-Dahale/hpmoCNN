@@ -24,6 +24,28 @@ typedef unsigned char uchar;
 
 int num_train = 1000, num_test = 500;
 
+void save_metrics(vector<float> &loss, vector<int> &val_acc,
+                  vector<float> &batch_times,
+                  unordered_map<string, double> &configs) {
+  fstream f;
+
+  f.open("../../batch_times.txt", ios::out);
+  for (auto &i : batch_times) f << i << endl;
+  f.close();
+
+  f.open("../../loss.txt", ios::out);
+  for (auto &i : loss) f << i << endl;
+  f.close();
+
+  f.open("../../val_acc.txt", ios::out);
+  for (auto &i : val_acc) f << i << endl;
+  f.close();
+
+  f.open("../../configs.txt", ios::out);
+  for (auto &i : configs) f << i.first << " " << i.second << endl;
+  f.close();
+}
+
 int reverseInt(int n) {
   const int bytes = 4;
   unsigned char ch[bytes];
@@ -43,12 +65,10 @@ void readMNIST224(vector<vector<uchar>> &train_images,
                   int num_train, int num_test) {
   string filename_train_images =
       "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
-  // string filename_train_images = "data/train-images";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
   string filename_test_images =
       "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
-  // string filename_test_images = "data/t10k-images";
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
@@ -138,10 +158,6 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   assert(train_images.size() == train_labels.size());
   assert(test_images.size() == test_labels.size());
 }
-
-void printTimes(vector<float> &time, string filename);
-void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
-                  vector<vector<float>> &bwd_vdnn_lag, string filename);
 
 int main(int argc, char *argv[]) {
   /******************* Parse command line arguments ********************/
@@ -446,14 +462,19 @@ int main(int argc, char *argv[]) {
   double learning_rate_decay = result["learning-rate-decay"].as<double>();
 
   /************************ Display configuration *************************/
-  cout << "batch_size: " << batch_size << endl;
-  cout << "softmax_eps: " << softmax_eps << endl;
-  cout << "init_std_dev: " << init_std_dev << endl;
-  cout << "num_epoch: " << num_epoch << endl;
-  cout << "learning_rate: " << learning_rate << endl;
-  cout << "learning_rate_decay: " << learning_rate_decay << endl;
-  cout << "num_train: " << num_train << endl;
-  cout << "num_test: " << num_test << endl;
+  unordered_map<string, double> configs = {
+      {"batch_size", batch_size},
+      {"softmax_eps", softmax_eps},
+      {"init_std_dev", init_std_dev},
+      {"num_epoch", num_epoch},
+      {"learning_rate", learning_rate},
+      {"learning_rate_decay", learning_rate_decay},
+      {"num_train", num_train},
+      {"num_test", num_test}};
+
+  for (auto &config : configs) {
+    cout << config.first << ": " << config.second << endl;
+  }
 
   /*************************** Train & Test ***************************/
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
@@ -463,10 +484,14 @@ int main(int argc, char *argv[]) {
                 learning_rate, learning_rate_decay, num_train, num_train);
   vector<float> loss;
   vector<int> val_acc;
-  solver.train(loss, val_acc, doo);
+  vector<float> batch_times;
+  solver.train(loss, val_acc, batch_times, doo);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
   std::cout << "TEST NUM CORRECT:" << num_correct << endl;
+
+  /*************************** Save metrics ***************************/
+  save_metrics(loss, val_acc, batch_times, configs);
 }

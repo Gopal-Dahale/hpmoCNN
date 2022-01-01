@@ -19,18 +19,14 @@ class Solver {
   Solver(NeuralNet *model, void *X_train, int *y_train, void *X_val, int *y_val,
          int num_epoch, UpdateRule update_rule, double learning_rate,
          double learning_rate_decay, int num_train, int num_val);
-  void train(std::vector<float> &loss, std::vector<int> &val_acc, bool doo);
+  void train(std::vector<float> &loss, std::vector<int> &val_acc,
+             std::vector<float> &batch_times, bool doo);
   float step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
              std::vector<float> &bwd_vdnn_lag, int *correct_count, bool train,
              bool doo);
   float step(int start_X, int start_y, int *correct_count, bool train,
              bool doo);
   void checkAccuracy(void *X, int *y, int num_samples, int *num_correct);
-
-  void getTrainTime(std::vector<float> &loss, std::vector<float> &time,
-                    int num_epoch,
-                    std::vector<std::vector<float>> &fwd_vdnn_lag,
-                    std::vector<std::vector<float>> &bwd_vdnn_lag);
 };
 
 #endif
