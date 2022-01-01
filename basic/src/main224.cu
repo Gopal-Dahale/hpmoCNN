@@ -52,47 +52,53 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
+  int images_per_file = 2000;
+  int num_train_files =
+      min((int)(ceil(num_train / float(images_per_file))), 30);
+  int num_test_files = min((int)(ceil(num_test / float(images_per_file))), 5);
+
   for (int i = 0; i < 2; i++) {
-    string filename;
-    if (i == 0)
-      filename = filename_train_images;
-    else
-      filename = filename_test_images;
-    filename = filename + ".idx3-ubyte";
-
-    ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
-
-    // read metadata
-    int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
-    f.read((char *)&magic_number, sizeof(magic_number));
-    magic_number = reverseInt(magic_number);
-    f.read((char *)&n_images, sizeof(n_images));
-    n_images = reverseInt(n_images);
-    f.read((char *)&n_rows, sizeof(n_rows));
-    n_rows = reverseInt(n_rows);
-    f.read((char *)&n_cols, sizeof(n_cols));
-    n_cols = reverseInt(n_cols);
-
-    if (i == 0)
-      n_images = min(n_images, num_train);
-    else
-      n_images = min(n_images, num_test);
-
-    for (int k = 0; k < n_images; k++) {
-      vector<uchar> temp;
-      temp.reserve(n_rows * n_cols);
-      for (int j = 0; j < n_rows * n_cols; j++) {
-        uchar t = 0;
-        f.read((char *)&t, sizeof(t));
-        temp.push_back(t);
-      }
+    int k = (i == 0 ? num_train_files : num_test_files);
+    for (int j = 0; j < k; j++) {
+      string filename;
       if (i == 0)
-        train_images.push_back(temp);
+        filename = filename_train_images;
       else
-        test_images.push_back(temp);
+        filename = filename_test_images;
+      filename = filename + to_string(j) + ".idx3-ubyte";
+
+      ifstream f(filename.c_str(), ios::binary);
+      if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+
+      // read metadata
+      int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
+      f.read((char *)&magic_number, sizeof(magic_number));
+      magic_number = reverseInt(magic_number);
+      f.read((char *)&n_images, sizeof(n_images));
+      n_images = reverseInt(n_images);
+      f.read((char *)&n_rows, sizeof(n_rows));
+      n_rows = reverseInt(n_rows);
+      f.read((char *)&n_cols, sizeof(n_cols));
+      n_cols = reverseInt(n_cols);
+
+      for (int k = 0; k < n_images; k++) {
+        vector<uchar> temp;
+        temp.reserve(n_rows * n_cols);
+        for (int j = 0; j < n_rows * n_cols; j++) {
+          uchar t = 0;
+          f.read((char *)&t, sizeof(t));
+          temp.push_back(t);
+        }
+        if (i == 0) {
+          train_images.push_back(temp);
+          if ((j * n_images + k + 1) >= num_train) break;
+        } else {
+          test_images.push_back(temp);
+          if ((j * n_images + k + 1) >= num_test) break;
+        }
+      }
+      f.close();
     }
-    f.close();
   }
 
   // read train/test labels
