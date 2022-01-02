@@ -53,7 +53,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
   /************************ Forward Propagation starts ***********************/
   std::cout << "Forward Propagation starts: " << '\n';
-  size_t buffer_bytes = 2*1024 * 1024 * 1024;  // 2GB
+  size_t buffer_bytes = 1024 * 1024 * 1024;  // 2GB
   int ttl_allocated = 0;
   std::vector<int> free_layer;  // Which layers to free
   for (int i = 0; i < num_layers; i++) {
@@ -78,7 +78,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 
     size_t temp_free_bytes = free_bytes;                  // Current free bytes
-    size_t free_memory = temp_free_bytes - buffer_bytes;  // Free memory
+    size_t free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;  // Free memory made 2 GB reserved
     size_t layer_size =
         layer_input_size[i + 2] * data_type_size;  // Size of the layer
 
@@ -92,7 +92,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
       std::cout << "GPU memory is low, offloading to CPU" << std::endl;
-      std::cout << (free_bytes - buffer_bytes) / float(buffer_bytes) << " <= "
+      std::cout << (free_bytes - buffer_bytes - buffer_bytes) / float(buffer_bytes) << " <= "
                 << layer_input_size[i + 2] * data_type_size /
                        float(buffer_bytes)
                 << '\n';
@@ -133,7 +133,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         layer_input_size[temp] * data_type_size,
                         cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();  // Remove the layer from the heap
-        free_memory = temp_free_bytes - buffer_bytes;
+        free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;
       }
       /*************************************************************/
     }
