@@ -108,6 +108,9 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       // Display cond1 && cond2
       std::cout << "Condition: " << (cond1 && cond2) << std::endl;
 
+
+
+
       // While the free memory is less than or equal to the (i+2)th layer
       // input size or the heap is not empty
       while ((free_memory <= layer_size) && (!layer_input_pq.empty())) {
@@ -133,6 +136,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         layer_input_size[temp] * data_type_size,
                         cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();  // Remove the layer from the heap
+        std::cout << "New Top: " << layer_input_pq.top().second << "\n";
         free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;
       }
       /*************************************************************/
