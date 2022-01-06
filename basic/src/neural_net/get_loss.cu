@@ -71,6 +71,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     // Push the layer_input_size + weights_size to the heap of ith layer
     if (i > 0) {
       layer_input_pq.push({layer_input_size[i], i});
+      std::cout << "Layer inserted: " << i << "\n";
     }
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
