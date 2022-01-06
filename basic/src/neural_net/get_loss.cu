@@ -311,6 +311,10 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   } else
     std::cout << "\nNo Offloaded Layers: ";
   std::cout << '\n';
+
+  // Empty the priority queue
+  while (!layer_input_pq.empty())
+    layer_input_pq.pop();
   /***************************************************************************/
 
   /************************** Accuracy Computation **************************/
@@ -599,9 +603,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "free mem after 1FP1BP: "
             << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
-
-  // Empty the priority queue
-  while (!layer_input_pq.empty()) layer_input_pq.pop();
 
   // Make offloaded array to all false
   for (int c = 0; c < num_layers; c++) offloaded[c] = false;
