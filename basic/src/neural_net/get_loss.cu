@@ -49,14 +49,23 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   float Salpha = 1.0, Sbeta = 0.0;
   double Dalpha = 1.0, Dbeta = 0.0;
 
+  size_t avg_layer_size = 0;
+
   // Display layer_input_size in bytes
   for (int c = 0; c < num_layers; c++)
+  {
     logfile << "layer_input_size[" << c
               << "] = " << layer_input_size[c] * data_type_size << std::endl;
+    avg_layer_size += layer_input_size[c];
+  }
+
+  avg_layer_size /= num_layers;
+  avg_layer_size *= data_type_size;
+  std::cout << "Average Layer Size: " << avg_layer_size << "\n";
 
   /************************ Forward Propagation starts ***********************/
   logfile << "Forward Propagation starts: " << '\n';
-  size_t buffer_bytes = 1024 * 1024 * 1024;  // 2GB
+  size_t buffer_bytes = 1024 * 1024 * 1024;  // 1GB
   int ttl_allocated = 0;
   std::vector<int> free_layer;  // Which layers to free
   for (int i = 0; i < num_layers; i++) {
@@ -82,7 +91,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 
     size_t temp_free_bytes = free_bytes;                  // Current free bytes
-    size_t free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;  // Free memory made 2 GB reserved
+    size_t free_memory = temp_free_bytes - avg_layer_size; // Use average layer size as reserve memory
+    // buffer_bytes - buffer_bytes;  // Free memory made 2 GB reserved
     size_t layer_size =
         layer_input_size[i + 2] * data_type_size;  // Size of the layer
 
@@ -96,7 +106,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
       logfile << "GPU memory is low, offloading to CPU" << std::endl;
-      logfile << (free_bytes - buffer_bytes - buffer_bytes) / float(buffer_bytes) << " <= "
+      logfile << (free_bytes - avg_layer_size) / float(buffer_bytes) << " <= "
                 << layer_input_size[i + 2] * data_type_size /
                        float(buffer_bytes)
                 << '\n';
@@ -141,7 +151,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();  // Remove the layer from the heap
         logfile << "New Top: " << layer_input_pq.top().second << "\n";
-        free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;
+        free_memory = temp_free_bytes - avg_layer_size; // buffer_bytes - buffer_bytes;
       }
       /*************************************************************/
     }
@@ -163,7 +173,12 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       this->workspace_size = cur_params->fwd_workspace_size;
 
-      cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size);
+      if(!cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size))
+      {
+        cudaMemGetInfo(&free_bytes, &total_bytes);
+        this->workspace_size = cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::FWD);
+        cudaMalloc(&(this->workspace), this->workspace_size);
+      }
 
       // Computation
       checkCUDNN(cudnnConvolutionForward(
@@ -419,7 +434,12 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       if (i == 1) logfile << this->workspace_size << "\n";
 
-      logfile << cudaMalloc(&(this->workspace), this->workspace_size) << "\n";
+      if (!cudaMalloc(&(this->workspace), this->workspace_size))
+      {
+        cudaMemGetInfo(&free_bytes, &total_bytes);
+        this->workspace_size = max(cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_FILTER),cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_DATA));
+        cudaMalloc(&(this->workspace), this->workspace_size);
+      }
 
       checkCUDNN(cudnnConvolutionBackwardBias(
           cudnn_handle, &alpha, cur_params->output_tensor, dlayer_input[i + 1],
