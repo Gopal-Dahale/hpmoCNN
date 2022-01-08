@@ -11,6 +11,11 @@
 #include <utility>
 #include <vector>
 
+#include <thrust/device_ptr.h>
+#include <thrust/functional.h>
+#include <thrust/reduce.h>
+#include <thrust/sort.h>
+
 #include "layer_params.cuh"
 #include "user_iface.cuh"
 #include "utils.cuh"

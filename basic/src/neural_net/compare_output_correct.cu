@@ -42,6 +42,7 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y)
 //     cudaDeviceSynchronize();
     cudaMemPrefetchAsync((int *)pred_y, batch_size, cudaCpuDeviceId);
     cudaMemPrefetchAsync((int *)y, batch_size, cudaCpuDeviceId);
+    cudaDeviceSynchronize();
     for (int i = 0; i < batch_size; i++)
     {
 //       std::cout << "Pred = " << pred_y[i] << " Actual = " << y[i] << " ";

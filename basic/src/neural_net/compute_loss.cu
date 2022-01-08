@@ -33,10 +33,18 @@ float NeuralNet::computeLoss()
           (double *)layer_input[num_layers], this->y, loss, batch_size,
           num_classes, softmax_eps);
   }
- 
+
+  thrust::device_ptr<float> ptrc(loss);
+  float ttl_loss = thrust::reduce(ptrc, ptrc + blocks * threads);
+
+  std::cout << ttl_loss << "\n";
+
   cudaMemPrefetchAsync((float *)loss, batch_size, cudaCpuDeviceId);
+  cudaDeviceSynchronize();
   float total_loss = 0.0;
   for (int i = 0; i < batch_size; i++)
     total_loss += loss[i];
+
+  std::cout << total_loss << "\n";
   return total_loss / batch_size;
 }
