@@ -58,6 +58,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   logfile << "Forward Propagation starts: " << '\n';
   size_t buffer_bytes = 1024 * 1024 * 1024;  // 2GB
   int ttl_allocated = 0;
+  size_t reserved_memory = layer_input_size[0]*data_type_size;
   std::vector<int> free_layer;  // Which layers to free
   for (int i = 0; i < num_layers; i++) {
     if (train == false && i == num_layers - 1) break;
@@ -82,7 +83,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 
     size_t temp_free_bytes = free_bytes;                  // Current free bytes
-    size_t free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;  // Free memory made 2 GB reserved
+    size_t free_memory = temp_free_bytes - (reserved_memory/(i+1)); //reserved memory is dynamic
+    // buffer_bytes - buffer_bytes;  // Free memory made 2 GB reserved
     size_t layer_size =
         layer_input_size[i + 2] * data_type_size;  // Size of the layer
 
@@ -96,7 +98,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
       logfile << "GPU memory is low, offloading to CPU" << std::endl;
-      logfile << (free_bytes - buffer_bytes - buffer_bytes) / float(buffer_bytes) << " <= "
+      logfile << (free_bytes - (reserved_memory/(i+1)) /*buffer_bytes - buffer_bytes*/) / float(buffer_bytes) << " <= "
                 << layer_input_size[i + 2] * data_type_size /
                        float(buffer_bytes)
                 << '\n';
@@ -141,7 +143,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();  // Remove the layer from the heap
         logfile << "New Top: " << layer_input_pq.top().second << "\n";
-        free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;
+        free_memory = temp_free_bytes - (reserved_memory/(i+1));// buffer_bytes - buffer_bytes;
       }
       /*************************************************************/
     }
@@ -155,6 +157,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     //     layer_input_size[i-1]*data_type_size, cudaCpuDeviceId,
     //     stream_memory); //<< '\n';
     // //     }
+    reserved_memory += layer_input_size[i+1]*data_type_size;
     cudaMemGetInfo(&free_bytes, &total_bytes);
     logfile << "Before Computation of Layer " << i << ": "
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
