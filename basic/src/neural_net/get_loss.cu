@@ -65,7 +65,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   }
 
   avg_layer_size /= num_conv_layers;
-  avg_layer_size *= data_type_size;
+  avg_layer_size *= data_type_size*2;
   std::cout << "Average Layer Size: " << avg_layer_size << "\n";
 
   /************************ Forward Propagation starts ***********************/
@@ -96,7 +96,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 
     size_t temp_free_bytes = free_bytes;                  // Current free bytes
-    size_t free_memory = temp_free_bytes - avg_layer_size; // Use average layer size as reserve memory
+    size_t free_memory = temp_free_bytes - avg_layer_size; // Use average conv layer size as reserve memory
     // buffer_bytes - buffer_bytes;  // Free memory made 2 GB reserved
     size_t layer_size =
         layer_input_size[i + 2] * data_type_size;  // Size of the layer
@@ -178,13 +178,14 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       this->workspace_size = cur_params->fwd_workspace_size;
 
-      if (cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size)) // If cudaMalloc fails then get workspace size according to the current free bytes available
-      {
-        std::cout << "in\n";
-        cudaMemGetInfo(&free_bytes, &total_bytes);
-        this->workspace_size = cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::FWD);
-        cudaMalloc(&(this->workspace), this->workspace_size);
-      }
+      cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size);
+      // if (cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size)) // If cudaMalloc fails then get workspace size according to the current free bytes available
+      // {
+      //   std::cout << "in\n";
+      //   cudaMemGetInfo(&free_bytes, &total_bytes);
+      //   this->workspace_size = cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::FWD);
+      //   cudaMalloc(&(this->workspace), this->workspace_size);
+      // }
 
       // Computation
       checkCUDNN(cudnnConvolutionForward(
@@ -440,12 +441,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       if (i == 1) logfile << this->workspace_size << "\n";
 
-      if (cudaMalloc(&(this->workspace), this->workspace_size)) //If cudaMalloc fails then get workspace size according to the current free bytes available
-      {
-        cudaMemGetInfo(&free_bytes, &total_bytes);
-        this->workspace_size = max(cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_FILTER),cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_DATA));
-        cudaMalloc(&(this->workspace), this->workspace_size);
-      }
+      cudaMalloc(&(this->workspace), this->workspace_size);
+      // if (cudaMalloc(&(this->workspace), this->workspace_size)) // If cudaMalloc fails then get workspace size according to the current free bytes available
+      // {
+      //   cudaMemGetInfo(&free_bytes, &total_bytes);
+      //   this->workspace_size = max(cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_FILTER),cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::BWD_DATA));
+      //   cudaMalloc(&(this->workspace), this->workspace_size);
+      // }
 
       checkCUDNN(cudnnConvolutionBackwardBias(
           cudnn_handle, &alpha, cur_params->output_tensor, dlayer_input[i + 1],
