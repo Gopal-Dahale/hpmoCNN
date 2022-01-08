@@ -50,16 +50,21 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   double Dalpha = 1.0, Dbeta = 0.0;
 
   size_t avg_layer_size = 0;
+  int num_conv_layers = 0;
 
   // Display layer_input_size in bytes
   for (int c = 0; c < num_layers; c++)
   {
     std::cout << "layer_input_size[" << c
               << "] = " << layer_input_size[c] * data_type_size << std::endl;
-    avg_layer_size += layer_input_size[c];
+    if(layer_type[c] == CONV)
+    {
+      avg_layer_size += layer_input_size[c];
+      num_conv_layers++;
+    }
   }
 
-  avg_layer_size /= num_layers;
+  avg_layer_size /= num_conv_layers;
   avg_layer_size *= data_type_size;
   std::cout << "Average Layer Size: " << avg_layer_size << "\n";
 
