@@ -83,8 +83,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
               << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 
     size_t temp_free_bytes = free_bytes;                  // Current free bytes
-    size_t free_memory = temp_free_bytes - (reserved_memory/(i+1)); //reserved memory is dynamic
-    // buffer_bytes - buffer_bytes;  // Free memory made 2 GB reserved
+    size_t free_memory = temp_free_bytes - buffer_bytes - buffer_bytes; // reserved memory is dynamic
+    // (reserved_memory / (i + 1));  // Free memory made 2 GB reserved
     size_t layer_size =
         layer_input_size[i + 2] * data_type_size;  // Size of the layer
 
@@ -98,10 +98,10 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
       logfile << "GPU memory is low, offloading to CPU" << std::endl;
-      logfile << (free_bytes - (reserved_memory/(i+1)) /*buffer_bytes - buffer_bytes*/) / float(buffer_bytes) << " <= "
-                << layer_input_size[i + 2] * data_type_size /
-                       float(buffer_bytes)
-                << '\n';
+      logfile << (free_bytes - buffer_bytes - buffer_bytes /*(reserved_memory/(i+1))*/) / float(buffer_bytes) << " <= "
+              << layer_input_size[i + 2] * data_type_size /
+                     float(buffer_bytes)
+              << '\n';
 
       /************* Heap logic with workspace fix ********************/
 
@@ -143,7 +143,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         cudaMemcpyDeviceToHost, stream_memory);
         layer_input_pq.pop();  // Remove the layer from the heap
         logfile << "New Top: " << layer_input_pq.top().second << "\n";
-        free_memory = temp_free_bytes - (reserved_memory/(i+1));// buffer_bytes - buffer_bytes;
+        free_memory = temp_free_bytes - buffer_bytes - buffer_bytes; // (reserved_memory/(i+1));
       }
       /*************************************************************/
     }
