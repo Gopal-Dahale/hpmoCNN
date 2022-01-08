@@ -54,7 +54,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   // Display layer_input_size in bytes
   for (int c = 0; c < num_layers; c++)
   {
-    logfile << "layer_input_size[" << c
+    std::cout << "layer_input_size[" << c
               << "] = " << layer_input_size[c] * data_type_size << std::endl;
     avg_layer_size += layer_input_size[c];
   }
@@ -175,6 +175,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       if (cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size)) // If cudaMalloc fails then get workspace size according to the current free bytes available
       {
+        std::cout << "in\n";
         cudaMemGetInfo(&free_bytes, &total_bytes);
         this->workspace_size = cur_params->getWorkspaceSize(free_bytes, ConvLayerParams::FWD);
         cudaMalloc(&(this->workspace), this->workspace_size);

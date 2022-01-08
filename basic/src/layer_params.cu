@@ -144,7 +144,8 @@ size_t ConvLayerParams::getWorkspaceSize(
   size_t gb = 1024 * 1024 * 1024;
   if (conv_direction == FWD) {
     // If fwd algo uses workspace more than 6 GB
-    if (fwd_perf[0].memory / float(gb) > WORKSPACE_SIZE_LIMIT) {
+    if (fwd_perf[0].memory / float(gb) > WORKSPACE_SIZE_LIMIT || fwd_perf[0].memory > free_bytes)
+    {
       // Iteratr over all fwd algo and find the one with less memory than 6 GB
       for (int i = 0; i < fwd_ret_count; i++) {
         // If fwd algo uses less memory than 6 GB
@@ -156,15 +157,17 @@ size_t ConvLayerParams::getWorkspaceSize(
           return fwd_perf[i].memory;  // Return the fwd workspace size
         }
       }
+
+      outOfMemory();
     }
 
-    if (fwd_perf[0].memory > free_bytes) outOfMemory();
     fwd_algo = fwd_perf[0].algo;
     fwd_workspace_size = fwd_perf[0].memory;
     return fwd_perf[0].memory;
 
   } else if (conv_direction == BWD_FILTER) {
-    if (bwd_filter_perf[0].memory / float(gb) > WORKSPACE_SIZE_LIMIT) {
+    if (bwd_filter_perf[0].memory / float(gb) > WORKSPACE_SIZE_LIMIT || bwd_filter_perf[0].memory > free_bytes)
+    {
       for (int i = 0; i < bwd_filter_ret_count; i++) {
         if (bwd_filter_perf[i].status == CUDNN_STATUS_SUCCESS &&
             bwd_filter_perf[i].memory / float(gb) < WORKSPACE_SIZE_LIMIT) {
@@ -173,13 +176,15 @@ size_t ConvLayerParams::getWorkspaceSize(
           return bwd_filter_perf[i].memory;
         }
       }
+
+      outOfMemory();
     }
-    if (bwd_filter_perf[0].memory > free_bytes) outOfMemory();
     bwd_filter_algo = bwd_filter_perf[0].algo;
     bwd_filter_workspace_size = bwd_filter_perf[0].memory;
     return bwd_filter_perf[0].memory;
   } else if (conv_direction == BWD_DATA) {
-    if (bwd_filter_perf[0].memory / float(gb) > WORKSPACE_SIZE_LIMIT) {
+    if (bwd_filter_perf[0].memory / float(gb) > WORKSPACE_SIZE_LIMIT || bwd_data_perf[0].memory > free_bytes)
+    {
       for (int i = 0; i < bwd_data_ret_count; i++) {
         if (bwd_data_perf[i].status == CUDNN_STATUS_SUCCESS &&
             bwd_data_perf[i].memory / float(gb) < WORKSPACE_SIZE_LIMIT) {
@@ -188,8 +193,9 @@ size_t ConvLayerParams::getWorkspaceSize(
           return bwd_data_perf[i].memory;
         }
       }
+
+      outOfMemory();
     }
-    if (bwd_data_perf[0].memory > free_bytes) outOfMemory();
     bwd_data_algo = bwd_data_perf[0].algo;
     bwd_data_workspace_size = bwd_data_perf[0].memory;
     return bwd_data_perf[0].memory;
