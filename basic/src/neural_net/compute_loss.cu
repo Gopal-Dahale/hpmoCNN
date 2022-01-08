@@ -35,7 +35,7 @@ float NeuralNet::computeLoss()
   }
 
   thrust::device_ptr<float> ptrc(loss);
-  float ttl_loss = thrust::reduce(ptrc, ptrc + blocks * threads);
+  float ttl_loss = thrust::reduce(ptrc, ptrc + batch_size);
 
   std::cout << ttl_loss << "\n";
 
