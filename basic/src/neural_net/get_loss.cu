@@ -63,7 +63,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     cudaMemGetInfo(&free_bytes, &total_bytes);
     int bef = free_bytes;
-    std::cout << i << " " << cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size); << " "
+    std::cout << i << " " << cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size) << " "
     cudaMemGetInfo(&free_bytes, &total_bytes);
     int aft = free_bytes;
     std::cout << bef << " " << aft << "\n";
