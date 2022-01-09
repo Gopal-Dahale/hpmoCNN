@@ -19,6 +19,7 @@
 #include "layer_params.cuh"
 #include "user_iface.cuh"
 #include "utils.cuh"
+#include <fstream>
 
 struct comp {
   constexpr bool operator()(std::pair<size_t, int> const &a,
@@ -26,6 +27,8 @@ struct comp {
     return (a.first < b.first || a.second > b.second);
   }
 };
+
+std::ofstream logfile;
 
 class NeuralNet {
  public:

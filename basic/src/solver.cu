@@ -53,6 +53,8 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
   int batch_size = model->batch_size;
   int num_train_batches = num_train / model->batch_size;
   int num_val_batches = num_val / model->batch_size;
+
+  logfile.open("/kaggle/working/hpmoCNN/log1.txt");
   for (int i = 0; i < num_epoch; i++) {
     std::cout << "Epoch " << i << std::endl;
     for (int j = 0; j < num_train_batches; j++) {
@@ -84,6 +86,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
 
       correct_count += temp_correct_count;
     }
+    logfile.close();
     val_acc.push_back(correct_count);
     std::cout << "VAL_ACC: " << val_acc[i] << std::endl;
     learning_rate *= learning_rate_decay;

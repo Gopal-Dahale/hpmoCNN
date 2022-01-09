@@ -612,6 +612,4 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
   // Make offloaded array to all false
   for (int c = 0; c < num_layers; c++) offloaded[c] = false;
-
-  logfile.close();
 }
