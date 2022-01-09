@@ -32,8 +32,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                         int *correct_count, float *scalar_loss, bool doo) {
   cudaMemGetInfo(&free_bytes, &total_bytes);
   int bef0 = free_bytes;
-  std::ofstream logfile;
-  logfile.open("/kaggle/working/hpmoCNN/log1.txt");
   cudaMalloc(&layer_input[0], layer_input_size[0] * data_type_size);
   cudaMemGetInfo(&free_bytes, &total_bytes);
   int aft0 = free_bytes;
