@@ -487,6 +487,8 @@ int main(int argc, char *argv[]) {
   vector<float> batch_times;
   float milli = 0;
   cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
   cudaEventRecord(start);
   solver.train(loss, val_acc, batch_times, doo);
   cudaEventRecord(stop);

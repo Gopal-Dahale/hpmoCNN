@@ -56,6 +56,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     if (train == false && i == num_layers - 1) break;
     float milli = 0;
     cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
     // cudaMemGetInfo(&free_bytes, &total_bytes);
     // int bef = free_bytes;
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
@@ -320,6 +322,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   // Empty the priority queue
   float temp_milli2 = 0;
   cudaEvent_t start1, stop1;
+  cudaEventCreate(&start1);
+  cudaEventCreate(&stop1);
 
   cudaEventRecord(start1);
 
@@ -558,6 +562,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     // logfile << "After Synchronization " << i << ": "<< free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
     float milli = 0;
     cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
     cudaEventRecord(start, stream_memory);
     cudaStreamSynchronize(stream_memory);
     cudaEventRecord(stop, stream_memory);
