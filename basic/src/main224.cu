@@ -485,7 +485,15 @@ int main(int argc, char *argv[]) {
   vector<float> loss;
   vector<int> val_acc;
   vector<float> batch_times;
+  float milli = 0;
+  cudaEvent_t start, stop;
+  cudaEventRecord(start);
   solver.train(loss, val_acc, batch_times, doo);
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+  cudaEventElapsedTime(&milli, start, stop);
+
+  std::cout << milli << "\n";
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
