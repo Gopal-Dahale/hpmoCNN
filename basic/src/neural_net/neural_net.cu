@@ -113,8 +113,8 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   // Allocate space for parameters
   for (int i = 0; i < num_layers; i++) {
     size_t input_size;
-    std::cout << i << " ";
     if (layers[i].type == CONV) {
+      std::cout << i << " ";
       ConvDescriptor *user_params = (ConvDescriptor *)layers[i].params;
       ((ConvLayerParams *)params[i])
           ->allocateSpace(curand_gen, this->data_type, data_type_size,
@@ -128,6 +128,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
         input_w = user_params->input_w;
       }
     } else if (layers[i].type == FULLY_CONNECTED) {
+      std::cout << i << " ";
       FCDescriptor *user_params = (FCDescriptor *)layers[i].params;
       ((FCLayerParams *)params[i])
           ->allocateSpace(curand_gen, this->data_type, data_type_size,
@@ -190,7 +191,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
 
   for(int c=0;c<num_layers+1;c++)
   {
-    std::cout << layer_input_size[c]*data_type_size << "\n";
+    std::cout << c << " " << layer_input_size[c]*data_type_size << "\n";
     // total_feature_map_size += layer_input_size[c] * data_type_size;
   }
   // total_feature_map_size *= data_type_size;
