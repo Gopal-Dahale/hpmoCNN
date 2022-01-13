@@ -110,7 +110,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
       // While the free memory is less than or equal to the (i+2)th layer
       // input size or the heap is not empty
-      while (mem_available && offload_available) {
+      while ((free_memory <= layer_size) && (!layer_input_pq.empty()))
+      {
         int temp = layer_input_pq.top().second;  // Get the layer index on top
                                                  // of the heap
         logfile << "Layer to offload: " << temp << std::endl;
