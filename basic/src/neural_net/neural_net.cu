@@ -113,7 +113,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   // Allocate space for parameters
   for (int i = 0; i < num_layers; i++) {
     size_t input_size;
-    cout << i << " ";
+    std::cout << i << " ";
     if (layers[i].type == CONV) {
       ConvDescriptor *user_params = (ConvDescriptor *)layers[i].params;
       ((ConvLayerParams *)params[i])
