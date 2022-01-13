@@ -113,6 +113,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   // Allocate space for parameters
   for (int i = 0; i < num_layers; i++) {
     size_t input_size;
+    cout << i << " ";
     if (layers[i].type == CONV) {
       ConvDescriptor *user_params = (ConvDescriptor *)layers[i].params;
       ((ConvLayerParams *)params[i])
@@ -230,9 +231,9 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
       cur_workspace_size = max(cur_workspace_size_1,
                                max(cur_workspace_size_2, cur_workspace_size_3));
       std::cout << i << " "
-                << cur_workspace_size_1 / (1024.0 * 1024.0 * 1024.0) << " "
-                << cur_workspace_size_2 / (1024.0 * 1024.0 * 1024.0) << " "
-                << cur_workspace_size_3 / (1024.0 * 1024.0 * 1024.0) << "\n";
+                << cur_workspace_size_1 << " "
+                << cur_workspace_size_2 << " "
+                << cur_workspace_size_3 << "\n";
       if (cur_workspace_size > workspace_size)
         this->workspace_size = cur_workspace_size;
     }

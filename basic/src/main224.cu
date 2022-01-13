@@ -22,7 +22,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
-int num_train = 1000, num_test = 500;
+int num_train = 1024, num_test = 512;
 
 void save_metrics(vector<float> &loss, vector<int> &val_acc,
                   vector<float> &batch_times,
