@@ -301,7 +301,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     // logfile << "After Offload and computation of layer " << i << " : "<< free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
-  // logfile << "Forward Propagation ends: " << '\n';
+  std::cout << "Forward Propagation ends: " << '\n';
   /************************ Forward Propagation ends ***********************/
 
   /************************ Offloaded layers Displayed ***********************/
@@ -373,7 +373,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   }
 
   /************************ Backward Propagation starts ***********************/
-  // logfile << "Backward Propagation starts: " << '\n';
+  std::cout << "Backward Propagation starts: " << '\n';
   for (int i = num_layers - 1; i >= 0; i--) {
     if (i > 0) {
       if (layer_type[i] == ACTV || layer_type[i] == SOFTMAX)
@@ -591,21 +591,21 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     // int aft4 = free_bytes;
     // logfile << "freed to dlayer " << i + 1 << ": " << (aft4 - bef4)<< " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
-    // if (i == 0) {
-      // cudaFree(layer_input[i]);
+    if (i == 0) {
+      cudaFree(layer_input[i]);
       // cudaMemGetInfo(&free_bytes, &total_bytes);
       // int aft5 = free_bytes;
       // logfile << "freed to layer " << i << ": " << (aft5 - aft4)<< " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
-      // cudaFree(dlayer_input[i]);
+      cudaFree(dlayer_input[i]);
       // cudaMemGetInfo(&free_bytes, &total_bytes);
       // int aft6 = free_bytes;
       // logfile << "freed to layer " << i << ": " << (aft6 - aft5)<< " free: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
-    // }
+    }
 
     // cudaMemGetInfo(&free_bytes, &total_bytes);
     // logfile << "freed up feature map and its derivative after layer " << i<< " of BP: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
   }
-  // logfile << "Backward Propagation ends: " << '\n';
+  std::cout << "Backward Propagation ends: " << '\n';
   /************************ Backward Propagation ends ***********************/
 
   // cudaMemGetInfo(&free_bytes, &total_bytes);
