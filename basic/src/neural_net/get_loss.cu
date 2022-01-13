@@ -92,7 +92,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
     if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
       // logfile << "GPU memory is low, offloading to CPU" << std::endl;
-      logfile << (free_bytes - buffer_bytes - buffer_bytes /*(reserved_memory/(i+1))*/) / float(buffer_bytes) << " <= "<< layer_input_size[i + 2] * data_type_size /float(buffer_bytes)<< '\n';
+      std::cout << (free_bytes - buffer_bytes - buffer_bytes /*(reserved_memory/(i+1))*/) / float(buffer_bytes) << " <= "<< layer_input_size[i + 2] * data_type_size /float(buffer_bytes)<< '\n';
 
       /************* Heap logic with workspace fix ********************/
 
@@ -120,7 +120,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
 
         // Update the free bytes
         temp_free_bytes += layer_input_pq.top().first * data_type_size;
-        // logfile << "Free gigabytes in GPU: "<< temp_free_bytes / float(buffer_bytes) << std::endl;
+        std::cout << "Free gigabytes in GPU: "<< temp_free_bytes / float(buffer_bytes) << std::endl;
         offloaded[temp] = true;  // Mark the layer as offloaded
 
         // Copy the layer to host
