@@ -68,7 +68,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
       cudaEventRecord(stop, model->stream_compute);
       cudaEventSynchronize(stop);
       cudaEventElapsedTime(&milli, start, stop);
-      if(j==0)
+      if(i==0)
       std::cout << j
                 << " " ;
       std::cout << milli
