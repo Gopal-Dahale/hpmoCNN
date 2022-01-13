@@ -179,9 +179,9 @@ int main(int argc, char *argv[]) {
           "learning-rate-decay", "Learning Rate Decay",
           cxxopts::value<double>()->default_value("1"))(
           "num-train", "Number of training examples to use",
-          cxxopts::value<int>()->default_value("1000"))(
+          cxxopts::value<int>()->default_value("1024"))(
           "num-test", "Number of testing examples to use",
-          cxxopts::value<int>()->default_value("500"))("help", "Print Usage");
+          cxxopts::value<int>()->default_value("512"))("help", "Print Usage");
 
   auto result = options.parse(argc, argv);
   if (result.count("help")) {
