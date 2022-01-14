@@ -297,7 +297,8 @@ int main(int argc, char *argv[]) {
   vector<float> loss;
   vector<int> val_acc;
   vector<float> batch_times;
-  solver.train(loss, val_acc, batch_times, doo);
+  float overhead=0;
+  solver.train(loss, val_acc, batch_times, &overhead);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;

@@ -524,12 +524,12 @@ int main(int argc, char *argv[])
     vector<float> loss;
     vector<int> val_acc;
     vector<float> batch_times;
-    float milli = 0;
+    float milli = 0, overhead = 0;
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start);
-    solver.train(loss, val_acc, batch_times, doo);
+    solver.train(loss, val_acc, batch_times, &overhead);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&milli, start, stop);

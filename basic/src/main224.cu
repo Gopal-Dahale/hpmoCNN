@@ -498,12 +498,13 @@ int main(int argc, char *argv[]) {
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
   cudaEventRecord(start);
-  solver.train(loss, val_acc, batch_times, overhead);
+  solver.train(loss, val_acc, batch_times, &overhead);
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&milli, start, stop);
 
   int num_correct;
+  
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);

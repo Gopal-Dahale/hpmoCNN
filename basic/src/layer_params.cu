@@ -103,7 +103,7 @@ void ConvLayerParams::allocateSpace(curandGenerator_t curand_gen,
   cudaMalloc(&W, kernel_size * data_type_size);
   cudaMalloc(&b, C_out * data_type_size);
 
-  std::cout << (kernel_size+C_out)*data_type_size << "\n";
+  // std::cout << (kernel_size+C_out)*data_type_size << "\n";
 
   cudaMalloc(&dW, kernel_size * data_type_size);
   cudaMalloc(&db, C_out * data_type_size);
@@ -254,7 +254,7 @@ void FCLayerParams::allocateSpace(curandGenerator_t curand_gen,
   if (wt_alloc_size % 2 != 0) wt_alloc_size += 1;
   cudaMalloc(&W, wt_alloc_size * data_type_size);
   cudaMalloc(&b, C_out * data_type_size);
-  std::cout << (wt_alloc_size+C_out)*data_type_size << "\n";
+  // std::cout << (wt_alloc_size+C_out)*data_type_size << "\n";
   cudaMalloc(&dW, wt_alloc_size * data_type_size);
   cudaMalloc(&db, C_out * data_type_size);
 

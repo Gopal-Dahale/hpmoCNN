@@ -55,7 +55,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
   int num_val_batches = num_val / model->batch_size;
 
   for (int i = 0; i < num_epoch; i++) {
-    std::cout << "Epoch " << i << std::endl;
+    // std::cout << "Epoch " << i << std::endl;
     for (int j = 0; j < num_train_batches; j++) {
       int start_sample = j * num_features * batch_size;
 
@@ -67,16 +67,16 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
       cudaEventRecord(stop, model->stream_compute);
       cudaEventSynchronize(stop);
       cudaEventElapsedTime(&milli, start, stop);
-      if(i==0)
-      std::cout << j
-                << " " ;
-      std::cout << milli
-                << std::endl;
+      // if(i==0)
+      // std::cout << j
+      //           << " " ;
+      // std::cout << milli
+      //           << std::endl;
 
       loss.push_back(temp_loss);
       batch_times.push_back(milli);
     }
-    std::cout << "LOSS: " << loss[loss.size() - 1] << std::endl;
+    // std::cout << "LOSS: " << loss[loss.size() - 1] << std::endl;
 
     int correct_count = 0;
     for (int j = 0; j < num_val_batches; j++) {
@@ -88,9 +88,9 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
       correct_count += temp_correct_count;
     }
     val_acc.push_back(correct_count);
-    std::cout << "VAL_ACC: " << val_acc[i] << std::endl;
+    // std::cout << "VAL_ACC: " << val_acc[i] << std::endl;
     learning_rate *= learning_rate_decay;
-    std::cout << "learning_rate: " << learning_rate << std::endl;
+    // std::cout << "learning_rate: " << learning_rate << std::endl;
   }
 }
 
