@@ -192,8 +192,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   // total_feature_map_size /= (1024.0 * 1024.0 * 1024.0);
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
-  // std::cout << "Free gigabytes just after allocate space: "
-            // << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+  std::cout << "Free gigabytes just after allocate space: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
 
   // Very small - could be allocated initially itself
   cudaMallocManaged((void **)&y, batch_size * sizeof(int));
@@ -274,6 +273,6 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
 
   size_t temp_free_bytes;
   cudaMemGetInfo(&temp_free_bytes, &total_bytes);
-  // std::cout << "Free gigabytes just before end of NeuralNet: "
-            // << temp_free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+  std::cout << "Free gigabytes just before end of NeuralNet: "
+            << temp_free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
 }
