@@ -244,7 +244,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   // free_bytes -= 1024 * 1024 * 600;
 
   cudaDeviceSynchronize();
-  mem_usage.open("../mem_usage.txt");
+  mem_usage.open("/kaggle/working/hpmoCNN/mem_usage.txt");
 
   for (int c = 0; c < num_layers + 1; c++)
   {
