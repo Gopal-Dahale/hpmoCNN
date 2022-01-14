@@ -267,7 +267,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
         wt_alloc_size += 1;
       weights = (wt_alloc_size + cur_params->C_out) * data_type_size;
     }
-    mem_usage << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
+    std::cout << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
     // total_feature_map_size += layer_input_size[c] * data_type_size;
   }
   mem_usage.close();
