@@ -55,7 +55,7 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
   int num_val_batches = num_val / model->batch_size;
 
   for (int i = 0; i < num_epoch; i++) {
-    std::cout << "Epoch " << i << std::endl;
+    // std::cout << "Epoch " << i << std::endl;
     for (int j = 0; j < num_train_batches; j++) {
       int start_sample = j * num_features * batch_size;
 
@@ -68,10 +68,10 @@ void Solver::train(std::vector<float> &loss, std::vector<int> &val_acc,
       cudaEventSynchronize(stop);
       cudaEventElapsedTime(&milli, start, stop);
       if(i==0)
-      std::cout << j
-                << " " ;
-      std::cout << milli
-                << std::endl;
+      // std::cout << j
+      //           << " " ;
+      // std::cout << milli
+      //           << std::endl;
 
       loss.push_back(temp_loss);
       batch_times.push_back(milli);

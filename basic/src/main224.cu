@@ -64,7 +64,7 @@ void save_mem_usage(NeuralNet* net)
   {
     size_t feature_map_size, fwd_workspace_size = 0, bwd_workspace_filter = 0, bwd_workspace_data = 0, weights = 0;
     feature_map_size = net->layer_input_size[c] * net->data_type_size;
-    if (net->layer_type[c] == CONV)
+    if (c != net->num_layers && net->layer_type[c] == CONV)
     {
       ConvLayerParams *cur_params = (ConvLayerParams *)net->params[c];
       fwd_workspace_size = cur_params->fwd_workspace_size;
@@ -72,7 +72,7 @@ void save_mem_usage(NeuralNet* net)
       bwd_workspace_data = cur_params->bwd_data_workspace_size;
       weights = cur_params->kernel_size * net->data_type_size;
     }
-    else if (net->layer_type[c] == FULLY_CONNECTED)
+    else if (c != net->num_layers && net->layer_type[c] == FULLY_CONNECTED)
     {
       FCLayerParams *cur_params = (FCLayerParams *)net->params[c];
       int wt_alloc_size = cur_params->weight_matrix_size;
@@ -81,7 +81,7 @@ void save_mem_usage(NeuralNet* net)
       weights = (wt_alloc_size + cur_params->C_out) * net->data_type_size;
     }
     mem_usage << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
-    std::cout << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
+    // std::cout << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
     // total_feature_map_size += layer_input_size[c] * data_type_size;
   }
   mem_usage.close();
