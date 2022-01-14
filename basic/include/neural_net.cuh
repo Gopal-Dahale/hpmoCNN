@@ -30,7 +30,7 @@ struct comp {
 
 class NeuralNet {
  public:
-   std::ofstream logfile;
+   std::ofstream mem_usage;
    void **layer_input, **dlayer_input, **params, **h_layer_input;
    int *layer_input_size;
    int *y, *pred_y;
@@ -73,9 +73,9 @@ class NeuralNet {
    void getLoss(void *X, int *y, double learning_rate,
                 std::vector<float> &fwd_vdnn_lag,
                 std::vector<float> &bwd_vdnn_lag, bool train = true,
-                int *correct_count = NULL, float *loss = NULL, bool d0o = false);
+                int *correct_count = NULL, float *loss = NULL, float *overhead = NULL);
    void getLoss(void *X, int *y, double learning_rate, bool train = true,
-                int *correct_count = NULL, float *loss = NULL, bool d0o = false);
+                int *correct_count = NULL, float *loss = NULL, float *overhead = NULL);
 
    void compareOutputCorrect(int *correct_count, int *y);
 

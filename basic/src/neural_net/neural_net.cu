@@ -189,11 +189,6 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   
   // total_workspace_size /= (1024.0 * 1024.0 * 1024.0);
 
-  for(int c=0;c<num_layers+1;c++)
-  {
-    std::cout << c << " " << layer_input_size[c]*data_type_size << "\n";
-    // total_feature_map_size += layer_input_size[c] * data_type_size;
-  }
   // total_feature_map_size *= data_type_size;
   // total_feature_map_size /= (1024.0 * 1024.0 * 1024.0);
   cudaDeviceSynchronize();
@@ -251,6 +246,32 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
   // free_bytes -= 1024 * 1024 * 600;
 
   cudaDeviceSynchronize();
+  mem_usage.open("../mem_usage.txt");
+
+  for (int c = 0; c < num_layers + 1; c++)
+  {
+    size_t feature_map_size, fwd_workspace_size=0, bwd_workspace_filter=0, bwd_workspace_data=0, weights=0;
+    feature_map_size = layer_input_size[c]*data_type_size;
+    if (layers[c].type == CONV)
+    {
+      ConvLayerParams *cur_params = (ConvLayerParams *)params[c];
+      fwd_workspace_size = cur_params->fwd_workspace_size;
+      bwd_workspace_filter = cur_params->bwd_filter_workspace_size;
+      bwd_workspace_data = cur_params->bwd_data_workspace_size;
+      weights = cur_params->kernel_size*data_type_size;
+    }
+    else if (layers[c].type == FULLY_CONNECTED)
+    {
+      FCLayerParams *cur_params = (FCLayerParams *)params[c];
+      int wt_alloc_size = cur_params->weight_matrix_size;
+      if (wt_alloc_size % 2 != 0)
+        wt_alloc_size += 1;
+      weights = (wt_alloc_size + cur_params->C_out) * data_type_size;
+    }
+    mem_usage << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
+    // total_feature_map_size += layer_input_size[c] * data_type_size;
+  }
+  mem_usage.close();
 
   size_t temp_free_bytes;
   cudaMemGetInfo(&temp_free_bytes, &total_bytes);

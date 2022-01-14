@@ -26,7 +26,7 @@ int num_train = 1024, num_test = 512;
 
 void save_metrics(vector<float> &loss, vector<int> &val_acc,
                   vector<float> &batch_times,
-                  unordered_map<string, double> &configs) {
+                  unordered_map<string, double> &configs, float total_train_time, float overhead) {
   fstream f;
 
   f.open("../batch_times.txt", ios::out);
@@ -43,6 +43,14 @@ void save_metrics(vector<float> &loss, vector<int> &val_acc,
 
   f.open("../configs.txt", ios::out);
   for (auto &i : configs) f << i.first << " " << i.second << endl;
+  f.close();
+
+  f.open("../totaltime.txt", ios::out);
+  f << total_train_time << endl;
+  f.close();
+
+  f.open("../totaloverhead.txt", ios::out);
+  f << overhead << endl;
   f.close();
 }
 
@@ -485,17 +493,16 @@ int main(int argc, char *argv[]) {
   vector<float> loss;
   vector<int> val_acc;
   vector<float> batch_times;
-  float milli = 0;
+  float milli = 0, overhead = 0;
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
   cudaEventRecord(start);
-  solver.train(loss, val_acc, batch_times, doo);
+  solver.train(loss, val_acc, batch_times, overhead);
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&milli, start, stop);
 
-  std::cout << milli << "\n";
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
@@ -503,5 +510,5 @@ int main(int argc, char *argv[]) {
   std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   /*************************** Save metrics ***************************/
-  save_metrics(loss, val_acc, batch_times, configs);
+  save_metrics(loss, val_acc, batch_times, configs, milli, overhead);
 }
