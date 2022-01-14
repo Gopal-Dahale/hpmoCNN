@@ -107,8 +107,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type,
       (bool *)calloc((num_layers + 1), sizeof(bool));  // Offloaded layers index
 
   cudaMemGetInfo(&free_bytes, &total_bytes);
-  // std::cout << "Free gigabytes just before allocate space: "
-            // << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+  std::cout << "Free gigabytes just before allocate space: " << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
 
   // Allocate space for parameters
   for (int i = 0; i < num_layers; i++) {
