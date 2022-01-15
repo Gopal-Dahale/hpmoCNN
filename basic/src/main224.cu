@@ -24,25 +24,39 @@ typedef unsigned char uchar;
 
 int num_train = 1024, num_test = 512;
 
+void save_offload_mem(vector<pair<size_t, size_t>> &offload_mem)
+{
+  fstream f;
+  f.open("../offload_mem.txt", ios::out);
+  for (auto &i : offload_mem)
+    f << i.first << " " << i.second << endl;
+  f.close();
+}
+
 void save_metrics(vector<float> &loss, vector<int> &val_acc,
                   vector<float> &batch_times,
-                  unordered_map<string, double> &configs, float total_train_time, float overhead) {
+                  unordered_map<string, double> &configs, float total_train_time, float overhead)
+{
   fstream f;
 
   f.open("../batch_times.txt", ios::out);
-  for (auto &i : batch_times) f << i << endl;
+  for (auto &i : batch_times)
+    f << i << endl;
   f.close();
 
   f.open("../loss.txt", ios::out);
-  for (auto &i : loss) f << i << endl;
+  for (auto &i : loss)
+    f << i << endl;
   f.close();
 
   f.open("../val_acc.txt", ios::out);
-  for (auto &i : val_acc) f << i << endl;
+  for (auto &i : val_acc)
+    f << i << endl;
   f.close();
 
   f.open("../configs.txt", ios::out);
-  for (auto &i : configs) f << i.first << " " << i.second << endl;
+  for (auto &i : configs)
+    f << i.first << " " << i.second << endl;
   f.close();
 
   f.open("../totaltime.txt", ios::out);
@@ -52,10 +66,9 @@ void save_metrics(vector<float> &loss, vector<int> &val_acc,
   f.open("../totaloverhead.txt", ios::out);
   f << overhead << endl;
   f.close();
-
 }
 
-void save_mem_usage(NeuralNet* net)
+void save_mem_usage(NeuralNet *net)
 {
   std::ofstream mem_usage;
   mem_usage.open("../mem_usage.txt");
@@ -87,14 +100,17 @@ void save_mem_usage(NeuralNet* net)
   mem_usage.close();
 }
 
-int reverseInt(int n) {
+int reverseInt(int n)
+{
   const int bytes = 4;
   unsigned char ch[bytes];
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     ch[i] = (n >> i * 8) & 255;
   }
   int p = 0;
-  for (int i = 0; i < bytes; i++) {
+  for (int i = 0; i < bytes; i++)
+  {
     p += (int)ch[i] << (bytes - i - 1) * 8;
   }
   return p;
@@ -103,7 +119,8 @@ int reverseInt(int n) {
 void readMNIST224(vector<vector<uchar>> &train_images,
                   vector<vector<uchar>> &test_images,
                   vector<uchar> &train_labels, vector<uchar> &test_labels,
-                  int num_train, int num_test) {
+                  int num_train, int num_test)
+{
   string filename_train_images =
       "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
@@ -118,9 +135,11 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       min((int)(ceil(num_train / float(images_per_file))), 30);
   int num_test_files = min((int)(ceil(num_test / float(images_per_file))), 5);
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     int num_files = (i == 0 ? num_train_files : num_test_files);
-    for (int j = 0; j < num_files; j++) {
+    for (int j = 0; j < num_files; j++)
+    {
       string filename;
       if (i == 0)
         filename = filename_train_images;
@@ -129,7 +148,8 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       filename = filename + to_string(j) + ".idx3-ubyte";
 
       ifstream f(filename.c_str(), ios::binary);
-      if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+      if (!f.is_open())
+        printf("Cannot read MNIST from %s\n", filename.c_str());
 
       // read metadata
       int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
@@ -142,20 +162,27 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       f.read((char *)&n_cols, sizeof(n_cols));
       n_cols = reverseInt(n_cols);
 
-      for (int k = 0; k < n_images; k++) {
+      for (int k = 0; k < n_images; k++)
+      {
         vector<uchar> temp;
         temp.reserve(n_rows * n_cols);
-        for (int j = 0; j < n_rows * n_cols; j++) {
+        for (int j = 0; j < n_rows * n_cols; j++)
+        {
           uchar t = 0;
           f.read((char *)&t, sizeof(t));
           temp.push_back(t);
         }
-        if (i == 0) {
+        if (i == 0)
+        {
           train_images.push_back(temp);
-          if ((j * n_images + k + 1) >= num_train) break;
-        } else {
+          if ((j * n_images + k + 1) >= num_train)
+            break;
+        }
+        else
+        {
           test_images.push_back(temp);
-          if ((j * n_images + k + 1) >= num_test) break;
+          if ((j * n_images + k + 1) >= num_test)
+            break;
         }
       }
       f.close();
@@ -163,7 +190,8 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   }
 
   // read train/test labels
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     string filename;
     if (i == 0)
       filename = filename_train_labels;
@@ -171,7 +199,8 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       filename = filename_test_labels;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open())
+      printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_labels = 0;
@@ -185,7 +214,8 @@ void readMNIST224(vector<vector<uchar>> &train_images,
     else
       n_labels = min(n_labels, num_test);
 
-    for (int k = 0; k < n_labels; k++) {
+    for (int k = 0; k < n_labels; k++)
+    {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
       if (i == 0)
@@ -200,7 +230,8 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   assert(test_images.size() == test_labels.size());
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   /******************* Parse command line arguments ********************/
   cxxopts::Options options(
       "hpmoCNN",
@@ -208,7 +239,7 @@ int main(int argc, char *argv[]) {
 
   options.add_options()(
       "batch-size", "Batch Size",
-      cxxopts::value<int>()->default_value("64"))  // a bool parameter
+      cxxopts::value<int>()->default_value("64")) // a bool parameter
       ("softmax-eps", "softmax eps",
        cxxopts::value<float>()->default_value("1e-8"))(
           "init-std-dev", "initial standard deviation",
@@ -225,7 +256,8 @@ int main(int argc, char *argv[]) {
           cxxopts::value<int>()->default_value("512"))("help", "Print Usage");
 
   auto result = options.parse(argc, argv);
-  if (result.count("help")) {
+  if (result.count("help"))
+  {
     std::cout << options.help() << std::endl;
     exit(0);
   }
@@ -257,13 +289,15 @@ int main(int argc, char *argv[]) {
   f_test_images = (float *)malloc(num_test * input_size * sizeof(float));
   f_test_labels = (int *)malloc(num_test * sizeof(int));
 
-  for (int k = 0; k < num_train; k++) {
+  for (int k = 0; k < num_train; k++)
+  {
     for (int j = 0; j < input_size; j++)
       f_train_images[k * input_size + j] = (float)train_images[k][j];
     f_train_labels[k] = (int)train_labels[k];
   }
 
-  for (int k = 0; k < num_test; k++) {
+  for (int k = 0; k < num_test; k++)
+  {
     for (int j = 0; j < input_size; j++)
       f_test_images[k * input_size + j] = (float)test_images[k][j];
     f_test_labels[k] = (int)test_labels[k];
@@ -272,26 +306,30 @@ int main(int argc, char *argv[]) {
   float *mean_image;
   mean_image = (float *)malloc(input_size * sizeof(float));
 
-  for (int i = 0; i < input_size; i++) {
+  for (int i = 0; i < input_size; i++)
+  {
     mean_image[i] = 0;
     for (int k = 0; k < num_train; k++)
       mean_image[i] += f_train_images[k * input_size + i];
     mean_image[i] /= num_train;
   }
 
-  for (int i = 0; i < num_train; i++) {
+  for (int i = 0; i < num_train; i++)
+  {
     for (int j = 0; j < input_size; j++)
       f_train_images[i * input_size + j] -= mean_image[j];
   }
 
-  for (int i = 0; i < input_size; i++) {
+  for (int i = 0; i < input_size; i++)
+  {
     mean_image[i] = 0;
     for (int k = 0; k < num_test; k++)
       mean_image[i] += f_test_images[k * input_size + i];
     mean_image[i] /= num_test;
   }
 
-  for (int i = 0; i < num_test; i++) {
+  for (int i = 0; i < num_test; i++)
+  {
     for (int j = 0; j < input_size; j++)
       f_test_images[i * input_size + j] -= mean_image[j];
   }
@@ -513,7 +551,8 @@ int main(int argc, char *argv[]) {
       {"num_train", num_train},
       {"num_test", num_test}};
 
-  for (auto &config : configs) {
+  for (auto &config : configs)
+  {
     cout << config.first << ": " << config.second << endl;
   }
 
@@ -526,18 +565,19 @@ int main(int argc, char *argv[]) {
   vector<float> loss;
   vector<int> val_acc;
   vector<float> batch_times;
+  vector<pair<size_t, size_t>> offload_mem;
   float milli = 0, overhead = 0;
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
   cudaEventRecord(start);
-  solver.train(loss, val_acc, batch_times, &overhead);
+  solver.train(loss, val_acc, batch_times, &overhead, offload_mem);
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&milli, start, stop);
 
   int num_correct;
-  
+
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);
   std::cout << "TRAIN NUM CORRECT:" << num_correct << endl;
   solver.checkAccuracy(f_test_images, f_test_labels, num_test, &num_correct);
@@ -546,4 +586,5 @@ int main(int argc, char *argv[]) {
   /*************************** Save metrics ***************************/
   save_mem_usage(&net);
   save_metrics(loss, val_acc, batch_times, configs, milli, overhead);
+  save_offload_mem(offload_mem);
 }
