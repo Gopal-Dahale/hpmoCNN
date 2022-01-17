@@ -11,7 +11,7 @@ touch totaltime.txt
 touch totaloverhead.txt
 touch mem_usage.txt
 touch offload_mem.txt
-cd ..
+cd -
 cd ../vgg19/batch_size128
 touch configs.txt
 touch loss.txt
@@ -21,7 +21,7 @@ touch totaltime.txt
 touch totaloverhead.txt
 touch mem_usage.txt
 touch offload_mem.txt
-cd ..
+cd -
 cd ../vgg19/batch_size256
 touch configs.txt
 touch loss.txt
@@ -31,7 +31,7 @@ touch totaltime.txt
 touch totaloverhead.txt
 touch mem_usage.txt
 touch offload_mem.txt
-cd ..
+cd -
 make -f makefile.vgg19
 ./main --batch-size 64 --epochs 10 --nn 19
 echo "batch size 64 done"
