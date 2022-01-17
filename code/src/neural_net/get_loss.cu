@@ -144,8 +144,6 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
       /*************************************************************/
     }
 
-    offload_mem.push_back({0, 0});
-
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&milli, start, stop);
