@@ -161,7 +161,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     // //     }
     // reserved_memory += layer_input_size[i+1]*data_type_size;
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    std::cout << "Before Computati/on of Layer " << i << ": "<< free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+    // std::cout << "Before Computati/on of Layer " << i << ": "<< free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
     if (layer_type[i] == CONV)
     {
       ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
@@ -298,7 +298,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
     cudaEventElapsedTime(&temp_milli, start, stop);
     milli += temp_milli;
     cudaMemGetInfo(&free_bytes, &total_bytes);
-    std::cout << "After Computation of Layer " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
+    // std::cout << "After Computation of Layer " << i << ": " << free_bytes / (1024.0 * 1024.0 * 1024.0) << "\n";
 
     /**************************** Free up memory ****************************/
     if (layer_type[i] == CONV)
