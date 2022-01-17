@@ -122,7 +122,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
                                                 // of the heap
         // std::cout << "Layer to offload: " << temp << std::endl;
         // std::cout << "Size of the layer to offload: "<< layer_input_pq.top().first * data_type_size /float(buffer_bytes) << std::endl;
-        // free_layer.push_back(temp);  // Add the layer index to the free layer
+        free_layer.push_back(temp);  // Add the layer index to the free layer
         // vector
 
         offload_mem.push_back({temp, layer_input_pq.top().first * data_type_size / float(buffer_bytes)});
