@@ -52,8 +52,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate,
   /************************ Forward Propagation starts ***********************/
   // std::cout << "Forward Propagation starts: " << '\n';
   size_t buffer_bytes = 1024 * 1024 * 1024; // 2GB
-  int ttl_allocated = 0;
-  size_t reserved_memory = layer_input_size[0] * data_type_size;
+  // int ttl_allocated = 0;
+  // size_t reserved_memory = layer_input_size[0] * data_type_size;
   std::vector<int> free_layer; // Which layers to free
   for (int i = 0; i < num_layers; i++)
   {
