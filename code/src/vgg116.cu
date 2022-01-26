@@ -24,10 +24,11 @@ typedef unsigned char uchar;
 
 int num_train = 1024, num_test = 512;
 
-void save_offload_mem(vector<pair<size_t, size_t>> &offload_mem)
+void save_offload_mem(vector<pair<size_t, size_t>> &offload_mem, int nn, int batch_size)
 {
   fstream f;
-  f.open("../offload_mem.txt", ios::out);
+  string res = "vgg" + to_string(nn) + "/batch_size" + to_string(batch_size);
+  f.open("../" + res + "/offload_mem.txt", ios::out);
   for (auto &i : offload_mem)
     f << i.first << " " << i.second << endl;
   f.close();
@@ -35,43 +36,45 @@ void save_offload_mem(vector<pair<size_t, size_t>> &offload_mem)
 
 void save_metrics(vector<float> &loss, vector<int> &val_acc,
                   vector<float> &batch_times,
-                  unordered_map<string, double> &configs, float total_train_time, float overhead)
+                  unordered_map<string, double> &configs, float total_train_time, float overhead, int nn, int batch_size)
 {
   fstream f;
 
-  f.open("../batch_times.txt", ios::out);
+  string res = "vgg" + to_string(nn) + "/batch_size" + to_string(batch_size);
+  f.open("../" + res + "/batch_times.txt", ios::out);
   for (auto &i : batch_times)
     f << i << endl;
   f.close();
 
-  f.open("../loss.txt", ios::out);
+  f.open("../" + res + "/loss.txt", ios::out);
   for (auto &i : loss)
     f << i << endl;
   f.close();
 
-  f.open("../val_acc.txt", ios::out);
+  f.open("../" + res + "/val_acc.txt", ios::out);
   for (auto &i : val_acc)
     f << i << endl;
   f.close();
 
-  f.open("../configs.txt", ios::out);
+  f.open("../" + res + "/configs.txt", ios::out);
   for (auto &i : configs)
     f << i.first << " " << i.second << endl;
   f.close();
 
-  f.open("../totaltime.txt", ios::out);
+  f.open("../" + res + "/totaltime.txt", ios::out);
   f << total_train_time << endl;
   f.close();
 
-  f.open("../totaloverhead.txt", ios::out);
+  f.open("../" + res + "/totaloverhead.txt", ios::out);
   f << overhead << endl;
   f.close();
 }
 
-void save_mem_usage(NeuralNet *net)
+void save_mem_usage(NeuralNet *net, int nn, int batch_size)
 {
   std::ofstream mem_usage;
-  mem_usage.open("../mem_usage.txt");
+  string res = "vgg" + to_string(nn) + "/batch_size" + to_string(batch_size);
+  mem_usage.open("../" + res + "/mem_usage.txt");
 
   for (int c = 0; c < net->num_layers + 1; c++)
   {
@@ -241,19 +244,14 @@ int main(int argc, char *argv[])
       "batch-size", "Batch Size",
       cxxopts::value<int>()->default_value("64")) // a bool parameter
       ("softmax-eps", "softmax eps",
-       cxxopts::value<float>()->default_value("1e-8"))(
-          "init-std-dev", "initial standard deviation",
-          cxxopts::value<float>()->default_value("0.01"))(
-          "epochs", "Number of epochs",
-          cxxopts::value<int>()->default_value("5"))(
-          "learning-rate", "Learning Rate",
-          cxxopts::value<double>()->default_value("0.01"))(
-          "learning-rate-decay", "Learning Rate Decay",
-          cxxopts::value<double>()->default_value("1"))(
-          "num-train", "Number of training examples to use",
-          cxxopts::value<int>()->default_value("1024"))(
-          "num-test", "Number of testing examples to use",
-          cxxopts::value<int>()->default_value("512"))("help", "Print Usage");
+       cxxopts::value<float>()->default_value("1e-8"))("init-std-dev", "initial standard deviation",
+                                                       cxxopts::value<float>()->default_value("0.01"))("epochs", "Number of epochs",
+                                                                                                       cxxopts::value<int>()->default_value("5"))("learning-rate", "Learning Rate",
+                                                                                                                                                  cxxopts::value<double>()->default_value("0.01"))("learning-rate-decay", "Learning Rate Decay",
+                                                                                                                                                                                                   cxxopts::value<double>()->default_value("1"))("num-train", "Number of training examples to use",
+                                                                                                                                                                                                                                                 cxxopts::value<int>()->default_value("1024"))("num-test", "Number of testing examples to use",
+                                                                                                                                                                                                                                                                                               cxxopts::value<int>()->default_value("512"))("nn", "neural network",
+                                                                                                                                                                                                                                                                                                                                            cxxopts::value<int>()->default_value("16"))("help", "Print Usage");
 
   auto result = options.parse(argc, argv);
   if (result.count("help"))
@@ -1339,9 +1337,11 @@ int main(int argc, char *argv[])
   int num_epoch = result["epochs"].as<int>();
   double learning_rate = result["learning-rate"].as<double>();
   double learning_rate_decay = result["learning-rate-decay"].as<double>();
+  int nn = result["nn"].as<int>();
 
   /************************ Display configuration *************************/
   unordered_map<string, double> configs = {
+      {"neural_network: vgg", nn},
       {"batch_size", batch_size},
       {"softmax_eps", softmax_eps},
       {"init_std_dev", init_std_dev},
@@ -1384,7 +1384,7 @@ int main(int argc, char *argv[])
   std::cout << "TEST NUM CORRECT:" << num_correct << endl;
 
   /*************************** Save metrics ***************************/
-  save_mem_usage(&net);
-  save_metrics(loss, val_acc, batch_times, configs, milli, overhead);
-  save_offload_mem(offload_mem);
+  save_mem_usage(&net, nn, batch_size);
+  save_metrics(loss, val_acc, batch_times, configs, milli, overhead, nn, batch_size);
+  save_offload_mem(offload_mem, nn, batch_size);
 }
