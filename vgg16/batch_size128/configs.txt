@@ -1,8 +1,0 @@
-num_test 512
-num_train 1024
-learning_rate_decay 1
-learning_rate 0.01
-num_epoch 10
-softmax_eps 1e-08
-init_std_dev 0.01
-batch_size 128
