@@ -11,7 +11,7 @@ enum workspaceStatus_t {
   WORKSPACE_STATUS_OUT_OF_MEMORY
 };
 
-const size_t WORKSPACE_SIZE_LIMIT = 6;  // GB
+const size_t WORKSPACE_SIZE_LIMIT = 6;  // 6GB
 
 #define checkWORKSPACE(expression)                                         \
   {                                                                        \
