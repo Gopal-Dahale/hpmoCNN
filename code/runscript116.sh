@@ -44,6 +44,8 @@ touch mem_usage.txt
 touch offload_mem.txt
 cd -
 make -f makefile.vgg116
+./main --batch-size 32 --epochs 10 --nn 116
+echo "batch size 32 done"
 ./main --batch-size 64 --epochs 10 --nn 116
 echo "batch size 64 done"
 ./main --batch-size 128 --epochs 10 --nn 116
