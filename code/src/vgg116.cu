@@ -24,41 +24,34 @@ typedef unsigned char uchar;
 
 int num_train = 1024, num_test = 512;
 
-void save_offload_mem(vector<pair<size_t, size_t>> &offload_mem, int nn, int batch_size)
-{
+void save_offload_mem(vector<pair<size_t, size_t>> &offload_mem, int nn, int batch_size) {
   fstream f;
   string res = "vgg" + to_string(nn) + "/batch_size" + to_string(batch_size);
   f.open("../" + res + "/offload_mem.txt", ios::out);
-  for (auto &i : offload_mem)
-    f << i.first << " " << i.second << endl;
+  for (auto &i : offload_mem) f << i.first << " " << i.second << endl;
   f.close();
 }
 
-void save_metrics(vector<float> &loss, vector<int> &val_acc,
-                  vector<float> &batch_times,
-                  unordered_map<string, double> &configs, float total_train_time, float overhead, int nn, int batch_size)
-{
+void save_metrics(vector<float> &loss, vector<int> &val_acc, vector<float> &batch_times,
+                  unordered_map<string, double> &configs, float total_train_time, float overhead,
+                  int nn, int batch_size) {
   fstream f;
 
   string res = "vgg" + to_string(nn) + "/batch_size" + to_string(batch_size);
   f.open("../" + res + "/batch_times.txt", ios::out);
-  for (auto &i : batch_times)
-    f << i << endl;
+  for (auto &i : batch_times) f << i << endl;
   f.close();
 
   f.open("../" + res + "/loss.txt", ios::out);
-  for (auto &i : loss)
-    f << i << endl;
+  for (auto &i : loss) f << i << endl;
   f.close();
 
   f.open("../" + res + "/val_acc.txt", ios::out);
-  for (auto &i : val_acc)
-    f << i << endl;
+  for (auto &i : val_acc) f << i << endl;
   f.close();
 
   f.open("../" + res + "/configs.txt", ios::out);
-  for (auto &i : configs)
-    f << i.first << " " << i.second << endl;
+  for (auto &i : configs) f << i.first << " " << i.second << endl;
   f.close();
 
   f.open("../" + res + "/totaltime.txt", ios::out);
@@ -70,79 +63,66 @@ void save_metrics(vector<float> &loss, vector<int> &val_acc,
   f.close();
 }
 
-void save_mem_usage(NeuralNet *net, int nn, int batch_size)
-{
+void save_mem_usage(NeuralNet *net, int nn, int batch_size) {
   std::ofstream mem_usage;
   string res = "vgg" + to_string(nn) + "/batch_size" + to_string(batch_size);
   mem_usage.open("../" + res + "/mem_usage.txt");
 
-  for (int c = 0; c < net->num_layers + 1; c++)
-  {
-    size_t feature_map_size, fwd_workspace_size = 0, bwd_workspace_filter = 0, bwd_workspace_data = 0, weights = 0;
+  for (int c = 0; c < net->num_layers + 1; c++) {
+    size_t feature_map_size, fwd_workspace_size = 0, bwd_workspace_filter = 0,
+                             bwd_workspace_data = 0, weights = 0;
     feature_map_size = net->layer_input_size[c] * net->data_type_size;
-    if (c != net->num_layers && net->layer_type[c] == CONV)
-    {
+    if (c != net->num_layers && net->layer_type[c] == CONV) {
       ConvLayerParams *cur_params = (ConvLayerParams *)net->params[c];
       fwd_workspace_size = cur_params->fwd_workspace_size;
       bwd_workspace_filter = cur_params->bwd_filter_workspace_size;
       bwd_workspace_data = cur_params->bwd_data_workspace_size;
       weights = cur_params->kernel_size * net->data_type_size;
-    }
-    else if (c != net->num_layers && net->layer_type[c] == FULLY_CONNECTED)
-    {
+    } else if (c != net->num_layers && net->layer_type[c] == FULLY_CONNECTED) {
       FCLayerParams *cur_params = (FCLayerParams *)net->params[c];
       int wt_alloc_size = cur_params->weight_matrix_size;
-      if (wt_alloc_size % 2 != 0)
-        wt_alloc_size += 1;
+      if (wt_alloc_size % 2 != 0) wt_alloc_size += 1;
       weights = (wt_alloc_size + cur_params->C_out) * net->data_type_size;
     }
-    mem_usage << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
-    // std::cout << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " " << bwd_workspace_data << " " << weights << "\n";
-    // total_feature_map_size += layer_input_size[c] * data_type_size;
+    mem_usage << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter << " "
+              << bwd_workspace_data << " " << weights << "\n";
+    // std::cout << feature_map_size << " " << fwd_workspace_size << " " << bwd_workspace_filter <<
+    // " " << bwd_workspace_data << " " << weights << "\n"; total_feature_map_size +=
+    // layer_input_size[c] * data_type_size;
   }
   mem_usage.close();
 }
 
-int reverseInt(int n)
-{
+int reverseInt(int n) {
   const int bytes = 4;
   unsigned char ch[bytes];
-  for (int i = 0; i < bytes; i++)
-  {
+  for (int i = 0; i < bytes; i++) {
     ch[i] = (n >> i * 8) & 255;
   }
   int p = 0;
-  for (int i = 0; i < bytes; i++)
-  {
+  for (int i = 0; i < bytes; i++) {
     p += (int)ch[i] << (bytes - i - 1) * 8;
   }
   return p;
 }
 
-void readMNIST224(vector<vector<uchar>> &train_images,
-                  vector<vector<uchar>> &test_images,
-                  vector<uchar> &train_labels, vector<uchar> &test_labels,
-                  int num_train, int num_test)
-{
-  string filename_train_images =
-      "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
+void readMNIST224(vector<vector<uchar>> &train_images, vector<vector<uchar>> &test_images,
+                  vector<uchar> &train_labels, vector<uchar> &test_labels, int num_train,
+                  int num_test) {
+  string filename_train_images = "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
-  string filename_test_images =
-      "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
+  string filename_test_images = "/kaggle/input/mnist224by224testdataset/test-images-224by224-";
   string filename_test_labels = "data/t10k-labels.idx1-ubyte";
 
   // read train/test images
   int images_per_file = 2000;
-  int num_train_files =
-      min((int)(ceil(num_train / float(images_per_file))), 30);
+  int num_train_files = min((int)(ceil(num_train / float(images_per_file))), 30);
   int num_test_files = min((int)(ceil(num_test / float(images_per_file))), 5);
 
-  for (int i = 0; i < 2; i++)
-  {
+  for (int i = 0; i < 2; i++) {
     int num_files = (i == 0 ? num_train_files : num_test_files);
-    for (int j = 0; j < num_files; j++)
-    {
+    for (int j = 0; j < num_files; j++) {
       string filename;
       if (i == 0)
         filename = filename_train_images;
@@ -151,8 +131,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       filename = filename + to_string(j) + ".idx3-ubyte";
 
       ifstream f(filename.c_str(), ios::binary);
-      if (!f.is_open())
-        printf("Cannot read MNIST from %s\n", filename.c_str());
+      if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
 
       // read metadata
       int magic_number = 0, n_images = 0, n_rows = 0, n_cols = 0;
@@ -165,27 +144,20 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       f.read((char *)&n_cols, sizeof(n_cols));
       n_cols = reverseInt(n_cols);
 
-      for (int k = 0; k < n_images; k++)
-      {
+      for (int k = 0; k < n_images; k++) {
         vector<uchar> temp;
         temp.reserve(n_rows * n_cols);
-        for (int j = 0; j < n_rows * n_cols; j++)
-        {
+        for (int j = 0; j < n_rows * n_cols; j++) {
           uchar t = 0;
           f.read((char *)&t, sizeof(t));
           temp.push_back(t);
         }
-        if (i == 0)
-        {
+        if (i == 0) {
           train_images.push_back(temp);
-          if ((j * n_images + k + 1) >= num_train)
-            break;
-        }
-        else
-        {
+          if ((j * n_images + k + 1) >= num_train) break;
+        } else {
           test_images.push_back(temp);
-          if ((j * n_images + k + 1) >= num_test)
-            break;
+          if ((j * n_images + k + 1) >= num_test) break;
         }
       }
       f.close();
@@ -193,8 +165,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   }
 
   // read train/test labels
-  for (int i = 0; i < 2; i++)
-  {
+  for (int i = 0; i < 2; i++) {
     string filename;
     if (i == 0)
       filename = filename_train_labels;
@@ -202,8 +173,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
       filename = filename_test_labels;
 
     ifstream f(filename.c_str(), ios::binary);
-    if (!f.is_open())
-      printf("Cannot read MNIST from %s\n", filename.c_str());
+    if (!f.is_open()) printf("Cannot read MNIST from %s\n", filename.c_str());
 
     // read metadata
     int magic_number = 0, n_labels = 0;
@@ -217,8 +187,7 @@ void readMNIST224(vector<vector<uchar>> &train_images,
     else
       n_labels = min(n_labels, num_test);
 
-    for (int k = 0; k < n_labels; k++)
-    {
+    for (int k = 0; k < n_labels; k++) {
       uchar t = 0;
       f.read((char *)&t, sizeof(t));
       if (i == 0)
@@ -233,12 +202,10 @@ void readMNIST224(vector<vector<uchar>> &train_images,
   assert(test_images.size() == test_labels.size());
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   /******************* Parse command line arguments ********************/
-  cxxopts::Options options(
-      "hpmoCNN",
-      "High Performance Memory Optimal Convolutional Neural Network");
+  cxxopts::Options options("hpmoCNN",
+                           "High Performance Memory Optimal Convolutional Neural Network");
 
   options.add_options()(
       "batch-size", "Batch Size",
@@ -254,8 +221,7 @@ int main(int argc, char *argv[])
                                                                                                                                                                                                                                                                                                                                             cxxopts::value<int>()->default_value("16"))("help", "Print Usage");
 
   auto result = options.parse(argc, argv);
-  if (result.count("help"))
-  {
+  if (result.count("help")) {
     std::cout << options.help() << std::endl;
     exit(0);
   }
@@ -272,8 +238,7 @@ int main(int argc, char *argv[])
 
   cout << "Reading MNIST dataset...  ";
 
-  readMNIST224(train_images, test_images, train_labels, test_labels, num_train,
-               num_test);
+  readMNIST224(train_images, test_images, train_labels, test_labels, num_train, num_test);
 
   assert(train_images.size() == train_labels.size());
   assert(test_images.size() == test_labels.size());
@@ -287,15 +252,13 @@ int main(int argc, char *argv[])
   f_test_images = (float *)malloc(num_test * input_size * sizeof(float));
   f_test_labels = (int *)malloc(num_test * sizeof(int));
 
-  for (int k = 0; k < num_train; k++)
-  {
+  for (int k = 0; k < num_train; k++) {
     for (int j = 0; j < input_size; j++)
       f_train_images[k * input_size + j] = (float)train_images[k][j];
     f_train_labels[k] = (int)train_labels[k];
   }
 
-  for (int k = 0; k < num_test; k++)
-  {
+  for (int k = 0; k < num_test; k++) {
     for (int j = 0; j < input_size; j++)
       f_test_images[k * input_size + j] = (float)test_images[k][j];
     f_test_labels[k] = (int)test_labels[k];
@@ -304,32 +267,24 @@ int main(int argc, char *argv[])
   float *mean_image;
   mean_image = (float *)malloc(input_size * sizeof(float));
 
-  for (int i = 0; i < input_size; i++)
-  {
+  for (int i = 0; i < input_size; i++) {
     mean_image[i] = 0;
-    for (int k = 0; k < num_train; k++)
-      mean_image[i] += f_train_images[k * input_size + i];
+    for (int k = 0; k < num_train; k++) mean_image[i] += f_train_images[k * input_size + i];
     mean_image[i] /= num_train;
   }
 
-  for (int i = 0; i < num_train; i++)
-  {
-    for (int j = 0; j < input_size; j++)
-      f_train_images[i * input_size + j] -= mean_image[j];
+  for (int i = 0; i < num_train; i++) {
+    for (int j = 0; j < input_size; j++) f_train_images[i * input_size + j] -= mean_image[j];
   }
 
-  for (int i = 0; i < input_size; i++)
-  {
+  for (int i = 0; i < input_size; i++) {
     mean_image[i] = 0;
-    for (int k = 0; k < num_test; k++)
-      mean_image[i] += f_test_images[k * input_size + i];
+    for (int k = 0; k < num_test; k++) mean_image[i] += f_test_images[k * input_size + i];
     mean_image[i] /= num_test;
   }
 
-  for (int i = 0; i < num_test; i++)
-  {
-    for (int j = 0; j < input_size; j++)
-      f_test_images[i * input_size + j] -= mean_image[j];
+  for (int i = 0; i < num_test; i++) {
+    for (int j = 0; j < input_size; j++) f_test_images[i * input_size + j] -= mean_image[j];
   }
 
   cout << "Done" << endl;
@@ -1340,28 +1295,26 @@ int main(int argc, char *argv[])
   int nn = result["nn"].as<int>();
 
   /************************ Display configuration *************************/
-  unordered_map<string, double> configs = {
-      {"neural_network: vgg", nn},
-      {"batch_size", batch_size},
-      {"softmax_eps", softmax_eps},
-      {"init_std_dev", init_std_dev},
-      {"num_epoch", num_epoch},
-      {"learning_rate", learning_rate},
-      {"learning_rate_decay", learning_rate_decay},
-      {"num_train", num_train},
-      {"num_test", num_test}};
+  unordered_map<string, double> configs = {{"neural_network: vgg", nn},
+                                           {"batch_size", batch_size},
+                                           {"softmax_eps", softmax_eps},
+                                           {"init_std_dev", init_std_dev},
+                                           {"num_epoch", num_epoch},
+                                           {"learning_rate", learning_rate},
+                                           {"learning_rate_decay", learning_rate_decay},
+                                           {"num_train", num_train},
+                                           {"num_test", num_test}};
 
-  for (auto &config : configs)
-  {
+  for (auto &config : configs) {
     cout << config.first << ": " << config.second << endl;
   }
 
   /*************************** Train & Test ***************************/
-  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
-                softmax_eps, init_std_dev, SGD);
-  Solver solver(&net, (void *)f_train_images, f_train_labels,
-                (void *)f_train_images, f_train_labels, num_epoch, SGD,
-                learning_rate, learning_rate_decay, num_train, num_train);
+  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, softmax_eps, init_std_dev,
+                SGD);
+  Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
+                f_train_labels, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
+                num_train);
   vector<float> loss;
   vector<int> val_acc;
   vector<float> batch_times;

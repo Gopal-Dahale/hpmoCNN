@@ -8,11 +8,9 @@
 
 #include "neural_net.cuh"
 
-void NeuralNet::save(std::string path)
-{
+void NeuralNet::save(std::string path) {
   FILE *f = fopen(path.c_str(), "wb");
-  if (!f)
-  {
+  if (!f) {
     printf("Failed to open file %s\n", path.c_str());
     return;
   }
@@ -20,11 +18,9 @@ void NeuralNet::save(std::string path)
   fclose(f);
 }
 
-void NeuralNet::load(std::string path)
-{
+void NeuralNet::load(std::string path) {
   FILE *f = fopen(path.c_str(), "rb");
-  if (!f)
-  {
+  if (!f) {
     printf("Failed to open file %s\n", path.c_str());
     return;
   }

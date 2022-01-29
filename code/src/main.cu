@@ -37,9 +37,8 @@ int reverseInt(int n) {
   return p;
 }
 
-void readMNIST(vector<vector<uchar>> &train_images,
-               vector<vector<uchar>> &test_images, vector<uchar> &train_labels,
-               vector<uchar> &test_labels) {
+void readMNIST(vector<vector<uchar>> &train_images, vector<vector<uchar>> &test_images,
+               vector<uchar> &train_labels, vector<uchar> &test_labels) {
   string filename_train_images = "data/train-images.idx3-ubyte";
   string filename_train_labels = "data/train-labels.idx1-ubyte";
 
@@ -115,8 +114,7 @@ void readMNIST(vector<vector<uchar>> &train_images,
   }
 }
 
-auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels,
-                       int size) {
+auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels, int size) {
   unordered_map<int, vector<int>> m;
   for (int i = 0; i < labels.size(); i++) m[(int)labels[i]].push_back(i);
 
@@ -160,8 +158,8 @@ auto create_mini_MNIST(vector<vector<uchar>> &images, vector<uchar> &labels,
 }
 
 void printTimes(vector<float> &time, string filename);
-void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag,
-                  vector<vector<float>> &bwd_vdnn_lag, string filename);
+void printvDNNLag(vector<vector<float>> &fwd_vdnn_lag, vector<vector<float>> &bwd_vdnn_lag,
+                  string filename);
 
 int main(int argc, char *argv[]) {
   bool doo = false;
@@ -200,26 +198,22 @@ int main(int argc, char *argv[]) {
 
   for (int i = 0; i < input_size; i++) {
     mean_image[i] = 0;
-    for (int k = 0; k < num_train; k++)
-      mean_image[i] += f_train_images[k * input_size + i];
+    for (int k = 0; k < num_train; k++) mean_image[i] += f_train_images[k * input_size + i];
     mean_image[i] /= num_train;
   }
 
   for (int i = 0; i < num_train; i++) {
-    for (int j = 0; j < input_size; j++)
-      f_train_images[i * input_size + j] -= mean_image[j];
+    for (int j = 0; j < input_size; j++) f_train_images[i * input_size + j] -= mean_image[j];
   }
 
   for (int i = 0; i < input_size; i++) {
     mean_image[i] = 0;
-    for (int k = 0; k < num_test; k++)
-      mean_image[i] += f_test_images[k * input_size + i];
+    for (int k = 0; k < num_test; k++) mean_image[i] += f_test_images[k * input_size + i];
     mean_image[i] /= num_test;
   }
 
   for (int i = 0; i < num_test; i++) {
-    for (int j = 0; j < input_size; j++)
-      f_test_images[i * input_size + j] -= mean_image[j];
+    for (int j = 0; j < input_size; j++) f_test_images[i * input_size + j] -= mean_image[j];
   }
 
   // Simple CNN
@@ -266,8 +260,7 @@ int main(int argc, char *argv[]) {
   }
   {
     SoftmaxDescriptor layer2_smax;
-    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1,
-                                 1);
+    layer2_smax.initializeValues(SOFTMAX_ACCURATE, SOFTMAX_MODE_INSTANCE, 10, 1, 1);
     LayerSpecifier temp;
     temp.initPointer(SOFTMAX);
     *((SoftmaxDescriptor *)temp.params) = layer2_smax;
@@ -278,8 +271,8 @@ int main(int argc, char *argv[]) {
   int batch_size = ((argc > 1) ? atoi(argv[1]) : 64);
   float softmax_eps = 1e-8;
   float init_std_dev = 0.01;
-  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW,
-                softmax_eps, init_std_dev, SGD);
+  NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, softmax_eps, init_std_dev,
+                SGD);
 
   int num_epoch = ((argc > 2) ? atoi(argv[2]) : 10);
   double learning_rate = ((argc > 3) ? atof(argv[3]) : 0.01);
@@ -291,13 +284,13 @@ int main(int argc, char *argv[]) {
   cout << "num_epoch: " << num_epoch << endl;
   cout << "learning_rate: " << learning_rate << endl;
 
-  Solver solver(&net, (void *)f_train_images, f_train_labels,
-                (void *)f_train_images, f_train_labels, num_epoch, SGD,
-                learning_rate, learning_rate_decay, num_train, num_train);
+  Solver solver(&net, (void *)f_train_images, f_train_labels, (void *)f_train_images,
+                f_train_labels, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
+                num_train);
   vector<float> loss;
   vector<int> val_acc;
   vector<float> batch_times;
-  float overhead=0;
+  float overhead = 0;
   solver.train(loss, val_acc, batch_times, &overhead);
   int num_correct;
   solver.checkAccuracy(f_train_images, f_train_labels, num_train, &num_correct);

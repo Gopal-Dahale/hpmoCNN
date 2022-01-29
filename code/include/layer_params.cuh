@@ -6,21 +6,17 @@
 #include "user_iface.cuh"
 #include "utils.cuh"
 
-enum workspaceStatus_t {
-  WORKSPACE_STATUS_SUCCESS,
-  WORKSPACE_STATUS_OUT_OF_MEMORY
-};
+enum workspaceStatus_t { WORKSPACE_STATUS_SUCCESS, WORKSPACE_STATUS_OUT_OF_MEMORY };
 
 const size_t WORKSPACE_SIZE_LIMIT = 6;  // 6GB
 
-#define checkWORKSPACE(expression)                                         \
-  {                                                                        \
-    workspaceStatus_t status = (expression);                               \
-    if (status != WORKSPACE_STATUS_SUCCESS) {                              \
-      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ \
-                << ": " << std::endl;                                      \
-      std::exit(EXIT_FAILURE);                                             \
-    }                                                                      \
+#define checkWORKSPACE(expression)                                                               \
+  {                                                                                              \
+    workspaceStatus_t status = (expression);                                                     \
+    if (status != WORKSPACE_STATUS_SUCCESS) {                                                    \
+      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " << std::endl; \
+      std::exit(EXIT_FAILURE);                                                                   \
+    }                                                                                            \
   }
 
 struct ConvLayerParams {
@@ -50,12 +46,11 @@ struct ConvLayerParams {
 
   void initializeValues(cudnnHandle_t cudnn_handle, ConvDescriptor *user_params,
                         cudnnDataType_t data_type, int batch_size,
-                        cudnnTensorFormat_t tensor_format,
-                        size_t data_type_size, LayerDimension &output_size,
-                        UpdateRule update_rule);
+                        cudnnTensorFormat_t tensor_format, size_t data_type_size,
+                        LayerDimension &output_size, UpdateRule update_rule);
 
-  void allocateSpace(curandGenerator_t curand_gen, cudnnDataType_t data_type,
-                     size_t data_type_size, float std_dev, size_t &free_bytese);
+  void allocateSpace(curandGenerator_t curand_gen, cudnnDataType_t data_type, size_t data_type_size,
+                     float std_dev, size_t &free_bytese);
 
   size_t getWorkspaceSize(size_t &free_bytes, ConvDirection conv_direction);
 
@@ -74,11 +69,10 @@ struct FCLayerParams {
   cudnnTensorDescriptor_t output_tensor;
 
   void initializeValues(FCDescriptor *user_params, int batch_size,
-                        cudnnTensorFormat_t tensor_format,
-                        cudnnDataType_t data_type, LayerDimension &output_size,
-                        UpdateRule update_rule);
-  void allocateSpace(curandGenerator_t curand_gen, cudnnDataType_t data_type,
-                     size_t data_type_size, float std_dev, size_t &free_bytes);
+                        cudnnTensorFormat_t tensor_format, cudnnDataType_t data_type,
+                        LayerDimension &output_size, UpdateRule update_rule);
+  void allocateSpace(curandGenerator_t curand_gen, cudnnDataType_t data_type, size_t data_type_size,
+                     float std_dev, size_t &free_bytes);
   void stepParams(cublasHandle_t cublas_handle, double learning_rate);
 };
 
@@ -88,8 +82,7 @@ struct PoolingLayerParams {
 
   cudnnPoolingDescriptor_t pool_desc;
 
-  void initializeValues(PoolingDescriptor *user_params,
-                        cudnnDataType_t data_type,
+  void initializeValues(PoolingDescriptor *user_params, cudnnDataType_t data_type,
                         cudnnTensorFormat_t tensor_format, int batch_size,
                         LayerDimension &output_size);
   void allocateSpace(size_t &free_bytes);
@@ -99,8 +92,7 @@ struct ActivationLayerParams {
   cudnnActivationDescriptor_t actv_desc;
   cudnnTensorDescriptor_t input_tensor;
 
-  void initializeValues(ActivationDescriptor *user_params,
-                        cudnnDataType_t data_type,
+  void initializeValues(ActivationDescriptor *user_params, cudnnDataType_t data_type,
                         cudnnTensorFormat_t tensor_format, int batch_size,
                         LayerDimension &output_size);
   void allocateSpace(size_t &free_bytes);
@@ -111,8 +103,7 @@ struct SoftmaxLayerParams {
   cudnnSoftmaxAlgorithm_t algo;
   cudnnSoftmaxMode_t mode;
 
-  void initializeValues(SoftmaxDescriptor *user_params,
-                        cudnnDataType_t data_type,
+  void initializeValues(SoftmaxDescriptor *user_params, cudnnDataType_t data_type,
                         cudnnTensorFormat_t tensor_format, int batch_size,
                         LayerDimension &output_size);
   void allocateSpace(size_t &free_bytes);

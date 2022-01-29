@@ -9,29 +9,23 @@
 #include "neural_net.cuh"
 
 template <typename T>
-__global__ void computeSoftmaxLoss(T *O, int *y, float *loss, int batch_size,
-                                   int num_classes, float eps)
-{
+__global__ void computeSoftmaxLoss(T *O, int *y, float *loss, int batch_size, int num_classes,
+                                   float eps) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
 
-  if (i >= batch_size)
-    return;
+  if (i >= batch_size) return;
 
   loss[i] = -logf(O[i * num_classes + y[i]] + eps);
 }
 
-float NeuralNet::computeLoss()
-{
-  if (layer_type[num_layers - 1] == SOFTMAX)
-  {
+float NeuralNet::computeLoss() {
+  if (layer_type[num_layers - 1] == SOFTMAX) {
     if (data_type == CUDNN_DATA_FLOAT)
       computeSoftmaxLoss<float><<<ceil(1.0 * batch_size / BW), BW>>>(
-          (float *)layer_input[num_layers], this->y, loss, batch_size,
-          num_classes, softmax_eps);
+          (float *)layer_input[num_layers], this->y, loss, batch_size, num_classes, softmax_eps);
     else if (data_type == CUDNN_DATA_DOUBLE)
       computeSoftmaxLoss<double><<<ceil(1.0 * batch_size / BW), BW>>>(
-          (double *)layer_input[num_layers], this->y, loss, batch_size,
-          num_classes, softmax_eps);
+          (double *)layer_input[num_layers], this->y, loss, batch_size, num_classes, softmax_eps);
   }
 
   thrust::device_ptr<float> ptrc(loss);
