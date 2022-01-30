@@ -13,7 +13,7 @@ class Metrics {
 
  public:
   int num_correct;
-  float overhead;
+  float *overhead;
   float train_time;
   std::vector<float> loss;
   std::vector<int> val_acc;

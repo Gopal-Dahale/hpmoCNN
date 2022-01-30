@@ -31,28 +31,63 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
 
   cudaMemGetInfo(&free_bytes, &total_bytes);
   init_free_bytes = free_bytes;
-  // std::cout << "Free gigabytes at start: "
-  // << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
 
   if (data_type == DATA_FLOAT) {
     this->data_type = CUDNN_DATA_FLOAT;
     data_type_size = sizeof(float);
-  }
-
-  else if (data_type == DATA_DOUBLE) {
+  } else if (data_type == DATA_DOUBLE) {
     this->data_type = CUDNN_DATA_DOUBLE;
     data_type_size = sizeof(double);
   }
 
-  if (tensor_format == TENSOR_NCHW)
+  if (tensor_format == TENSOR_NCHW) {
     this->tensor_format = CUDNN_TENSOR_NCHW;
-  else if (tensor_format == TENSOR_NHWC)
+  } else if (tensor_format == TENSOR_NHWC) {
     this->tensor_format = CUDNN_TENSOR_NHWC;
+  }
 
   this->batch_size = batch_size;
   this->softmax_eps = softmax_eps;
   this->init_std_dev = init_std_dev;
 
+  init_layers(layers, update_rule);
+
+  cudaMemGetInfo(&free_bytes, &total_bytes);
+  std::cout << "Free gigabytes just before allocate space: "
+            << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+
+  allocate_mem_for_layers(layers);
+  cudaDeviceSynchronize();
+  cudaMemGetInfo(&free_bytes, &total_bytes);
+  std::cout << "Free gigabytes just after allocate space: "
+            << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+
+  // Very small - could be allocated initially itself
+  cudaMallocManaged((void **)&y, batch_size * sizeof(int));
+  cudaMallocManaged((void **)&pred_y, batch_size * sizeof(int));
+  cudaMallocManaged((void **)&loss, batch_size * sizeof(float));
+  cudaMallocManaged(&one_vec, batch_size * data_type_size);
+
+  if (this->data_type == CUDNN_DATA_FLOAT) {
+    fillValue<float><<<ceil(1.0 * batch_size / BW), BW>>>((float *)one_vec, batch_size, 1);
+  } else {
+    fillValue<double><<<ceil(1.0 * batch_size / BW), BW>>>((double *)one_vec, batch_size, 1);
+  }
+
+  allocate_workspace_for_layers(layers);
+
+  cudaDeviceSynchronize();
+  cudaMemGetInfo(&free_bytes, &total_bytes);
+
+  cudaDeviceSynchronize();
+
+  size_t temp_free_bytes;
+  cudaMemGetInfo(&temp_free_bytes, &total_bytes);
+  std::cout << "Free gigabytes just before end of NeuralNet: "
+            << temp_free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+}
+
+void NeuralNet::init_layers(std::vector<LayerSpecifier> &layers, UpdateRule update_rule) {
   num_layers = layers.size();
 
   // Allocation of space for input to each layer
@@ -101,20 +136,16 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
 
   h_layer_input = (void **)malloc((num_layers + 1) * sizeof(void *));  // host
   offloaded = (bool *)calloc((num_layers + 1), sizeof(bool));          // Offloaded layers index
+}
 
-  cudaMemGetInfo(&free_bytes, &total_bytes);
-  std::cout << "Free gigabytes just before allocate space: "
-            << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
-
+void NeuralNet::allocate_mem_for_layers(std::vector<LayerSpecifier> &layers) {
   // Allocate space for parameters
   for (int i = 0; i < num_layers; i++) {
     size_t input_size;
     if (layers[i].type == CONV) {
-      // std::cout << i << " ";
       ConvDescriptor *user_params = (ConvDescriptor *)layers[i].params;
       ((ConvLayerParams *)params[i])
           ->allocateSpace(curand_gen, this->data_type, data_type_size, init_std_dev, free_bytes);
-
       input_size =
           batch_size * user_params->input_channels * user_params->input_h * user_params->input_w;
       if (i == 0) {
@@ -123,7 +154,6 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
         input_w = user_params->input_w;
       }
     } else if (layers[i].type == FULLY_CONNECTED) {
-      // std::cout << i << " ";
       FCDescriptor *user_params = (FCDescriptor *)layers[i].params;
       ((FCLayerParams *)params[i])
           ->allocateSpace(curand_gen, this->data_type, data_type_size, init_std_dev, free_bytes);
@@ -165,34 +195,11 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
       }
       if (i == num_layers - 1) num_classes = user_params->channels;
     }
-
-    //     cudaMallocManaged(&layer_input[i], input_size * data_type_size);
-    //     cudaMallocManaged(&dlayer_input[i], input_size * data_type_size);
     layer_input_size[i] = input_size;
   }
-  // size_t total_feature_map_size = 0;
-  // size_t total_workspace_size = 0;
+}
 
-  // total_workspace_size /= (1024.0 * 1024.0 * 1024.0);
-
-  // total_feature_map_size *= data_type_size;
-  // total_feature_map_size /= (1024.0 * 1024.0 * 1024.0);
-  cudaDeviceSynchronize();
-  cudaMemGetInfo(&free_bytes, &total_bytes);
-  std::cout << "Free gigabytes just after allocate space: "
-            << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
-
-  // Very small - could be allocated initially itself
-  cudaMallocManaged((void **)&y, batch_size * sizeof(int));
-  cudaMallocManaged((void **)&pred_y, batch_size * sizeof(int));
-  cudaMallocManaged((void **)&loss, batch_size * sizeof(float));
-  cudaMallocManaged(&one_vec, batch_size * data_type_size);
-
-  if (this->data_type == CUDNN_DATA_FLOAT)
-    fillValue<float><<<ceil(1.0 * batch_size / BW), BW>>>((float *)one_vec, batch_size, 1);
-  else
-    fillValue<double><<<ceil(1.0 * batch_size / BW), BW>>>((double *)one_vec, batch_size, 1);
-
+void NeuralNet::allocate_workspace_for_layers(std::vector<LayerSpecifier> &layers) {
   // Allocate space for workspace
   size_t cur_workspace_size_1, cur_workspace_size_2, cur_workspace_size_3, cur_workspace_size;
   this->workspace_size = 0;
@@ -209,14 +216,4 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
       if (cur_workspace_size > workspace_size) this->workspace_size = cur_workspace_size;
     }
   }
-
-  cudaDeviceSynchronize();
-  cudaMemGetInfo(&free_bytes, &total_bytes);
-
-  cudaDeviceSynchronize();
-
-  size_t temp_free_bytes;
-  cudaMemGetInfo(&temp_free_bytes, &total_bytes);
-  std::cout << "Free gigabytes just before end of NeuralNet: "
-            << temp_free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
 }

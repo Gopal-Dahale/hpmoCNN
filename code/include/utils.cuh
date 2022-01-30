@@ -51,50 +51,8 @@
     }                                                                              \
   }
 
-#define checkCNMEM(expression)                                                     \
-  {                                                                                \
-    cnmemStatus_t status = (expression);                                           \
-    if (status != CNMEM_STATUS_SUCCESS) {                                          \
-      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " \
-                << cnmemGetErrorString(status) << std::endl;                       \
-      std::exit(EXIT_FAILURE);                                                     \
-    }                                                                              \
-  }
-
-#define checkCNMEMRet(expression)                                                  \
-  {                                                                                \
-    cnmemStatus_t status = (expression);                                           \
-    if (status != CNMEM_STATUS_SUCCESS) {                                          \
-      if (status == CNMEM_STATUS_OUT_OF_MEMORY) {                                  \
-        return false;                                                              \
-      }                                                                            \
-      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " \
-                << cnmemGetErrorString(status) << std::endl;                       \
-      std::exit(EXIT_FAILURE);                                                     \
-    }                                                                              \
-  }
-
-#define checkCNMEMSim(expression, req_size, max_consume, free_bytes, action, flag) \
-  {                                                                                \
-    cnmemStatus_t status = (expression);                                           \
-    if (status != CNMEM_STATUS_SUCCESS) {                                          \
-      if (status == CNMEM_STATUS_OUT_OF_MEMORY) {                                  \
-        flag = true;                                                               \
-        size_t largest_free_block_size = 0;                                        \
-        cnmemGetLargestFreeBlockSize(largest_free_block_size, NULL);               \
-        max_consume = req_size - largest_free_block_size + max_consume;            \
-        max_consume = (max_consume > free_bytes) ? free_bytes : max_consume;       \
-        action;                                                                    \
-      }                                                                            \
-      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " \
-                << cnmemGetErrorString(status) << std::endl;                       \
-      std::exit(EXIT_FAILURE);                                                     \
-    }                                                                              \
-  }
-
 struct LayerDimension {
   int N, C, H, W;
-
   int getTotalSize();
 };
 
@@ -106,23 +64,5 @@ __global__ void fillValue(T *v, int size, int value) {
 }
 
 void outOfMemory();
-
-struct CnmemSpace {
-  size_t free_bytes;
-  size_t initial_free_bytes;
-  bool out_of_memory;
-
-  enum Op { ADD, SUB };
-
-  CnmemSpace(size_t free_bytes);
-
-  void updateSpace(Op op, size_t size);
-
-  bool isAvailable();
-
-  size_t getConsumed();
-
-  void updateMaxConsume(size_t &max_consume);
-};
 
 #endif

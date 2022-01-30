@@ -28,6 +28,28 @@ struct comp {
 };
 
 class NeuralNet {
+ private:
+  void init_layers(std::vector<LayerSpecifier> &, UpdateRule);
+  void allocate_mem_for_layers(std::vector<LayerSpecifier> &);
+  void allocate_workspace_for_layers(std::vector<LayerSpecifier> &);
+  void max_heap_policy(std::vector<std::pair<size_t, size_t>> &, std::vector<int> &, int &);
+  void conv_forward(int &, float &, float &);
+  void fc_forward(int &, float &, float &, float &, float &, double &, double &);
+  void pooling_forward(int &, float &, float &);
+  void activation_forward(int &, float &, float &);
+  void softmax_forward(int &, float &, float &);
+  void forward_prop(bool &, std::vector<std::pair<size_t, size_t>> &, float &, float &, float &,
+                    float &, double &, double &, std::vector<float> &, float *);
+  void backward_prop(void *, float &, float &, float &, float &, double &, double &,
+                     std::vector<float> &, float *, double &);
+  void softmax_loss_backward();
+  void prefetch_policy(int &, void *);
+  void conv_backward(int &, float &, float &, double &);
+  void fc_backward(int &, float &, float &, float &, float &, double &, double &, double &);
+  void pooling_backward(int &, float &, float &);
+  void activation_backward(int &, float &, float &);
+  void softmax_backward(int &, float &, float &);
+
  public:
   std::ofstream mem_usage;
   void **layer_input, **dlayer_input, **params, **h_layer_input;
@@ -60,14 +82,11 @@ class NeuralNet {
 
   cudaStream_t stream_compute, stream_memory;
 
-  // void **h_layer_input;
-
   NeuralNet();
 
   NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, int batch_size,
             TensorFormat tensor_format, float softmax_eps, float init_std_dev,
             UpdateRule update_rule);
-
   void getLoss(void *X, int *y, double learning_rate, std::vector<float> &fwd_vdnn_lag,
                std::vector<float> &bwd_vdnn_lag,
                std::vector<std::pair<size_t, size_t>> &offload_mem, bool train = true,
@@ -75,11 +94,8 @@ class NeuralNet {
   void getLoss(void *X, int *y, double learning_rate,
                std::vector<std::pair<size_t, size_t>> &offload_mem, bool train = true,
                int *correct_count = NULL, float *loss = NULL, float *overhead = NULL);
-
   void compareOutputCorrect(int *correct_count, int *y);
-
   float computeLoss();
-
   void save(std::string path);
   void load(std::string path);
 };

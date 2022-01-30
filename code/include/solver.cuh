@@ -1,8 +1,9 @@
 #ifndef SOLVER
 #define SOLVER
 
+#include "datasets/mnist224.cuh"
+#include "metrics.cuh"
 #include "neural_net.cuh"
-
 class Solver {
  public:
   NeuralNet *model;
@@ -16,11 +17,9 @@ class Solver {
   int num_features;
   cudaEvent_t start, stop;
 
-  Solver(NeuralNet *model, void *X_train, int *y_train, void *X_val, int *y_val, int num_epoch,
-         UpdateRule update_rule, double learning_rate, double learning_rate_decay, int num_train,
-         int num_val);
-  void train(std::vector<float> &loss, std::vector<int> &val_acc, std::vector<float> &batch_times,
-             float *overhead, std::vector<std::pair<size_t, size_t>> &offload_mem);
+  Solver(NeuralNet *model, MNIST224 &mnist224, int num_epoch, UpdateRule update_rule,
+         double learning_rate, double learning_rate_decay, int num_train, int num_val);
+  void train(Metrics &);
   float step(int start_X, int start_y, std::vector<float> &fwd_vdnn_lag,
              std::vector<float> &bwd_vdnn_lag, int *correct_count, bool train, float *overhead,
              std::vector<std::pair<size_t, size_t>> &offload_mem);

@@ -102,15 +102,13 @@ int main(int argc, char *argv[]) {
   /*************************** Train & Test ***************************/
   NeuralNet net(layer_specifier, DATA_FLOAT, batch_size, TENSOR_NCHW, softmax_eps, init_std_dev,
                 SGD);
-  Solver solver(&net, (void *)mnist224.f_train_images, mnist224.f_train_labels,
-                (void *)mnist224.f_train_images, mnist224.f_train_labels, num_epoch, SGD,
-                learning_rate, learning_rate_decay, num_train, num_train);
+  Solver solver(&net, mnist224, num_epoch, SGD, learning_rate, learning_rate_decay, num_train,
+                num_train);
   Metrics metrics(&net, neural_net, configs);
   GpuTimer timer;
 
   timer.start();
-  solver.train(metrics.loss, metrics.val_acc, metrics.batch_times, &metrics.overhead,
-               metrics.offload_mem);
+  solver.train(metrics);
   timer.stop();
   metrics.train_time = timer.elapsed();
 

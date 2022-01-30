@@ -15,9 +15,9 @@ struct GpuTimer {
     cudaEventDestroy(stop_event);
   }
 
-  void start() { cudaEventRecord(start_event, 0); }
+  void start(const cudaStream_t &stream = (cudaStream_t)0) { cudaEventRecord(start_event, stream); }
 
-  void stop() { cudaEventRecord(stop_event, 0); }
+  void stop(const cudaStream_t &stream = (cudaStream_t)0) { cudaEventRecord(stop_event, stream); }
 
   float elapsed() {
     float elapsed;
