@@ -2,6 +2,8 @@
 #define VGG_116
 #include <vector>
 
+#include "neural_net.cuh"
+
 class VGG116 {
  public:
   std::vector<LayerSpecifier> layer_specifier;

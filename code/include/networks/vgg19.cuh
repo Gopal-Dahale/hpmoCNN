@@ -2,6 +2,8 @@
 #define VGG_19
 #include <vector>
 
+#include "neural_net.cuh"
+
 class VGG19 {
  public:
   // VGG NET
