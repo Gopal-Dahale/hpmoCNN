@@ -1,6 +1,8 @@
 NN_DIR = src/neural_net
+DATASETS_DIR = src/datasets
 NEURAL_NET = $(NN_DIR)/neural_net.cu $(NN_DIR)/get_loss.cu $(NN_DIR)/compute_loss.cu $(NN_DIR)/compare_output_correct.cu $(NN_DIR)/save_and_load.cu
-SOURCE	= src/utils.cu src/user_iface.cu src/solver.cu $(NEURAL_NET) src/layer_params.cu src/vgg16.cu
+DATASETS = $(DATASETS_DIR)/mnist224.cu
+SOURCE	= src/utils.cu src/user_iface.cu src/solver.cu $(NEURAL_NET) $(DATASETS) src/layer_params.cu src/vgg16.cu src/metrics.cu src/parser.cu
 HEADER	= 
 OUT	= main
 CC	 = nvcc
