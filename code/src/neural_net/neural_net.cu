@@ -200,7 +200,8 @@ void NeuralNet::allocate_mem_for_layers(std::vector<LayerSpecifier> &layers) {
       if (i == num_layers - 1) num_classes = user_params->channels;
     }
     layer_input_size[i] = input_size;
-    LOGD << "Layer " << i << " input size: " << input_size;
+    LOGD << "Layer " << i << " input size: " << std::setprecision(2)
+         << input_size / (1024.0 * 1024.0) << " MB";
   }
   LOGD << "Allocating memory for layers done";
 }
@@ -223,6 +224,7 @@ void NeuralNet::allocate_workspace_for_layers(std::vector<LayerSpecifier> &layer
       if (cur_workspace_size > workspace_size) this->workspace_size = cur_workspace_size;
     }
   }
-  LOGD << "Workspace size for layers: " << this->workspace_size;
+  LOGD << "Workspace size for layers: " << std::setprecision(2)
+       << this->workspace_size / (1024.0 * 1024.0) << " MB";
   LOGD << "Allocating workspace for layers done";
 }

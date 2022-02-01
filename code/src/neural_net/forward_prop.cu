@@ -20,8 +20,8 @@ void NeuralNet::max_heap_policy(std::vector<std::pair<size_t, size_t>> &offload_
 
   if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
     LOGD << "Not enough memory to allocate layer " << i + 2;
-    LOGD << "Free memory: " << free_memory;
-    LOGD << "Layer size: " << layer_size;
+    LOGD << "Free memory: " << std::setprecision(2) << free_memory / (1024.0 * 1024.0) << " MB";
+    LOGD << "Layer size: " << std::setprecision(2) << layer_size / (1024.0 * 1024.0) << " MB";
 
     offload_mem.push_back({free_memory /*(reserved_memory/(i+1))*/, layer_size});
 
@@ -50,7 +50,7 @@ void NeuralNet::max_heap_policy(std::vector<std::pair<size_t, size_t>> &offload_
       layer_input_pq.pop();  // Remove the layer from the heap
       free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;  // (reserved_memory/(i+1));
     }
-    LOGD << "Free Memory: " << free_memory;
+    LOGD << "Free Memory: " << std::setprecision(2) << free_memory / (1024.0 * 1024.0) << " MB";
     /*************************************************************/
   }
 }
@@ -67,7 +67,8 @@ void NeuralNet::forward_prop(bool &train, std::vector<std::pair<size_t, size_t>>
     }
     GpuTimer timer;
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
-    LOGD << "Allocated layer " << i + 1 << " Size: " << layer_input_size[i + 1];
+    LOGD << "Allocated layer " << i + 1 << " Size: " << std::setprecision(2)
+         << layer_input_size[i + 1] * data_type_size / (1024.0 * 1024.0) << " MB";
     free_gpu_mem();
 
     // Push the layer_input_size + weights_size to the heap of ith layer
@@ -145,7 +146,8 @@ void NeuralNet::conv_forward(int &i, float &alpha, float &beta) {
   ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
   this->workspace_size = cur_params->fwd_workspace_size;
   cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size);
-  LOGD << "Allocated workspace of layer " << i << " Size: " << cur_params->fwd_workspace_size;
+  LOGD << "Allocated workspace of layer " << i << " Size: " << std::setprecision(2)
+       << cur_params->fwd_workspace_size / (1024.0 * 1024.0) << " MB";
 
   // Computation
   checkCUDNN(cudnnConvolutionForward(cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],

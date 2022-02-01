@@ -26,7 +26,8 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
   cudaMalloc(&layer_input[0], layer_input_size[0] * data_type_size);
   cudaMemcpy(layer_input[0], X, batch_size * input_channels * input_h * input_w * data_type_size,
              cudaMemcpyHostToDevice);
-  LOGD << "Allocated layer " << 0 << " Size: " << layer_input_size[0];
+  LOGD << "Allocated layer " << 0 << " Size: " << std::setprecision(2)
+       << layer_input_size[0] * data_type_size / (1024.0 * 1024.0) << " MB";
   free_gpu_mem();
 
   if (train == true) {
