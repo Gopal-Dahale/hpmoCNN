@@ -14,7 +14,7 @@ LOG_FILE_NAME = Log.txt
 LFLAGS	 = 
 
 all: $(SOURCE)
-	rm $(LOG_FILE_NAME)
+	rm -r $(LOG_FILE_NAME)
 	$(CC) -o $(OUT) $(FLAGS) $(SOURCE) -lcublas -lcudnn -lcurand
 
 clean:
