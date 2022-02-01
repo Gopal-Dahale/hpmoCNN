@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 
 #define BW (16 * 16)
 #define CNMEM_GRANULARITY 512
@@ -26,7 +27,7 @@
     cudnnStatus_t status = (expression);                                           \
     if (status != CUDNN_STATUS_SUCCESS) {                                          \
       std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " \
-                << cudnnGetErrorString(status) << std::endl;                       \
+                << cudnnGetErrorString(status) << '\n';                            \
       std::exit(EXIT_FAILURE);                                                     \
     }                                                                              \
   }
@@ -36,7 +37,7 @@
     cublasStatus_t status = (expression);                                          \
     if (status != CUBLAS_STATUS_SUCCESS) {                                         \
       std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " \
-                << _cudaGetErrorEnum(status) << std::endl;                         \
+                << _cudaGetErrorEnum(status) << '\n';                              \
       std::exit(EXIT_FAILURE);                                                     \
     }                                                                              \
   }
@@ -46,9 +47,18 @@
     curandStatus_t status = (expression);                                          \
     if (status != CURAND_STATUS_SUCCESS) {                                         \
       std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " \
-                << _cudaGetErrorEnum(status) << std::endl;                         \
+                << _cudaGetErrorEnum(status) << '\n';                              \
       std::exit(EXIT_FAILURE);                                                     \
     }                                                                              \
+  }
+
+#define free_gpu_mem()                                                                           \
+  {                                                                                              \
+    size_t fb;                                                                                   \
+    size_t tb;                                                                                   \
+    cudaMemGetInfo(&fb, &tb);                                                                    \
+    LOGD << "Free GPU memory: " << std::setprecision(2) << fb / 1024.0 * 1024.0 << " MB";        \
+    LOGD << "Percent of free GPU memory: " << std::setprecision(2) << (fb / (double)tb) * 100.0; \
   }
 
 struct LayerDimension {

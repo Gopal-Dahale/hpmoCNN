@@ -7,7 +7,6 @@
 #include <string>
 
 #include "neural_net.cuh"
-#include "logger.cuh"
 
 NeuralNet::NeuralNet() {
   this->num_layers = 0;
@@ -17,10 +16,10 @@ NeuralNet::NeuralNet() {
 NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, int batch_size,
                      TensorFormat tensor_format, float softmax_eps, float init_std_dev,
                      UpdateRule update_rule) {
-  Logger logger;
   cudaStreamCreate(&stream_compute);
   cudaStreamCreate(&stream_memory);
   LOGD << "Created streams";
+
   // create handle
   checkCUDNN(cudnnCreate(&cudnn_handle));
   checkCUDNN(cudnnSetStream(cudnn_handle, stream_compute));
@@ -91,6 +90,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
 
 void NeuralNet::init_layers(std::vector<LayerSpecifier> &layers, UpdateRule update_rule) {
   num_layers = layers.size();
+  LOGD << "Initializing " << num_layers << " layers";
 
   // Allocation of space for input to each layer
   layer_input = (void **)malloc((num_layers + 1) * sizeof(void *));
@@ -138,9 +138,11 @@ void NeuralNet::init_layers(std::vector<LayerSpecifier> &layers, UpdateRule upda
 
   h_layer_input = (void **)malloc((num_layers + 1) * sizeof(void *));  // host
   offloaded = (bool *)calloc((num_layers + 1), sizeof(bool));          // Offloaded layers index
+  LOGD << "Initiliazing layers done";
 }
 
 void NeuralNet::allocate_mem_for_layers(std::vector<LayerSpecifier> &layers) {
+  LOGD << "Allocating memory for layers";
   // Allocate space for parameters
   for (int i = 0; i < num_layers; i++) {
     size_t input_size;
@@ -198,10 +200,13 @@ void NeuralNet::allocate_mem_for_layers(std::vector<LayerSpecifier> &layers) {
       if (i == num_layers - 1) num_classes = user_params->channels;
     }
     layer_input_size[i] = input_size;
+    LOGD << "Layer " << i << " input size: " << input_size;
   }
+  LOGD << "Allocating memory for layers done";
 }
 
 void NeuralNet::allocate_workspace_for_layers(std::vector<LayerSpecifier> &layers) {
+  LOGD << "Allocating workspace for layers";
   // Allocate space for workspace
   size_t cur_workspace_size_1, cur_workspace_size_2, cur_workspace_size_3, cur_workspace_size;
   this->workspace_size = 0;
@@ -218,4 +223,6 @@ void NeuralNet::allocate_workspace_for_layers(std::vector<LayerSpecifier> &layer
       if (cur_workspace_size > workspace_size) this->workspace_size = cur_workspace_size;
     }
   }
+  LOGD << "Workspace size for layers: " << this->workspace_size;
+  LOGD << "Allocating workspace for layers done";
 }

@@ -19,6 +19,10 @@ void NeuralNet::max_heap_policy(std::vector<std::pair<size_t, size_t>> &offload_
   }
 
   if ((i + 2 < num_layers) && (free_memory <= layer_size)) {
+    LOGD << "Not enough memory to allocate layer " << i + 2;
+    LOGD << "Free memory: " << free_memory;
+    LOGD << "Layer size: " << layer_size;
+
     offload_mem.push_back({free_memory /*(reserved_memory/(i+1))*/, layer_size});
 
     /************* Heap logic with workspace fix ********************/
@@ -26,6 +30,7 @@ void NeuralNet::max_heap_policy(std::vector<std::pair<size_t, size_t>> &offload_
     // While the free memory is less than or equal to the (i+2)th layer
     // input size or the heap is not empty
     while ((free_memory <= layer_size) && (!layer_input_pq.empty())) {
+      LOGD << "Deallocated layer " << layer_input_pq.top().second;
       int temp = layer_input_pq.top().second;  // Get the layer index on top
                                                // of the heap
       free_layer.push_back(temp);              // Add the layer index to the free layer
@@ -45,6 +50,7 @@ void NeuralNet::max_heap_policy(std::vector<std::pair<size_t, size_t>> &offload_
       layer_input_pq.pop();  // Remove the layer from the heap
       free_memory = temp_free_bytes - buffer_bytes - buffer_bytes;  // (reserved_memory/(i+1));
     }
+    LOGD << "Free Memory: " << free_memory;
     /*************************************************************/
   }
 }
@@ -52,6 +58,7 @@ void NeuralNet::max_heap_policy(std::vector<std::pair<size_t, size_t>> &offload_
 void NeuralNet::forward_prop(bool &train, std::vector<std::pair<size_t, size_t>> &offload_mem,
                              float &alpha, float &beta, float &Salpha, float &Sbeta, double &Dalpha,
                              double &Dbeta, std::vector<float> &fwd_dnn_lag, float *overhead) {
+  LOGD << "Forward Propagation Starts";
   std::vector<int> free_layer;  // Which layers to free
   for (int i = 0; i < num_layers; i++) {
     float milli = 0;
@@ -60,6 +67,8 @@ void NeuralNet::forward_prop(bool &train, std::vector<std::pair<size_t, size_t>>
     }
     GpuTimer timer;
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
+    LOGD << "Allocated layer " << i + 1 << " Size: " << layer_input_size[i + 1];
+    free_gpu_mem();
 
     // Push the layer_input_size + weights_size to the heap of ith layer
     if (i > 0) {
@@ -121,18 +130,22 @@ void NeuralNet::forward_prop(bool &train, std::vector<std::pair<size_t, size_t>>
     timer.stop();
     milli += timer.elapsed();
     fwd_dnn_lag.push_back(milli);
-    if (overhead != NULL) *overhead += milli;
+    if (overhead != NULL) {
+      *overhead += milli;
+    }
     if (train == false && offloaded[i] == false) {
       cudaFree(layer_input[i]);
     }
     /**********************************************************************/
   }
+  LOGD << "Forward Propagation Ends";
 }
 
 void NeuralNet::conv_forward(int &i, float &alpha, float &beta) {
   ConvLayerParams *cur_params = (ConvLayerParams *)params[i];
   this->workspace_size = cur_params->fwd_workspace_size;
   cudaMalloc(&(this->workspace), cur_params->fwd_workspace_size);
+  LOGD << "Allocated workspace of layer " << i << " Size: " << cur_params->fwd_workspace_size;
 
   // Computation
   checkCUDNN(cudnnConvolutionForward(cudnn_handle, &alpha, cur_params->input_tensor, layer_input[i],

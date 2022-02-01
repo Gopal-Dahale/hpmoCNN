@@ -21,9 +21,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
                         std::vector<float> &bwd_dnn_lag,
                         std::vector<std::pair<size_t, size_t>> &offload_mem, bool train,
                         int *correct_count, float *scalar_loss, float *overhead) {
+  LOGD << "getLoss";
+  free_gpu_mem();
   cudaMalloc(&layer_input[0], layer_input_size[0] * data_type_size);
   cudaMemcpy(layer_input[0], X, batch_size * input_channels * input_h * input_w * data_type_size,
              cudaMemcpyHostToDevice);
+  LOGD << "Allocated layer " << 0 << " Size: " << layer_input_size[0];
+  free_gpu_mem();
 
   if (train == true) {
     cudaMemcpy(this->y, y, batch_size * data_type_size, cudaMemcpyHostToDevice);
@@ -34,6 +38,7 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
   double Dalpha = 1.0, Dbeta = 0.0;
   forward_prop(train, offload_mem, alpha, beta, Salpha, Sbeta, Dalpha, Dbeta, fwd_dnn_lag,
                overhead);
+
   GpuTimer timer;
   timer.start();
   while (!layer_input_pq.empty()) {
@@ -53,15 +58,22 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
 
   *scalar_loss = computeLoss();  // Loss Computation
 
+  free_gpu_mem();
   backward_prop(X, alpha, beta, Salpha, Sbeta, Dalpha, Dbeta, bwd_dnn_lag, overhead, learning_rate);
 
   for (int k = 0; k < num_layers; k++) {
-    if (layer_input[k] != NULL) cudaFree(layer_input[k]);
-    if (dlayer_input[k] != NULL) cudaFree(dlayer_input[k]);
+    if (layer_input[k] != NULL) {
+      cudaFree(layer_input[k]);
+    }
+    if (dlayer_input[k] != NULL) {
+      cudaFree(dlayer_input[k]);
+    }
   }
 
   // Make offloaded array to all false
   for (int c = 0; c < num_layers; c++) {
     offloaded[c] = false;
   }
+  free_gpu_mem();
+  LOGD << "getLoss Done";
 }

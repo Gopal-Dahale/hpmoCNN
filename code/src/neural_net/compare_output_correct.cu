@@ -54,7 +54,6 @@ void NeuralNet::compareOutputCorrect(int *correct_count, int *y) {
         tempd += 1;
       }
     }
-    std::cout << "tempd: " << tempd << "\n";
   }
   p++;
 }
