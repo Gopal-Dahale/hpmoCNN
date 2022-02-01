@@ -15,14 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "datasets/mnist224.cuh"
-#include "gpu_timer.cuh"
-#include "metrics.cuh"
-#include "networks/vgg116.cuh"
-#include "networks/vgg16.cuh"
-#include "networks/vgg19.cuh"
-#include "parser.cuh"
-#include "solver.cuh"
+#include "hpmo_cnn.cuh"
 
 using namespace std;
 
