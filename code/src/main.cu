@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "hpmo_cnn.cuh"
+#include "logger.cuh"
 
 using namespace std;
 
@@ -41,6 +42,7 @@ auto get_layer_specifier(string neural_net) {
 }
 
 int main(int argc, char *argv[]) {
+  Logger logger;
   /******************* Parse command line arguments ********************/
   Parser parser;
   auto options = parser.init();
@@ -56,7 +58,7 @@ int main(int argc, char *argv[]) {
   num_train = result["num-train"].as<int>();
   num_test = result["num-test"].as<int>();
 
-  cout << "Reading MNIST dataset...  ";
+  LOGD << "Reading MNIST dataset...  ";
 
   string path_train_images = "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
   string path_train_labels = "data/train-labels.idx1-ubyte";
@@ -67,7 +69,7 @@ int main(int argc, char *argv[]) {
                     path_test_labels);
   mnist224.read_mnist_224();
   mnist224.normalize();
-  cout << "Done" << endl;
+  LOGD << "Done";
 
   auto neural_net = result["net"].as<std::string>();
   auto layer_specifier = get_layer_specifier(neural_net);

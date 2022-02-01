@@ -7,6 +7,7 @@
 #include <string>
 
 #include "neural_net.cuh"
+#include "logger.cuh"
 
 NeuralNet::NeuralNet() {
   this->num_layers = 0;
@@ -16,9 +17,10 @@ NeuralNet::NeuralNet() {
 NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, int batch_size,
                      TensorFormat tensor_format, float softmax_eps, float init_std_dev,
                      UpdateRule update_rule) {
+  Logger logger;
   cudaStreamCreate(&stream_compute);
   cudaStreamCreate(&stream_memory);
-
+  LOGD << "Created streams";
   // create handle
   checkCUDNN(cudnnCreate(&cudnn_handle));
   checkCUDNN(cudnnSetStream(cudnn_handle, stream_compute));
