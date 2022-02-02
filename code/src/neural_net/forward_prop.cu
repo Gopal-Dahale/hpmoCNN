@@ -72,7 +72,6 @@ void NeuralNet::forward_prop(bool &train, std::vector<std::pair<size_t, size_t>>
     cudaMalloc(&layer_input[i + 1], layer_input_size[i + 1] * data_type_size);
     std::cout << "Allocated layer " << i + 1 << " Size: " << std::setprecision(2)
               << layer_input_size[i + 1] * data_type_size / (1024.0 * 1024.0) << " MB" << '\n';
-    free_gpu_mem();
 
     // Push the layer_input_size + weights_size to the heap of ith layer
     if (i > 0) {

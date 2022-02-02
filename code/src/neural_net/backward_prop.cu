@@ -57,7 +57,7 @@ void NeuralNet::backward_prop(void *X, float &alpha, float &beta, float &Salpha,
         dlayer_input[i] = dlayer_input[i + 1];
       }
       prefetch_policy(i, X);
-      free_gpu_mem();
+
       cudaMalloc(&dlayer_input[i], layer_input_size[i] * data_type_size);
     }
 
@@ -105,14 +105,12 @@ void NeuralNet::backward_prop(void *X, float &alpha, float &beta, float &Salpha,
     cudaFree(dlayer_input[i + 1]);
     std::cout << "Freed layer " << i + 1 << " Size " << std::setprecision(2)
               << layer_input_size[i + 1] * data_type_size / (1024.0 * 1024.0) << "MB" << '\n';
-    free_gpu_mem();
 
     if (i == 0) {
       cudaFree(layer_input[i]);
       cudaFree(dlayer_input[i]);
       std::cout << "Freed layer " << i << " Size " << std::setprecision(2)
                 << layer_input_size[i] * data_type_size / (1024.0 * 1024.0) << "MB" << '\n';
-      free_gpu_mem();
     }
   }
   std::cout << "Backward Propagation Ends" << '\n';
