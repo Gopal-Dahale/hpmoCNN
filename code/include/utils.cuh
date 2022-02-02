@@ -52,13 +52,15 @@
     }                                                                              \
   }
 
-#define free_gpu_mem()                                                                           \
-  {                                                                                              \
-    size_t fb;                                                                                   \
-    size_t tb;                                                                                   \
-    cudaMemGetInfo(&fb, &tb);                                                                    \
-    LOGD << "Free GPU memory: " << std::setprecision(2) << fb / (1024.0 * 1024.0) << " MB";      \
-    LOGD << "Percent of free GPU memory: " << std::setprecision(2) << (fb / (double)tb) * 100.0; \
+#define free_gpu_mem()                                                                          \
+  {                                                                                             \
+    size_t fb;                                                                                  \
+    size_t tb;                                                                                  \
+    cudaMemGetInfo(&fb, &tb);                                                                   \
+    std::cout << "Free GPU memory: " << std::setprecision(2) << fb / (1024.0 * 1024.0) << " MB" \
+              << '\n';                                                                          \
+    std::cout << "Percent of free GPU memory: " << std::setprecision(2)                         \
+              << (fb / (double)tb) * 100.0 << '\n';                                             \
   }
 
 struct LayerDimension {

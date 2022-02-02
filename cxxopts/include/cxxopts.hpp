@@ -542,7 +542,7 @@ namespace cxxopts
     // Otherwise manually instantiate the exception, print what() to stderr,
     // and exit
     T exception{text};
-    std::cerr << exception.what() << std::endl;
+    std::cerr << exception.what() << '\n';
     std::exit(EXIT_FAILURE);
 #endif
   }

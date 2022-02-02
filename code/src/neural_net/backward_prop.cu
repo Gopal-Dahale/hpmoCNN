@@ -30,9 +30,9 @@ void NeuralNet::softmax_loss_backward() {
 
 void NeuralNet::prefetch_policy(int &i, void *X) {
   if (offloaded[i - 1]) {
-    LOGD << "Prefetching layer " << i - 1 << " Size " << std::setprecision(2)
-         << layer_input_size[i - 1] * data_type_size / (1024.0 * 1024.0) << "MB"
-         << " from CPU";
+    std::cout << "Prefetching layer " << i - 1 << " Size " << std::setprecision(2)
+              << layer_input_size[i - 1] * data_type_size / (1024.0 * 1024.0) << "MB"
+              << " from CPU" << '\n';
     cudaMalloc(&layer_input[i - 1], layer_input_size[i - 1] * data_type_size);
     if (i - 1 != 0) {
       cudaMemcpyAsync(layer_input[i - 1], h_layer_input[i - 1],
@@ -48,7 +48,7 @@ void NeuralNet::prefetch_policy(int &i, void *X) {
 void NeuralNet::backward_prop(void *X, float &alpha, float &beta, float &Salpha, float &Sbeta,
                               double &Dalpha, double &Dbeta, std::vector<float> &bwd_dnn_lag,
                               float *overhead, double &learning_rate) {
-  LOGD << "Backward Propagation Starts";
+  std::cout << "Backward Propagation Starts" << '\n';
   cudaMalloc(&dlayer_input[num_layers], batch_size * num_classes * data_type_size);
 
   for (int i = num_layers - 1; i >= 0; i--) {
@@ -103,19 +103,19 @@ void NeuralNet::backward_prop(void *X, float &alpha, float &beta, float &Salpha,
 
     cudaFree(layer_input[i + 1]);
     cudaFree(dlayer_input[i + 1]);
-    LOGD << "Freed layer " << i + 1 << " Size " << std::setprecision(2)
-         << layer_input_size[i + 1] * data_type_size / (1024.0 * 1024.0) << "MB";
+    std::cout << "Freed layer " << i + 1 << " Size " << std::setprecision(2)
+              << layer_input_size[i + 1] * data_type_size / (1024.0 * 1024.0) << "MB" << '\n';
     free_gpu_mem();
 
     if (i == 0) {
       cudaFree(layer_input[i]);
       cudaFree(dlayer_input[i]);
-      LOGD << "Freed layer " << i << " Size " << std::setprecision(2)
-           << layer_input_size[i] * data_type_size / (1024.0 * 1024.0) << "MB";
+      std::cout << "Freed layer " << i << " Size " << std::setprecision(2)
+                << layer_input_size[i] * data_type_size / (1024.0 * 1024.0) << "MB" << '\n';
       free_gpu_mem();
     }
   }
-  LOGD << "Backward Propagation Ends";
+  std::cout << "Backward Propagation Ends" << '\n';
 }
 
 void NeuralNet::conv_backward(int &i, float &alpha, float &beta, double &learning_rate) {
@@ -137,8 +137,8 @@ void NeuralNet::conv_backward(int &i, float &alpha, float &beta, double &learnin
   this->workspace_size = max(cur_params->bwd_filter_workspace_size, temp_data_wksp);
 
   cudaMalloc(&(this->workspace), this->workspace_size);
-  LOGD << "Allocated workspace of layer " << i << " Size: " << std::setprecision(2)
-       << this->workspace_size / (1024.0 * 1024.0) << "MB";
+  std::cout << "Allocated workspace of layer " << i << " Size: " << std::setprecision(2)
+            << this->workspace_size / (1024.0 * 1024.0) << "MB" << '\n';
 
   checkCUDNN(cudnnConvolutionBackwardBias(cudnn_handle, &alpha, cur_params->output_tensor,
                                           dlayer_input[i + 1], &beta, cur_params->bias_desc,

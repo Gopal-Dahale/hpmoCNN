@@ -4,7 +4,6 @@
 #include "datasets/mnist224.cuh"
 #include "metrics.cuh"
 #include "neural_net.cuh"
-#include "logger.cuh"
 class Solver {
  public:
   NeuralNet *model;
@@ -17,7 +16,6 @@ class Solver {
   int num_train_batches;
   int num_features;
   cudaEvent_t start, stop;
-  Logger logger;
 
   Solver(NeuralNet *model, MNIST224 &mnist224, int num_epoch, UpdateRule update_rule,
          double learning_rate, double learning_rate_decay, int num_train, int num_val);

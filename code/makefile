@@ -7,14 +7,11 @@ HEADER	=
 OUT	= main
 CC	 = nvcc
 INC_DIR_BASIC = ./include/
-INC_DIR_EXTERN = ../cxxopts/include/ 
-INC_DIR_LOGGER = ../plog/include/
-FLAGS	 = -I$(INC_DIR_BASIC) -I$(INC_DIR_EXTERN) -I$(INC_DIR_LOGGER)
-LOG_FILE_NAME = Log.txt
+INC_DIR_EXTERN = ../cxxopts/include/
+FLAGS	 = -I$(INC_DIR_BASIC) -I$(INC_DIR_EXTERN) 
 LFLAGS	 = 
 
 all: $(SOURCE)
-	rm -f $(LOG_FILE_NAME)
 	$(CC) -o $(OUT) $(FLAGS) $(SOURCE) -lcublas -lcudnn -lcurand
 
 clean:

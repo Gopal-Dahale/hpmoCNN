@@ -10,13 +10,13 @@ enum workspaceStatus_t { WORKSPACE_STATUS_SUCCESS, WORKSPACE_STATUS_OUT_OF_MEMOR
 
 const size_t WORKSPACE_SIZE_LIMIT = 6;  // 6GB
 
-#define checkWORKSPACE(expression)                                                               \
-  {                                                                                              \
-    workspaceStatus_t status = (expression);                                                     \
-    if (status != WORKSPACE_STATUS_SUCCESS) {                                                    \
-      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " << std::endl; \
-      std::exit(EXIT_FAILURE);                                                                   \
-    }                                                                                            \
+#define checkWORKSPACE(expression)                                                          \
+  {                                                                                         \
+    workspaceStatus_t status = (expression);                                                \
+    if (status != WORKSPACE_STATUS_SUCCESS) {                                               \
+      std::cerr << "Error in file " << __FILE__ << " on line " << __LINE__ << ": " << '\n'; \
+      std::exit(EXIT_FAILURE);                                                              \
+    }                                                                                       \
   }
 
 struct ConvLayerParams {

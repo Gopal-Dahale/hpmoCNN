@@ -180,25 +180,25 @@ is used, which is ',' by default. Ensure that you use no whitespaces between val
 those would be interpreted as the next command line option. Example for a command line option
 that can be parsed as a `std::vector<double>`:
 
-~~~
+```
 --my_list=1,-2.1,3,4.5
-~~~
+```
 
 ## Options specified multiple times
 
 The same option can be specified several times, with different arguments, which will all
 be recorded in order of appearance. An example:
 
-~~~
+```
 --use train --use bus --use ferry
-~~~
+```
 
 this is supported through the use of a vector of value for the option:
 
-~~~
+```
 options.add_options()
   ("use", "Usable means of transport", cxxopts::value<std::vector<std::string>>())
-~~~
+```
 
 ## Custom help
 
@@ -206,10 +206,10 @@ The string after the program name on the first line of the help can be
 completely replaced by calling `options.custom_help`. Note that you might
 also want to override the positional help by calling `options.positional_help`.
 
-
 ## Example
 
 Putting all together:
+
 ```cpp
 int main(int argc, char** argv)
 {
@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 
     if (result.count("help"))
     {
-      std::cout << options.help() << std::endl;
+      std::cout << options.help() << '\n';
       exit(0);
     }
     bool debug = result["debug"].as<bool>();
@@ -247,16 +247,16 @@ This is a header only library.
 
 The only build requirement is a C++ compiler that supports C++11 features such as:
 
-* regex
-* constexpr
-* default constructors
+- regex
+- constexpr
+- default constructors
 
 GCC >= 4.9 or clang >= 3.1 with libc++ are known to work.
 
 The following compilers are known not to work:
 
-* MSVC 2013
+- MSVC 2013
 
 # TODO list
 
-* Allow unrecognised options.
+- Allow unrecognised options.

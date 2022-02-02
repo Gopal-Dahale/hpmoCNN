@@ -21,13 +21,13 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
                         std::vector<float> &bwd_dnn_lag,
                         std::vector<std::pair<size_t, size_t>> &offload_mem, bool train,
                         int *correct_count, float *scalar_loss, float *overhead) {
-  LOGD << "getLoss";
+  std::cout << "getLoss" << '\n';
   free_gpu_mem();
   cudaMalloc(&layer_input[0], layer_input_size[0] * data_type_size);
   cudaMemcpy(layer_input[0], X, batch_size * input_channels * input_h * input_w * data_type_size,
              cudaMemcpyHostToDevice);
-  LOGD << "Allocated layer " << 0 << " Size: " << std::setprecision(2)
-       << layer_input_size[0] * data_type_size / (1024.0 * 1024.0) << " MB";
+  std::cout << "Allocated layer " << 0 << " Size: " << std::setprecision(2)
+            << layer_input_size[0] * data_type_size / (1024.0 * 1024.0) << " MB";
   free_gpu_mem();
 
   if (train == true) {
@@ -76,5 +76,5 @@ void NeuralNet::getLoss(void *X, int *y, double learning_rate, std::vector<float
     offloaded[c] = false;
   }
   free_gpu_mem();
-  LOGD << "getLoss Done";
+  std::cout << "getLoss Done" << '\n';
 }

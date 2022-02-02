@@ -16,7 +16,6 @@
 #include <vector>
 
 #include "hpmo_cnn.cuh"
-#include "logger.cuh"
 
 using namespace std;
 
@@ -30,19 +29,18 @@ auto get_layer_specifier(string neural_net) {
   if (neural_net == "vgg19") {
     VGG19 vgg19;
     layer_specifier = vgg19.layer_specifier;
-    std::cout << "Network: VGG19" << std::endl;
+    std::cout << "Network: VGG19" << '\n';
   } else if (neural_net == "vgg116") {
     VGG116 vgg116;
     layer_specifier = vgg116.layer_specifier;
-    std::cout << "Network: VGG116" << std::endl;
+    std::cout << "Network: VGG116" << '\n';
   } else {
-    std::cout << "Network: VGG16" << std::endl;
+    std::cout << "Network: VGG16" << '\n';
   }
   return layer_specifier;
 }
 
 int main(int argc, char *argv[]) {
-  Logger logger;
   /******************* Parse command line arguments ********************/
   Parser parser;
   auto options = parser.init();
@@ -50,7 +48,7 @@ int main(int argc, char *argv[]) {
 
   // Display the help message if the user requested it
   if (result.count("help")) {
-    std::cout << options.help() << std::endl;
+    std::cout << options.help() << '\n';
     exit(0);
   }
 
@@ -58,7 +56,7 @@ int main(int argc, char *argv[]) {
   num_train = result["num-train"].as<int>();
   num_test = result["num-test"].as<int>();
 
-  LOGD << "Reading MNIST dataset...  ";
+  std::cout << "Reading MNIST dataset...  " << '\n';
 
   string path_train_images = "/kaggle/input/mnist224by224testdataset/train-images-224by224-";
   string path_train_labels = "data/train-labels.idx1-ubyte";
@@ -69,7 +67,7 @@ int main(int argc, char *argv[]) {
                     path_test_labels);
   mnist224.read_mnist_224();
   mnist224.normalize();
-  LOGD << "Done";
+  std::cout << "Done" << '\n';
 
   auto neural_net = result["net"].as<std::string>();
   auto layer_specifier = get_layer_specifier(neural_net);
@@ -90,7 +88,7 @@ int main(int argc, char *argv[]) {
       {"num_train", num_train},         {"num_test", num_test}};
 
   for (auto &config : configs) {
-    cout << config.first << ": " << config.second << endl;
+    cout << config.first << ": " << config.second << '\n';
   }
 
   /*************************** Train & Test ***************************/
@@ -111,8 +109,8 @@ int main(int argc, char *argv[]) {
   solver.checkAccuracy(mnist224.f_test_images, mnist224.f_test_labels, num_test,
                        &metrics.num_correct);
 
-  std::cout << "TRAIN NUM CORRECT:" << metrics.num_correct << endl;
-  std::cout << "TEST NUM CORRECT:" << metrics.num_correct << endl;
+  std::cout << "TRAIN NUM CORRECT:" << metrics.num_correct << '\n';
+  std::cout << "TEST NUM CORRECT:" << metrics.num_correct << '\n';
 
   /*************************** Save metrics ***************************/
   metrics.save_layer_mem_usage();

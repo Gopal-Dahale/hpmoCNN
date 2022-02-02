@@ -19,7 +19,6 @@
 #include "layer_params.cuh"
 #include "user_iface.cuh"
 #include "utils.cuh"
-#include "logger.cuh"
 
 struct comp {
   constexpr bool operator()(std::pair<size_t, int> const &a,
@@ -82,7 +81,6 @@ class NeuralNet {
   int num_classes;
 
   cudaStream_t stream_compute, stream_memory;
-  Logger logger;
 
   NeuralNet();
 

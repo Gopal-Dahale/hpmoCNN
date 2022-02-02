@@ -18,7 +18,7 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
                      UpdateRule update_rule) {
   cudaStreamCreate(&stream_compute);
   cudaStreamCreate(&stream_memory);
-  LOGD << "Created streams";
+  std::cout << "Created streams" << '\n';
 
   // create handle
   checkCUDNN(cudnnCreate(&cudnn_handle));
@@ -55,13 +55,13 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
 
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "Free gigabytes just before allocate space: "
-            << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+            << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 
   allocate_mem_for_layers(layers);
   cudaDeviceSynchronize();
   cudaMemGetInfo(&free_bytes, &total_bytes);
   std::cout << "Free gigabytes just after allocate space: "
-            << free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+            << free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 
   // Very small - could be allocated initially itself
   cudaMallocManaged((void **)&y, batch_size * sizeof(int));
@@ -85,12 +85,12 @@ NeuralNet::NeuralNet(std::vector<LayerSpecifier> &layers, DataType data_type, in
   size_t temp_free_bytes;
   cudaMemGetInfo(&temp_free_bytes, &total_bytes);
   std::cout << "Free gigabytes just before end of NeuralNet: "
-            << temp_free_bytes / (1024.0 * 1024.0 * 1024.0) << std::endl;
+            << temp_free_bytes / (1024.0 * 1024.0 * 1024.0) << '\n';
 }
 
 void NeuralNet::init_layers(std::vector<LayerSpecifier> &layers, UpdateRule update_rule) {
   num_layers = layers.size();
-  LOGD << "Initializing " << num_layers << " layers";
+  std::cout << "Initializing " << num_layers << " layers" << '\n';
 
   // Allocation of space for input to each layer
   layer_input = (void **)malloc((num_layers + 1) * sizeof(void *));
@@ -138,11 +138,11 @@ void NeuralNet::init_layers(std::vector<LayerSpecifier> &layers, UpdateRule upda
 
   h_layer_input = (void **)malloc((num_layers + 1) * sizeof(void *));  // host
   offloaded = (bool *)calloc((num_layers + 1), sizeof(bool));          // Offloaded layers index
-  LOGD << "Initiliazing layers done";
+  std::cout << "Initiliazing layers done" << '\n';
 }
 
 void NeuralNet::allocate_mem_for_layers(std::vector<LayerSpecifier> &layers) {
-  LOGD << "Allocating memory for layers";
+  std::cout << "Allocating memory for layers" << '\n';
   // Allocate space for parameters
   for (int i = 0; i < num_layers; i++) {
     size_t input_size;
@@ -200,14 +200,14 @@ void NeuralNet::allocate_mem_for_layers(std::vector<LayerSpecifier> &layers) {
       if (i == num_layers - 1) num_classes = user_params->channels;
     }
     layer_input_size[i] = input_size;
-    LOGD << "Layer " << i << " input size: " << std::setprecision(2)
-         << input_size / (1024.0 * 1024.0) << " MB";
+    std::cout << "Layer " << i << " input size: " << std::setprecision(2)
+              << input_size / (1024.0 * 1024.0) << " MB" << '\n';
   }
-  LOGD << "Allocating memory for layers done";
+  std::cout << "Allocating memory for layers done" << '\n';
 }
 
 void NeuralNet::allocate_workspace_for_layers(std::vector<LayerSpecifier> &layers) {
-  LOGD << "Allocating workspace for layers";
+  std::cout << "Allocating workspace for layers" << '\n';
   // Allocate space for workspace
   size_t cur_workspace_size_1, cur_workspace_size_2, cur_workspace_size_3, cur_workspace_size;
   this->workspace_size = 0;
@@ -224,7 +224,7 @@ void NeuralNet::allocate_workspace_for_layers(std::vector<LayerSpecifier> &layer
       if (cur_workspace_size > workspace_size) this->workspace_size = cur_workspace_size;
     }
   }
-  LOGD << "Workspace size for layers: " << std::setprecision(2)
-       << this->workspace_size / (1024.0 * 1024.0) << " MB";
-  LOGD << "Allocating workspace for layers done";
+  std::cout << "Workspace size for layers: " << std::setprecision(2)
+            << this->workspace_size / (1024.0 * 1024.0) << " MB" << '\n';
+  std::cout << "Allocating workspace for layers done" << '\n';
 }

@@ -5,7 +5,7 @@
 
 Solver::Solver(NeuralNet *model, MNIST224 &mnist224, int num_epoch, UpdateRule update_rule,
                double learning_rate, double learning_rate_decay, int num_train, int num_val) {
-  LOGD << "Solver::Solver";
+  std::cout << "Solver::Solver" << '\n';
   if ((model->batch_size == 0) || (model->num_layers == 0))
     throw std::invalid_argument("Model is not initialized. Use parameterized constructor.");
   this->model = model;
@@ -24,7 +24,7 @@ Solver::Solver(NeuralNet *model, MNIST224 &mnist224, int num_epoch, UpdateRule u
 
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
-  LOGD << "Solver::Solver done";
+  std::cout << "Solver::Solver done" << '\n';
 }
 
 float Solver::step(int start_X, int start_y, int *correct_count, bool train, float *overhead,
@@ -49,16 +49,16 @@ float Solver::step(int start_X, int start_y, std::vector<float> &fwd_dnn_lag,
 }
 
 void Solver::train(Metrics &metrics) {
-  LOGD << "Solver::train";
+  std::cout << "Solver::train" << '\n';
   GpuTimer timer;
   int batch_size = model->batch_size;
   int num_train_batches = num_train / model->batch_size;
   int num_val_batches = num_val / model->batch_size;
 
   for (int i = 0; i < num_epoch; i++) {
-    LOGD << "Epoch " << i;
+    std::cout << "Epoch " << i << '\n';
     for (int j = 0; j < num_train_batches; j++) {
-      LOGD << "Batch " << j;
+      std::cout << "Batch " << j << '\n';
       int start_sample = j * num_features * batch_size;
 
       timer.start(model->stream_compute);
@@ -80,7 +80,7 @@ void Solver::train(Metrics &metrics) {
     metrics.val_acc.emplace_back(correct_count);
     learning_rate *= learning_rate_decay;
   }
-  LOGD << "Solver::train done";
+  std::cout << "Solver::train done" << '\n';
 }
 
 void Solver::checkAccuracy(void *X, int *y, int num_samples, int *num_correct) {
