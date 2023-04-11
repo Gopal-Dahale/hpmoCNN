@@ -2,16 +2,10 @@
 
 ```bash
 ├───.vscode
-├───cnn
-│   ├───include
-│   ├───launch
-│   └───src
-└───hello_world
-    ├───.vscode
+├───code
+    ├───include
     ├───launch
-    └───neo
-        ├───device
-        └───kernels
+    └───src
 ```
 
 ```
