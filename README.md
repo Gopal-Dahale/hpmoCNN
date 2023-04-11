@@ -1,23 +1,4 @@
 "# hpmoCNN"
-
-```bash
-├───.vscode
-├───code
-    ├───include
-    ├───launch
-    └───src
-```
-
-```
-cd cnn
-nvcc -o launch\main -I ./include launch\main.cu && launch\main
-```
-
-```
-cd basic
-make
-```
-
 # Summary
 
 The following layers have been implemented
