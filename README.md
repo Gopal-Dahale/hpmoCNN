@@ -1,4 +1,3 @@
-"# hpmoCNN"
 # Summary
 
 The following layers have been implemented
